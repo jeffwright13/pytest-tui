@@ -12,18 +12,18 @@ def read(fname):
 
 
 setup(
-    name="pytest-fold",
-    version="0.8.4",
+    name="pytest-tui",
+    version="0.8.6",
     author="Jeff Wright",
     author_email="jeff.washcloth@gmail.com",
     license="MIT",
-    url="https://github.com/jeffwright13/pytest-fold",
-    description="Capture Pytest output and when test run is complete, drop user into interactive text user interface",
+    url="https://github.com/jeffwright13/pytest-tui",
+    description="Text User Interface (TUI) for Pytest, automatically launched after your test run is finished ",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
-    # packages=["pytest_fold"],
+    # packages=["pytest_tui"],
     packages=find_packages(),
-    py_modules=["pytest_fold"],
+    py_modules=["pytest_tui"],
     python_requires=">=3.8",
     install_requires=[
         "Faker>=13.0.0",
@@ -44,13 +44,13 @@ setup(
         "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
     ],
-    keywords="pytest testing fold output logs fail pytermtk asciimatics textual single-source",
+    keywords="pytest testing tui output logs fail pytermtk textual single-source",
     entry_points={
-        "pytest11": ["pytest_fold = pytest_fold.plugin"],
+        "pytest11": ["pytest_tui = pytest_tui.plugin"],
         "console_scripts": [
-            "tuitxt = pytest_fold.tui_textual1:main",
-            "tuitxt2 = pytest_fold.tui_textual2:main",
-            "tuitk = pytest_fold.tui_pytermtk:main",
+            "tuitxt = pytest_tui.tui_textual1:main",
+            "tuitxt2 = pytest_tui.tui_textual2:main",
+            "tuitk = pytest_tui.tui_pytermtk:main",
         ],
     },
 )
