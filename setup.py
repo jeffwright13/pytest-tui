@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name="pytest-tui",
-    version="0.8.6",
+    version="0.8.8",
     author="Jeff Wright",
     author_email="jeff.washcloth@gmail.com",
     license="MIT",
@@ -48,7 +48,7 @@ setup(
     entry_points={
         "pytest11": ["pytest_tui = pytest_tui.plugin"],
         "console_scripts": [
-            "tuitxt = pytest_tui.tui_textual1:main",
+            "tuitxt1 = pytest_tui.tui_textual1:main",
             "tuitxt2 = pytest_tui.tui_textual2:main",
             "tuitk = pytest_tui.tui_pytermtk:main",
         ],

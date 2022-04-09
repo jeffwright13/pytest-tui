@@ -49,8 +49,8 @@ def pytest_addoption(parser):
         "--tt",
         action="store",
         default="pytermtk",
-        help="specify user interface ('pytermtk' ' k' | 'textual1' 't1' | 'textual2' 't2' | 'none' 'n')",
-        choices=["pytermtk", "k", "textual1", "t1", "textual2", "t2", "none", "n"],
+        help="specify user interface ('pytermtk' 'tk' | 'textual1' 't1' | 'textual2' 't2' | 'none' 'n')",
+        choices=["pytermtk", "tk", "textual1", "t1", "textual2", "t2", "none", "n"],
     )
 
 
@@ -206,7 +206,7 @@ def pytui_tui(config: Config) -> None:
     try:
         capmanager.suspend_global_capture(in_=True)
     finally:
-        if config.getoption("--tt") in ["k", "pytermtk"]:
+        if config.getoption("--tt") in ["tk", "pytermtk"]:
             tuitk()
         elif config.getoption("--tt") in ["t1", "textual1"]:
             tuitxt1()
