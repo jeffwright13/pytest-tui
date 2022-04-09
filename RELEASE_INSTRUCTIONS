@@ -18,23 +18,23 @@ RELEASE_INSTRUCTIONS
 
 6 Test the installation in a fresh directory:
   cd ~
-  mkdir pytest-fold-testing
-  cd pytest-fold-testing
+  mkdir pytest-tui-testing
+  cd pytest-tui-testing
   pyenv local 3.9.9
   python -m venv venv
   source venv/bin/activate
-  python -m pip install --index-url https://test.pypi.org/simple/ pytest-fold
-  mkdir -p ./tests/ && p ../pytest-fold/tests/* ./tests/
+  python -m pip install --index-url https://test.pypi.org/simple/ pytest-tui
+  mkdir -p ./tests/ && p ../pytest-tui/tests/* ./tests/
 
 7 Verify PyTermTk TUI:
-  pytest --fold
+  pytest --tui
 
 8 Verify Textual TUIs:
-  pytest --fold --ft=t1
-  pytest --fold --ft=t2
+  pytest --tui --ft=t1
+  pytest --tui --ft=t2
 
 9 Verify No-TUI:
-  pytest --fold --ft=n
+  pytest --tui --ft=n
 
 10 Make any adjustments required, then git-commit and push, then start over at step 1
 
@@ -45,7 +45,7 @@ RELEASE_INSTRUCTIONS
 11 Test the installation as per Step 6
 
 12 Run a test run to make sure it works (verify TUI):
-  pytest --fold
+  pytest --tui
 
 App A Encode screencasts to /webm for posting on GitHub
   ffmpeg -i "<filename>.mp4" -b:v 0 -crf 30 -pass 1 -an -f webm -y /dev/null

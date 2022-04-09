@@ -21,7 +21,7 @@ short_test_summary_matcher = re.compile(r"^==.*\sshort test summary info\s.*==+"
 lastline_matcher = re.compile(r"^==.*in\s\d+.\d+s.*=+")
 ansi_failed_test_name_matcher = re.compile(r"\x1b\[31m\x1b\[1m__+\W(\S+)\W__+\x1b\[0m")
 ansi_passed_test_name_matcher = re.compile(r"\x1b\[32m\x1b\[1m__+\W(\S+)\W__+\x1b\[0m")
-section_name_matcher = re.compile(r"~~>PYTEST_FOLD_(\w+)")
+section_name_matcher = re.compile(r"~~>PYTEST_TUI_(\w+)")
 standard_test_matcher = re.compile(
     r".*\::(\S+)\s(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)"
 )
@@ -31,13 +31,13 @@ live_log_outcome_matcher = re.compile(
 )
 
 MARKERS = {
-    "pytest_fold_test_session_starts": "~~>PYTEST_FOLD_TEST_SESSION_STARTS<~~",
-    "pytest_fold_errors_section": "~~>PYTEST_FOLD_ERRORS_SECTION<~~",
-    "pytest_fold_failures_section": "~~>PYTEST_FOLD_FAILURES_SECTION<~~",
-    "pytest_fold_warnings_summary": "~~>PYTEST_FOLD_WARNINGS_SUMMARY<~~",
-    "pytest_fold_passes_section": "~~>PYTEST_FOLD_PASSES_SECTION<~~",
-    "pytest_fold_short_test_summary": "~~>PYTEST_FOLD_SHORT_TEST_SUMMARY<~~",
-    "pytest_fold_last_line": "~~>PYTEST_FOLD_LAST_LINE<~~",
+    "pytest_tui_test_session_starts": "~~>PYTEST_TUI_TEST_SESSION_STARTS<~~",
+    "pytest_tui_errors_section": "~~>PYTEST_TUI_ERRORS_SECTION<~~",
+    "pytest_tui_failures_section": "~~>PYTEST_TUI_FAILURES_SECTION<~~",
+    "pytest_tui_warnings_summary": "~~>PYTEST_TUI_WARNINGS_SUMMARY<~~",
+    "pytest_tui_passes_section": "~~>PYTEST_TUI_PASSES_SECTION<~~",
+    "pytest_tui_short_test_summary": "~~>PYTEST_TUI_SHORT_TEST_SUMMARY<~~",
+    "pytest_tui_last_line": "~~>PYTEST_TUI_LAST_LINE<~~",
 }
 
 
@@ -296,7 +296,7 @@ class Results:
 
 class MarkedSections:
     """
-    This class processes a Pytest output file that has been marked by pytest-fold,
+    This class processes a Pytest output file that has been marked by pytest-tui,
     and identifies its sections. Pytest defines the following possible sections in
     its console output (not all show by default; they are dictated by option settings,
     e.g. in pytest.ini, on cmd line, etc.):
@@ -341,13 +341,13 @@ class MarkedSections:
         return (
             line.strip()
             in (
-                MARKERS["pytest_fold_test_session_starts"],
-                MARKERS["pytest_fold_errors_section"],
-                MARKERS["pytest_fold_failures_section"],
-                MARKERS["pytest_fold_passes_section"],
-                MARKERS["pytest_fold_warnings_summary"],
-                MARKERS["pytest_fold_short_test_summary"],
-                MARKERS["pytest_fold_last_line"],
+                MARKERS["pytest_tui_test_session_starts"],
+                MARKERS["pytest_tui_errors_section"],
+                MARKERS["pytest_tui_failures_section"],
+                MARKERS["pytest_tui_passes_section"],
+                MARKERS["pytest_tui_warnings_summary"],
+                MARKERS["pytest_tui_short_test_summary"],
+                MARKERS["pytest_tui_last_line"],
             )
             if line.strip()
             else False
@@ -362,7 +362,7 @@ class MarkedSections:
 
         for line in lines:
             if self._line_is_a_marker(line):
-                if MARKERS["pytest_fold_last_line"] in line:
+                if MARKERS["pytest_tui_last_line"] in line:
                     continue
                 section_name = re.search(section_name_matcher, line).groups()[0]
                 self.Sections[section_name].content = r""

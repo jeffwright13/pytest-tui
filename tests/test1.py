@@ -168,8 +168,8 @@ def test_13_passes_and_has_stdout(capsys):
     assert True
 
 
-# These 2 tests can intentionally cause an error - useful for testing output of
-# folding - if the fixture is commented out, the test throws an error at setup.
+# These 2 tests can intentionally cause an error - useful for testing
+# if the fixture is commented out, the test throws an error at setup.
 #
 # @pytest.fixture()
 # def fixture_for_fun(log_testname):

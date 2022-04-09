@@ -5,10 +5,10 @@ from textual.app import App
 from textual import messages
 from textual.views import DockView, GridView
 from textual.widgets import Header, Footer, TreeControl, ScrollView, TreeClick
-from pytest_fold.utils import Results
+from pytest_tui.utils import Results
 
 
-class FoldFooter(Footer):
+class tuiFooter(Footer):
     # Override default Footer method 'make_key_text' to allow customizations
     def make_key_text(self) -> Text:
         """Create text containing all the keys."""
@@ -35,7 +35,7 @@ class FoldFooter(Footer):
         return text
 
 
-class FoldApp(App):
+class tuiApp(App):
     """
     Textual class inherited from App
     Provides docking and data population for test session headers and results
@@ -84,7 +84,7 @@ class FoldApp(App):
         header1 = Header(style="bold white on black")
         header1.title = self.summary_results
         await self.view.dock(header1, edge="top", size=1)
-        footer = FoldFooter()
+        footer = tuiFooter()
         await self.view.dock(footer, edge="bottom")
 
         # Stylize the results-tree section headers
@@ -253,7 +253,7 @@ class FoldApp(App):
 
 
 def main():
-    app = FoldApp()
+    app = tuiApp()
     app.run()
 
 

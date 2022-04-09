@@ -4,7 +4,7 @@ from textual import events
 from textual.app import App
 from textual.views import DockView
 from textual.widgets import Header, Footer, TreeControl, ScrollView, TreeClick
-from pytest_fold.utils import Results
+from pytest_tui.utils import Results
 
 TREE_WIDTH = 30
 
@@ -25,7 +25,7 @@ CATEGORIES = {
 }
 
 
-class PytestFoldApp(App):
+class PytestTuiApp(App):
     async def on_load(self, event: events.Load) -> None:
         # Load results from OUTFILE; bind actions to heaader/footer widgets
         self.test_results = Results()
@@ -95,7 +95,7 @@ class PytestFoldApp(App):
 
 
 def main():
-    app = PytestFoldApp()
+    app = PytestTuiApp()
     app.run()
 
 
