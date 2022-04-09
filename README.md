@@ -54,7 +54,7 @@ If you have already exited the TUI and would like to re-enter it with the same d
 * `termtxt` (to launch Textual)
 * `termtk` (to launch PyTermTk)
 
-You can also run with the `--tui` option enabled but bypass auto-launch of the TUI with the `--ft=n` option.
+You can also run with the `--tui` option enabled but bypass auto-launch of the TUI with the `--tt=n` option.
 
 ## Known Limitations / Issues
 - Rudimentary user interfaces that need a lot of love:

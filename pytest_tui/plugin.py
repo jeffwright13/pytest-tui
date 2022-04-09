@@ -46,7 +46,7 @@ def pytest_addoption(parser):
     )
     group.addoption(
         "--tui-tui",
-        "--ft",
+        "--tt",
         action="store",
         default="pytermtk",
         help="specify user interface ('pytermtk' ' k' | 'textual1' 't1' | 'textual2' 't2' | 'none' 'n')",
@@ -206,12 +206,12 @@ def pytui_tui(config: Config) -> None:
     try:
         capmanager.suspend_global_capture(in_=True)
     finally:
-        if config.getoption("--ft") in ["k", "pytermtk"]:
+        if config.getoption("--tt") in ["k", "pytermtk"]:
             tuitk()
-        elif config.getoption("--ft") in ["t1", "textual1"]:
+        elif config.getoption("--tt") in ["t1", "textual1"]:
             tuitxt1()
-        elif config.getoption("--ft") in ["t2", "textual2"]:
+        elif config.getoption("--tt") in ["t2", "textual2"]:
             tuitxt2()
-        elif config.getoption("--ft") not in ["n", "none"]:
-            print(f"Incorrect choice for tui-tui: {config.getoption('--ft')}")
+        elif config.getoption("--tt") not in ["n", "none"]:
+            print(f"Incorrect choice for tui-tui: {config.getoption('--tt')}")
         capmanager.resume_global_capture()

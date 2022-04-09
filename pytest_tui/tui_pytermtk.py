@@ -1,4 +1,4 @@
-from pytest_fold.utils import OUTCOMES, Results
+from pytest_tui.utils import OUTCOMES, Results
 
 import TermTk as ttk
 
