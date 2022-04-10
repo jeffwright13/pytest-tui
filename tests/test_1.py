@@ -31,16 +31,30 @@ def test_c_error(error_fixture):
     pass
 
 
-def test_d_skip():
-    pytest.skip("skipping this test")
+def test_d1_skip_inline():
+    pytest.skip("Skipping this test with inline call to 'pytest.skip()'.")
 
 
-def test_e_xfail():
-    pytest.xfail("xfailing this test")
+pytest.mark.skip(reason="Skipping this test with decorator.")
+def test_d2_skip_decorator():
+    pytest.skip("Skipping this test with inline call to 'pytest.skip()'.")
 
 
-@pytest.mark.xfail(reason="always xfail")
-def test_f_xpass():
+def test_e1_xfail_by_inline_and_has_reason():
+    pytest.xfail("Marked as Xfail with inline call to 'pytest.xfail()'.")
+
+
+@pytest.mark.xfail(reason="Marked as Xfail with decorator.")
+def test_e2_xfail_by_decorator_and_has_reason():
+    pytest.xfail("Marked as Xfail with decorator.")
+
+
+def test_f1_xfails_by_inline_even_though_assertTrue_happens_before_pytestDotXfail():
+    assert True
+    pytest.xfail("Marked as Xfail with inline call to 'pytest.xfail()'.")
+
+@pytest.mark.xfail(reason="Marked as Xfail with decorator.")
+def test_f2_xpass_by_xfail_decorator_and_has_reason():
     pass
 
 
@@ -94,12 +108,12 @@ def test_5_marked_SKIP(log_testname):
 
 
 @pytest.mark.xfail
-def test_6_marked_xfail_but_passes(log_testname):
+def test_6_marked_xfail_by_decorator_but_passes_and_has_no_reason(log_testname):
     assert 1
 
 
 @pytest.mark.xfail
-def test_7_marked_xfail_and_fails(log_testname):
+def test_7_marked_xfail_by_decorator_and_fails_and_has_no_reason(log_testname):
     assert 0
 
 
@@ -188,3 +202,9 @@ def test_15_causes_error_fail_stderr_stdout_stdlog(fixture_for_fun):
     print("FAIL this stderr is captured", file=sys.stderr)
     logger.warning("FAIL this log is captured")
     assert 0
+
+def test_16_fail_compare_dicts_for_pytest_icdiff():
+    listofStrings = ["Hello", "hi", "there", "at", "this"]
+    listofInts = [7, 10, 45, 23, 77]
+    assert len(listofStrings) == len(listofInts)
+    assert listofStrings == listofInts
