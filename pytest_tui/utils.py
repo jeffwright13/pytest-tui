@@ -22,10 +22,14 @@ lastline_matcher = re.compile(r"^==.*in\s\d+.\d+s.*=+")
 ansi_failed_test_name_matcher = re.compile(r"\x1b\[31m\x1b\[1m__+\W(\S+)\W__+\x1b\[0m")
 ansi_passed_test_name_matcher = re.compile(r"\x1b\[32m\x1b\[1m__+\W(\S+)\W__+\x1b\[0m")
 section_name_matcher = re.compile(r"~~>PYTEST_TUI_(\w+)")
+# standard_test_matcher = re.compile(
+#     r".*\::(\S+)\s(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)"
+# )
 standard_test_matcher = re.compile(
-    r".*\::(\S+)\s(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)"
+    r"(.*\::\S+)\s(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)"
 )
-live_log_testname_matcher = re.compile(r".*::(\S+)", re.MULTILINE)
+# live_log_testname_matcher = re.compile(r".*::(\S+)", re.MULTILINE)
+live_log_testname_matcher = re.compile(r"(.*::\S+)", re.MULTILINE)
 live_log_outcome_matcher = re.compile(
     r"^(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)\W.+(\[\W?.*?\])", re.MULTILINE
 )
@@ -90,7 +94,7 @@ class Results:
         self.test_results = self._get_test_results()
 
         # This code presents categorized test results
-        self._categorize_tests()
+        self._get_test_outcomes_and_titles()
         self._update_testinfo_category()
 
         self.tests_errors = self._get_result_by_outcome("ERROR")
@@ -159,7 +163,7 @@ class Results:
     def _get_test_results(self):
         """
         Process TestReport objects from Pytest output; remove duplicates;
-        extract ANSI-encoded traceback info for failures.
+        extract ANSI-encoded traceback info for failures/passes.
         """
         self.failed_tracebacks = self._get_tracebacks(
             "FAILURES_SECTION", ansi_failed_test_name_matcher
@@ -171,9 +175,12 @@ class Results:
         return list({item.title: item for item in processed_reports}.values())
 
     def _get_tracebacks(self, section_name: str, regex: Pattern) -> dict:
-        # get ANSI-coded traceback text for each test in failures section, in the
-        # form of a dictionary: {'test_title': 'ansi-encoded traceback text'}
-
+        # Get ANSI-coded traceback text for each test in failures section, in the
+        # form of a dictionary: {'test_title': 'ansi-encoded traceback text'}.
+        # A key here is identifying the Fully Qualififed Testname (FQTN). Only the
+        # testname (and not test's file name) are included on the first
+        # line of the test's traceback info. The file name is on the last line, and
+        # can be dificult to identify.
         testname = ""
         tracebacks = {}
 
@@ -204,7 +211,8 @@ class Results:
             test_info.caplog = report.caplog
             test_info.capstderr = report.capstderr
             test_info.capstdout = report.capstdout
-            test_info.title = report.head_line
+            # test_info.title = report.head_line
+            test_info.title = report.nodeid
             test_info.keywords = set(report.keywords)
 
             test_infos.append(test_info)
@@ -228,15 +236,16 @@ class Results:
             if title == test_result.title:
                 test_result.category = result
 
-    def _categorize_tests(self) -> None:
+    def _get_test_outcomes_and_titles(self) -> None:
         """
-        Extract test title and outcome from each line.
+        Extract test title and outcome from each line of the verbose 'test session starts'
+        section. This guarantees that our classification of each test's outcome is the
+        same as Pytest's.
 
         Line formats are different depending on setting of Pytest config option 'log_cli'.
-        Hence the two regex matcher flavors (standard / live_log), and the two
-        sections of per-line regex analysys. (Creating a single regex that captures both
-        formats reliably was very difficult, hence worked around with with some per-line
-        logic.
+        Hence the two regex matcher flavors (standard / live_log), and the two sections
+        of per-line regex analysys (creating a single regex that captures both formats
+        reliably was very difficult; hence worked around with with some per-line logic.
         """
         look_for_live_log_outcome = False
 
@@ -271,7 +280,8 @@ class Results:
                 title = outcome = None
 
     def _get_result_by_outcome(self, outcome: str) -> None:
-        # dict of {testname: log+stderr+stdout) for each test, per-outcome
+        # dict of {testname: log+stderr+stdout) for each test, per-outcome;
+        # outcomes are determined in code _get_test_outcomes_and_titles()
         if outcome == "FAILED":
             return {
                 test_result.title: test_result.text

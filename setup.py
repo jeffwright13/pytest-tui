@@ -21,7 +21,6 @@ setup(
     description="Text User Interface (TUI) for Pytest, automatically launched after your test run is finished ",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
-    # packages=["pytest_tui"],
     packages=find_packages(),
     py_modules=["pytest_tui"],
     python_requires=">=3.8",
