@@ -84,4 +84,4 @@ Contributions are very welcome. Please run pyflakes and black on any code before
 I have tried to make the TUIs as clean as possible, but I am not a UI expert and I am sure many improvements could be made. If you are slick with user interfaces, I would love some help!
 
 ## License
-Distributed under the terms of the `MIT`_ license, "pytest-tui" is free and open source software.
+Distributed under the terms of the MIT license, "pytest-tui" is free and open source software.
