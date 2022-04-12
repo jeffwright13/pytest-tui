@@ -65,11 +65,12 @@ If you have already exited the TUI and would like to re-enter it with the same d
 You can also run with the `--tui` option enabled and bypass auto-launch of the TUI with the `--tt=n` option. This allows you to gather results now, and look at them in the TUIs later.
 
 ## Known Limitations / Issues
-- Rudimentary user interfaces that need a lot of love:
+- Non-optimal user interfaces that need a lot of love:
   - Textual interface can be slow, esp. if run within an IDE
-  - PyTermTk interface sometimes gets corrupted if resized
+  - PyTermTk interface may get corrupted if resized
+- Does not handle test cases with the same name from different source files.
 - Not fully tested with all combinations of output formats. Probably some use-cases where things won't work 100% right.
-- `pytest-tui` is currently incompatible with `--tb=native` and will cause an INTERNALERROR if run together. (TODO: Fix this.)
+- `pytest-tui` is currently incompatible with `--tb=native` and will cause an INTERNALERROR if run together.
 
 ## History
 This project was originally envisioned to only show test failures, and allow the user to 'fold' the details of the failed tests by clicking a line so that the details would alternately show/hide. As development progressed, it became clear that what was really needed was a real TUI, one that organized the output in such a way that all of Pytest's output was available in a more streamlined way.
