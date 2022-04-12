@@ -1,4 +1,5 @@
-# Pyfold
+# Pytest-tui
+*.bin
 console_output.fold
 console_output.pickle
 textual.log

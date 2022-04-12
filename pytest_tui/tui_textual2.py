@@ -59,7 +59,6 @@ class PytestTuiApp(App):
             )
             for testname in eval(f"self.test_results.tests_{category.lower()}"):
                 _test_text = Text(testname)
-                _test_text.stylize("italic")
                 await tree.add(tree.root.id, _test_text, {})
 
         await tree.root.expand()
