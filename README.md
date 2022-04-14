@@ -50,7 +50,7 @@ Or, if you want to get technical about it:
 
 Simplified:
 
-* `pytest --tui [--tt t1|t2|tk|none] <other-pytest-options>`
+* `pytest --tui [--tt t1|t2|t3|none] <other-pytest-options>`
 
 See 'pytest --help' for more info.
 
@@ -58,17 +58,18 @@ To quit the Textual TUI, either click the Quit button, or press `Q`. To quit the
 
 If you have already exited the TUI and would like to re-enter it with the same data generated from the last Pytest run, simply type:
 
-* `tuitxt1` (to launch Textual TUI flavor 1)
-* `tuitxt2` (to launch Textual TUI flavor 2)
-* `tuitk` (to launch PyTermTk)
+* `tui1` (to launch PyTermTk)
+* `tui2` (to launch Textual TUI flavor 1)
+* `tui3` (to launch Textual TUI flavor 2)
 
 You can also run with the `--tui` option enabled and bypass auto-launch of the TUI with the `--tt=n` option. This allows you to gather results now, and look at them in the TUIs later.
 
 ## Known Limitations / Issues
-- Non-optimal user interfaces that need a lot of love:
-  - Textual interface can be slow, esp. if run within an IDE
+- User interfaces need work:
+  - Overall layouts need optimization
   - PyTermTk interface may get corrupted if resized
-- Does not handle test cases with the same name from different source files.
+  - Textual interface can be slow, esp. if run within an IDE
+  - Textual interface #1 (`tui2`) requires user to toggle All (`A`) to see test outputs if number of tests is large
 - Not fully tested with all combinations of output formats. Probably some use-cases where things won't work 100% right.
 - `pytest-tui` is currently incompatible with `--tb=native` and will cause an INTERNALERROR if run together.
 

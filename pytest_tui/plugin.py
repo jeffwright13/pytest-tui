@@ -48,12 +48,12 @@ def pytest_addoption(parser):
         help="automatically launch text user interface after run is finished",
     )
     group.addoption(
-        "--tui-tui",
+        "--tuitui",
         "--tt",
         action="store",
         default="pytermtk",
-        help="specify user interface ('pytermtk' 'tk' | 'textual1' 't1' | 'textual2' 't2' | 'none' 'n')",
-        choices=["pytermtk", "tk", "textual1", "t1", "textual2", "t2", "none", "n"],
+        help="specify user interface ('pytermtk' 't1' | 'textual1' 't2' | 'textual2' 't3' | 'none' 'n')",
+        choices=["pytermtk", "t1", "textual1", "t2", "textual2", "t3", "none", "n"],
     )
 
 
