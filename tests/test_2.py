@@ -14,6 +14,7 @@ logging.getLogger("faker").setLevel(logging.ERROR)
 # Used for testing ability to handle duplicate tes names
 # across different files
 
+
 @pytest.fixture
 def error_fixture():
     assert 0
