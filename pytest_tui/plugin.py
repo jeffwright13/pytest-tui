@@ -235,11 +235,11 @@ def pytui_tui(config: Config) -> None:
     try:
         capmanager.suspend_global_capture(in_=True)
     finally:
-        if config.getoption("--tt") in ["tk", "pytermtk"]:
+        if config.getoption("--tt") in ["t1", "pytermtk"]:
             tuitk()
-        elif config.getoption("--tt") in ["t1", "textual1"]:
+        elif config.getoption("--tt") in ["t2", "textual1"]:
             tuitxt1()
-        elif config.getoption("--tt") in ["t2", "textual2"]:
+        elif config.getoption("--tt") in ["t3", "textual2"]:
             tuitxt2()
         elif config.getoption("--tt") not in ["n", "none"]:
             print(f"Incorrect choice for tui-tui: {config.getoption('--tt')}")
