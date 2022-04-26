@@ -45,15 +45,21 @@ class TuiFooter(Footer):
         return text
 
 
-class TabLabel:
-    name: str
-    style: str
+class TreeViewer(Widget):
+    def __init__(
+        self,
+        tree: TreeControl,
+        body: ScrollView,
+    ) -> None:
+        super().__init__()
+        self.tree = tree
+        self.body = body
+        self.dock_view = DockView()
 
 
 class Tab(Widget):
     def __init__(
         self,
-        # label: TabLabel,
         label: str,
         style: str,
         content_type: str,  # either 'section' or 'tree'
@@ -74,18 +80,31 @@ class Tabs(Widget):
         self.view = DockView()
 
     async def action_clicked_tab(self, label: str) -> None:
+        # Handle tabs being clicked
+        body = self.parent.parent.body
+        test_results = self.parent.parent.test_results
+        section_content = {
+            "Summary": test_results.Sections["TEST_SESSION_STARTS"].content
+            + test_results.Sections["LAST_LINE"].content,
+            "Warnings": test_results.Sections["WARNINGS_SUMMARY"].content,
+            "Errors": test_results.Sections["ERRORS_SECTION"].content,
+            "Full Output": test_results.unmarked_output,
+        }
+
+        # Render the clicked tab with bold underline
         for tab_name in self.tabs:
             if tab_name == label:
-                tab = self.tabs[tab_name]
-                tab.rich_text.stylize("bold underline")
-                body = self.parent.parent.body
+                self.tabs[tab_name].rich_text.stylize("bold underline")
             else:
                 self.tabs[tab_name].rich_text.stylize("not bold not underline")
-        # if tab:
-        # Somehow redraw parent.parent.body (ScrollView) with section text
-        # self.parent.parent.body.contents("Hello")
-        # self.parent.parent.body.refresh()
-        self.refresh()
+            self.refresh()
+
+        if self.tabs[label].content_type == "section":
+            self.parent.parent.body.visible = True
+            await body.update(Text.from_ansi(section_content[label]))
+        elif self.tabs[label].content_type == "tree":
+            self.parent.parent.body.visible = False
+
         await self.view.dock()
 
     def render(self):
@@ -109,7 +128,6 @@ class TuiApp(App):
 
     async def on_mount(self) -> None:
         # Create and dock header widget
-        self.title = self.summary_results
         self.header = Header(style="bold white on black", clock=False)
         self.header.title = self.summary_results
         await self.view.dock(self.header, edge="top", size=1)
@@ -126,17 +144,26 @@ class TuiApp(App):
             "Xfails": Tab("Xfails", "yellow", content_type="tree"),
             "Xpasses": Tab("Xpasses", "yellow", content_type="tree"),
             "Warnings": Tab("Warnings", "yellow", content_type="section"),
-            "Errors": Tab("Errors", "magenta", content_type="tree"),
+            "Errors": Tab("Errors", "magenta", content_type="section"),
             "Full Output": Tab("Full Output", "cyan", content_type="section"),
         }
         self.tabs = Tabs(tabs)
         await self.view.dock(self.tabs, edge="top", size=2)
 
         # Body (to display full sections or result trees)
-        self.body = ScrollView(
-            Text.from_ansi(self.test_results.Sections["TEST_SESSION_STARTS"].content)
-        )
+        self.body = ScrollView()
+        # await self.view.dock(self.body, edge="top")
         await self.view.dock(self.body)
 
+        # self.tree = TreeViewer()
+        # await self.view.dock(self.tree)
 
-TuiApp.run()
+
+# TuiApp().run()
+def main():
+    app = TuiApp()
+    app.run()
+
+
+if __name__ == "__main__":
+    main()
