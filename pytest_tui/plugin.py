@@ -244,8 +244,17 @@ def pytest_unconfigure(config: Config):
         with open(REPORTFILE, "wb") as report_file:
             pickle.dump(reports, report_file)
 
-    # Launch the TUI
-    if config.getoption("--tui") == True:
+    # Launch the selected TUI
+    if any(
+        [
+            config.option.tui,
+            config.option.tui1,
+            config.option.tui2,
+            config.option.tui3,
+            config.option.tui4,
+            config.option.tuin,
+        ]
+    ):
         pytui_tui(config)
 
 
@@ -256,13 +265,22 @@ def pytui_tui(config: Config) -> None:
     """
     # disable capturing while TUI runs to avoid error `redirected stdin is pseudofile, has
     # no fileno()`; adapted from https://githubmemory.com/repo/jsbueno/terminedia/issues/25
-    if not config.getoption("--tui"):
+    if not any(
+        [
+            config.option.tui,
+            config.option.tui1,
+            config.option.tui2,
+            config.option.tui3,
+            config.option.tui4,
+            config.option.tuin,
+        ]
+    ):
         return
     capmanager = config.pluginmanager.getplugin("capturemanager")
     try:
         capmanager.suspend_global_capture(in_=True)
     finally:
-        if config.getoption("--tui1"):
+        if config.getoption("--tui") or config.getoption("--tui1"):
             tui1()
         elif config.getoption("--tui2"):
             tui2()
