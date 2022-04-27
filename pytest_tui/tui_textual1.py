@@ -225,6 +225,8 @@ class tuiApp(App):
         self.body.border_style = "green"
         await self.dockview.dock(self.body, edge="right")
 
+        self.pass_tree.visible = False
+
     async def handle_tree_click(self, message: TreeClick[dict]) -> None:
         label = message.node.label.plain
 
