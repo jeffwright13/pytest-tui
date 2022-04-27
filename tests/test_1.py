@@ -20,7 +20,7 @@ def error_fixture():
 
 
 def test_a_ok():
-    print("ok")
+    print("This test doesn't have much to say, but it passes - ok!!")
 
 
 def test_b_fail():
@@ -28,6 +28,7 @@ def test_b_fail():
 
 
 def test_c_error(error_fixture):
+    print("This test should be marked as an Error.")
     pass
 
 
@@ -58,11 +59,14 @@ def test_f1_xfails_by_inline_even_though_assertTrue_happens_before_pytestDotXfai
 
 @pytest.mark.xfail(reason="Marked as Xfail with decorator.")
 def test_f2_xpass_by_xfail_decorator_and_has_reason():
+    print("This test is marked Xfail by use of decorator '@pytest.mark.xfail'.")
+    print("However, because its outcome is a PASS, it is classified as XPass instead.")
     pass
 
 
 @pytest.mark.parametrize("test_input, expected", [("3+5", 8), ("2+4", 6), ("6*9", 42)])
 def test_g_eval_parameterized(test_input, expected):
+    print(f"Testing {test_input} == {expected}")
     assert eval(test_input) == expected
 
 
@@ -181,7 +185,7 @@ def test_12_fails_and_has_stdout(capsys):
 
 
 def test_13_passes_and_has_stdout(capsys):
-    print("this test passes")  # stdout is consumed by pytest
+    print("This test passes. This message is a 'print' and is consumed by Pytest via stdout.")  # stdout is consumed by pytest
     assert True
 
 
