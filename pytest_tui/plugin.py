@@ -9,9 +9,10 @@ from types import SimpleNamespace
 from _pytest.config import Config, create_terminal_writer
 from _pytest._io.terminalwriter import TerminalWriter
 from _pytest.reports import TestReport
-from pytest_tui.tui_pytermtk import main as tuitk
-from pytest_tui.tui_textual1 import main as tuitxt1
-from pytest_tui.tui_textual2 import main as tuitxt2
+from pytest_tui.tui_pytermtk import main as tui1
+from pytest_tui.tui_textual1 import main as tui2
+from pytest_tui.tui_textual2 import main as tui3
+from pytest_tui.tui_textual_tabs import main as tui4
 from pytest_tui.utils import (
     test_session_starts_matcher,
     errors_section_matcher,
@@ -45,21 +46,38 @@ def pytest_addoption(parser):
     group.addoption(
         "--tui",
         action="store_true",
-        help="automatically launch text user interface after run is finished",
+        help="automatically launch default text user interface after run is finished",
     )
     group.addoption(
-        "--tuitui",
-        "--tt",
-        action="store",
-        default="pytermtk",
-        help="specify user interface ('pytermtk' 't1' | 'textual1' 't2' | 'textual2' 't3' | 'none' 'n')",
-        choices=["pytermtk", "t1", "textual1", "t2", "textual2", "t3", "none", "n"],
+        "--tui1",
+        action="store_true",
+        help="automatically launch text user interface 'tui1' (pytermtk) [DEFAULT]",
+    )
+    group.addoption(
+        "--tui2",
+        action="store_true",
+        help="automatically launch text user interface 'tui2' (textual)",
+    )
+    group.addoption(
+        "--tui3",
+        action="store_true",
+        help="automatically launch text user interface 'tui3' (textual)",
+    )
+    group.addoption(
+        "--tui4",
+        action="store_true",
+        help="automatically launch text user interface 'tui4' (textual)",
+    )
+    group.addoption(
+        "--tuin",
+        action="store_true",
+        help="generate pytest-tui output files, but do not launch user interface",
     )
 
 
-def add_ansi(config: Config, report: TestReport):
+def add_ansi_to_report(config: Config, report: TestReport):
     """
-    If the report has longreprtext (traceback info), mark it up with ANSI
+    If the report has longreprtext (traceback info), mark it up with ANSI codes
     From https://stackoverflow.com/questions/71846269/algorithm-for-extracting-first-and-last-lines-from-sectionalized-output-file
     """
     buf = StringIO()
@@ -84,7 +102,7 @@ def add_ansi(config: Config, report: TestReport):
 def pytest_report_teststatus(report: TestReport, config: Config):
     """Construct list(s) of individual TestReport instances"""
     if hasattr(report, "longreprtext") and report.longreprtext:
-        add_ansi(config, report)
+        add_ansi_to_report(config, report)
     reports.append(report)
 
 
@@ -102,7 +120,16 @@ def pytest_configure(config: Config) -> None:
         "A"  # force "display all" mode so all results can be shown
     )
 
-    if config.option.tui:
+    if any(
+        [
+            config.option.tui,
+            config.option.tui1,
+            config.option.tui2,
+            config.option.tui3,
+            config.option.tui4,
+            config.option.tuin,
+        ]
+    ):
         tr = config.pluginmanager.getplugin("terminalreporter")
         if tr is not None:
             # identify and mark the very first line of terminal output
@@ -160,7 +187,7 @@ def pytest_configure(config: Config) -> None:
                 oldwrite(s, **kwargs)
 
                 # Mark up this line's text by passing it to an instance of TerminalWriter's
-                # 'markup' method. Do not pass "flush" to the method or it will throw an error.
+                # 'markup' method. Do not pass "flush" to the method   s it will throw an error.
                 s1 = s
                 kwargs.pop("flush") if "flush" in kwargs.keys() else None
                 s1 = TerminalWriter().markup(s, **kwargs)
@@ -217,8 +244,17 @@ def pytest_unconfigure(config: Config):
         with open(REPORTFILE, "wb") as report_file:
             pickle.dump(reports, report_file)
 
-    # Launch the TUI
-    if config.getoption("--tui") == True:
+    # Launch the selected TUI
+    if any(
+        [
+            config.option.tui,
+            config.option.tui1,
+            config.option.tui2,
+            config.option.tui3,
+            config.option.tui4,
+            config.option.tuin,
+        ]
+    ):
         pytui_tui(config)
 
 
@@ -229,18 +265,29 @@ def pytui_tui(config: Config) -> None:
     """
     # disable capturing while TUI runs to avoid error `redirected stdin is pseudofile, has
     # no fileno()`; adapted from https://githubmemory.com/repo/jsbueno/terminedia/issues/25
-    if not config.getoption("--tui"):
+    if not any(
+        [
+            config.option.tui,
+            config.option.tui1,
+            config.option.tui2,
+            config.option.tui3,
+            config.option.tui4,
+            config.option.tuin,
+        ]
+    ):
         return
     capmanager = config.pluginmanager.getplugin("capturemanager")
     try:
         capmanager.suspend_global_capture(in_=True)
     finally:
-        if config.getoption("--tt") in ["tk", "pytermtk"]:
-            tuitk()
-        elif config.getoption("--tt") in ["t1", "textual1"]:
-            tuitxt1()
-        elif config.getoption("--tt") in ["t2", "textual2"]:
-            tuitxt2()
-        elif config.getoption("--tt") not in ["n", "none"]:
-            print(f"Incorrect choice for tui-tui: {config.getoption('--tt')}")
+        if config.getoption("--tui") or config.getoption("--tui1"):
+            tui1()
+        elif config.getoption("--tui2"):
+            tui2()
+        elif config.getoption("--tui3"):
+            tui3()
+        elif config.getoption("--tui4"):
+            tui4()
+        elif not config.getoption("--tuin"):
+            print("Invalid pytest-tui option")
         capmanager.resume_global_capture()

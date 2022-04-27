@@ -21,7 +21,7 @@ def error_fixture():
 
 
 def test_a_ok():
-    print("ok")
+    print("This test doesn't have much to say, but it passes - ok!!")
 
 
 def test_b_fail():
@@ -29,4 +29,5 @@ def test_b_fail():
 
 
 def test_c_error(error_fixture):
+    print("This test should be marked as an Error.")
     pass

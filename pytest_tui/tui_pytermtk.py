@@ -33,6 +33,16 @@ class TkTui:
         self.quit_button.clicked.connect(self.root.quit)
         self.root.layout().addWidget(self.quit_button, 0, 1)
 
+    def keyPressEvent(self, evt) -> bool:
+        # Handle keypress 'Q'
+        if evt.key == ttk.TTkK.Key_Q:
+            self.root.quit()
+        return False
+
+    def keyEvent(self, evt):
+        if evt.type == ttk.TTkK.Character and evt.key == ttk.TTkK.Key_Q:
+            self.root.quit()
+
     def create_tab_widget(self) -> None:
         # Create tabs for results from individual terminal output sections
         self.tab_widget = ttk.TTkTabWidget(border=False)
