@@ -12,7 +12,12 @@ When you run Pytest campaigns that produce a lot of terminal output (e.g. with m
 
 Just run your Pytest campaigns like you normally would, adding the command line option `--tui`. Your test session will proceed as it always does, giving you its familiar terminal output while running. Then, at the end of the session, a TUI of your choice is launched and your results are displayed on-screen for you to examine. When you're done, exit the TUI and you are placed back into the terminal where you were before it was launched. Wait, what? You need to look at those results again? Well, you *could* scroll back in the terminal like you've done in the past. Or, you could execute one of the built-in scripts (e.g. "tuitk") and you're back in the TUI again. Easy.
 
-Test results are categorized in almost the same way Pytest does: by (a) outcome [Pass|Fail|Error|Skipped|Xpass|Xfail], and (b) output section [Summary|Full|Errors|Passes|Failures|Warnings]. The intent it to make it easier for you to find the specific results you want so you can examine it without all the other results getting in your way.
+Test results are categorized in the same way Pytest does it:
+
+- outcome [Pass|Fail|Error|Skipped|Xpass|Xfail]
+- output section [Summary|Full|Errors|Passes|Failures|Warnings].
+
+The intent it to make it easier for you to find the specific results you want so you can examine it without all the other results getting in your way. 
 
 ## Features
 - Choice of two TUIs: Textual and PyTermTk
@@ -44,13 +49,9 @@ From top-level directory:
 
 * `pytest --tui`
 
-Or, if you want to get technical about it:
+This will launch the default TUI. You can optionally specify one of the other TUIs by adding a number (1-4) t the end of the `--tui` option:
 
-* `pytest --tui [--tui-tui textual1|textual2|pytermtk|none] <other-pytest-options>`
-
-Simplified:
-
-* `pytest --tui [--tt t1|t2|t3|none] <other-pytest-options>`
+* `pytest --tui [--tui1|--tui2|--tui3|--tui4|--tuin] <other-pytest-options>`
 
 See 'pytest --help' for more info.
 
@@ -59,17 +60,18 @@ To quit the Textual TUI, either click the Quit button, or press `Q`. To quit the
 If you have already exited the TUI and would like to re-enter it with the same data generated from the last Pytest run, simply type:
 
 * `tui1` (to launch PyTermTk)
-* `tui2` (to launch Textual TUI flavor 1)
-* `tui3` (to launch Textual TUI flavor 2)
+* `tui2` (to launch Textual TUI flavor 1) - the 'all results stacked up but are individually hideable' version
+* `tui3` (to launch Textual TUI flavor 2 - the 'all results in a tree on the left' version)
+* `tui4` (to launch Textual TUI flavor 3 - the 'tabbed' version)
 
-You can also run with the `--tui` option enabled and bypass auto-launch of the TUI with the `--tt=n` option. This allows you to gather results now, and look at them in the TUIs later.
+You can also run with the `--tuin` option to bypass auto-launch of the TUI. This allows you to gather results now, and look at them in any of the TUIs later.
 
 ## Known Limitations / Issues
 - User interfaces need work:
   - Overall layouts need optimization
   - PyTermTk interface may get corrupted if resized
   - Textual interface can be slow, esp. if run within an IDE
-  - Textual interface #1 (`tui2`) requires user to toggle All (`A`) to see test outputs if number of tests is large
+  - Textual interface #1 (`tui2`) requires user to toggle All (`A`) to see test outputs if the number of tests is large
 - Not fully tested with all combinations of output formats. Probably some use-cases where things won't work 100% right.
 - `pytest-tui` is currently incompatible with `--tb=native` and will cause an INTERNALERROR if run together.
 
