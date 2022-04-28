@@ -1,5 +1,5 @@
 import contextlib
-from typing import TypedDict, Dict
+from typing import Dict
 from rich.console import RenderableType
 from rich.style import Style
 from rich.text import Text
@@ -112,8 +112,8 @@ class Tabs(Widget):
         # Render tree info
         elif self.tabs[label].content_type == "tree":
             # self.parent.parent.body.visible = False
-            with contextlib.suppress(Exception):
-                del self.parent.parent.view.named_widgets[f"{self.tree_name}"]
+            # with contextlib.suppress(Exception):
+            #     del self.parent.parent.view.named_widgets[f"{self.tree_name}"]
             self.parent.parent.view.refresh()
             self.tree_name = tree_names[label]
             await body.update(eval(f"self.parent.parent.{self.tree_name}"))
