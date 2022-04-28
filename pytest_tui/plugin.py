@@ -9,10 +9,10 @@ from types import SimpleNamespace
 from _pytest.config import Config, create_terminal_writer
 from _pytest._io.terminalwriter import TerminalWriter
 from _pytest.reports import TestReport
-from pytest_tui.tui_pytermtk import main as tui1
-from pytest_tui.tui_textual1 import main as tui2
-from pytest_tui.tui_textual2 import main as tui3
-from pytest_tui.tui_textual_tabs import main as tui4
+from pytest_tui.tui_textual_tabs import main as tui1
+from pytest_tui.tui_pytermtk import main as tui2
+from pytest_tui.tui_textual1 import main as tui3
+from pytest_tui.tui_textual2 import main as tui4
 from pytest_tui.utils import (
     test_session_starts_matcher,
     errors_section_matcher,
@@ -51,12 +51,12 @@ def pytest_addoption(parser):
     group.addoption(
         "--tui1",
         action="store_true",
-        help="automatically launch text user interface 'tui1' (pytermtk) [DEFAULT]",
+        help="automatically launch text user interface 'tui1' (textual) [DEFAULT]",
     )
     group.addoption(
         "--tui2",
         action="store_true",
-        help="automatically launch text user interface 'tui2' (textual)",
+        help="automatically launch text user interface 'tui2' (pytermtk)",
     )
     group.addoption(
         "--tui3",

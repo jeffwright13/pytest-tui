@@ -18,7 +18,7 @@ setup(
     author_email="jeff.washcloth@gmail.com",
     license="MIT",
     url="https://github.com/jeffwright13/pytest-tui",
-    description="Text User Interface (TUI) for Pytest, automatically launched after your test run is finished ",
+    description="Text User Interface (TUI) for Pytest, automatically launched after your test run is finished",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     packages=find_packages(),
@@ -47,10 +47,10 @@ setup(
     entry_points={
         "pytest11": ["pytest_tui = pytest_tui.plugin"],
         "console_scripts": [
-            "tui1 = pytest_tui.tui_pytermtk:main",
-            "tui2 = pytest_tui.tui_textual1:main",
-            "tui3 = pytest_tui.tui_textual2:main",
-            "tui4 = pytest_tui.tui_textual_tabs:main",
+            "tui1 = pytest_tui.tui_textual_tabs:main",
+            "tui2 = pytest_tui.tui_pytermtk:main",
+            "tui3 = pytest_tui.tui_textual1:main",
+            "tui4 = pytest_tui.tui_textual2:main",
         ],
     },
 )
