@@ -17,7 +17,7 @@ Test results are categorized in the same way Pytest does it:
 - outcome [Pass|Fail|Error|Skipped|Xpass|Xfail]
 - output section [Summary|Full|Errors|Passes|Failures|Warnings].
 
-The intent it to make it easier for you to find the specific results you want so you can examine it without all the other results getting in your way. 
+The intent it to make it easier for you to find the specific results you want so you can examine it without all the other results getting in your way.
 
 ## Features
 - Choice of two TUIs: Textual and PyTermTk
@@ -59,10 +59,10 @@ To quit the Textual TUI, either click the Quit button, or press `Q`. To quit the
 
 If you have already exited the TUI and would like to re-enter it with the same data generated from the last Pytest run, simply type:
 
-* `tui1` (to launch PyTermTk)
-* `tui2` (to launch Textual TUI flavor 1) - the 'all results stacked up but are individually hideable' version
-* `tui3` (to launch Textual TUI flavor 2 - the 'all results in a tree on the left' version)
-* `tui4` (to launch Textual TUI flavor 3 - the 'tabbed' version)
+* `tui1` (to launch Textual TUI flavor 3 - the 'tabbed' version)
+* `tui2` (to launch PyTermTk)
+* `tui3` (to launch Textual TUI flavor 1) - the 'all results stacked up but are individually hideable' version - not recommended
+* `tui4` (to launch Textual TUI flavor 2 - the 'all results in a tree on the left' version) - not recommended
 
 You can also run with the `--tuin` option to bypass auto-launch of the TUI. This allows you to gather results now, and look at them in any of the TUIs later.
 
