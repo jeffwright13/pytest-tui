@@ -30,11 +30,13 @@ RELEASE_INSTRUCTIONS
   pytest --tui
 
 8 Verify Textual TUIs:
-  pytest --tui --tt=t1
-  pytest --tui --tt=t2
+  pytest --tui1
+  pytest --tui2
+  pytest --tui3
+  pytest --tui4
 
 9 Verify No-TUI:
-  pytest --tui --tt=n
+  pytest --tuin
 
 10 Make any adjustments required, then git-commit and push, then start over at step 1
 
