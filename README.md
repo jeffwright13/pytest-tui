@@ -45,13 +45,14 @@ The intent it to make it easier for you to find the specific results you want so
 
 ## Usage
 
-From top-level directory:
+Run the following command from the top-level directory of the codebase you want to test. (If you would like some dummy tests that will allow you to take pytest-tui for a testdrive, copy all the files at https://github.com/jeffwright13/pytest-tui/tree/main/tests into a folder called `tests/`).
+Now, launch the program as follows:
 
 * `pytest --tui`
 
-This will launch the default TUI. You can optionally specify one of the other TUIs by adding a number (1-4) t the end of the `--tui` option:
+This will launch the default TUI. You can optionally specify a different TUI by adding a number (1, 2) to the end of the `--tui` option:
 
-* `pytest --tui [--tui1|--tui2|--tui3|--tui4|--tuin] <other-pytest-options>`
+* `pytest --tui [--tui1|--tui2|--tuin] <other-pytest-options>`
 
 See 'pytest --help' for more info.
 
@@ -59,12 +60,10 @@ To quit the Textual TUI, either click the Quit button, or press `Q`. To quit the
 
 If you have already exited the TUI and would like to re-enter it with the same data generated from the last Pytest run, simply type:
 
-* `tui1` (to launch Textual TUI flavor 3 - the 'tabbed' version)
-* `tui2` (to launch PyTermTk)
-* `tui3` (to launch Textual TUI flavor 1) - the 'all results stacked up but are individually hideable' version - not recommended
-* `tui4` (to launch Textual TUI flavor 2 - the 'all results in a tree on the left' version) - not recommended
+* `tui1` (to launch the Textual TUI)
+* `tui2` (to launch the PyTermTk TUI)
 
-You can also run with the `--tuin` option to bypass auto-launch of the TUI. This allows you to gather results now, and look at them in any of the TUIs later.
+You can run with the `--tuin` option to bypass auto-launch of the TUI. This allows you to gather results now, and look at them in any of the TUIs later.
 
 ## Known Limitations / Issues
 - User interfaces need work:

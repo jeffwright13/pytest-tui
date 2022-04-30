@@ -1,16 +1,12 @@
-import contextlib
 from typing import Dict
 from rich.console import RenderableType
-from rich.style import Style
+from textual.keys import Keys
+from rich.panel import Panel
 from rich.text import Text
 from textual import events
 from textual.app import App
-from textual import messages
-from textual.views import DockView
 from textual.widget import Widget
 from textual.widgets import (
-    Header,
-    Footer,
     TreeControl,
     ScrollView,
     TreeClick,
@@ -35,27 +31,6 @@ CATEGORIES = {
 }
 
 
-class TuiFooter(Footer):
-    # Override default Footer method 'make_key_text' to allow customizations
-    def make_key_text(self) -> Text:
-        """Create text containing all the keys."""
-        text = Text(style="bold white on black", no_wrap=True, justify="center", end="")
-        for binding in self.app.bindings.shown_keys:
-            key_display = (
-                binding.key.upper()
-                if binding.key_display is None
-                else binding.key_display
-            )
-            hovered = self.highlight_key == binding.key
-            key_text = Text.assemble(
-                (f" {key_display} ", "reverse" if hovered else "default on default"),
-                f" {binding.description} ",
-                meta={"@click": f"app.press('{binding.key}')", "key": binding.key},
-            )
-            text.append_text(key_text)
-        return text
-
-
 class Tab(Widget):
     def __init__(
         self,
@@ -76,15 +51,16 @@ class Tabs(Widget):
     ) -> None:
         super().__init__()
         self.tabs = tabs
-        self.view = DockView()
 
     async def action_clicked_tab(self, label: str) -> None:
         # Handle tabs being clicked
+        if label == "Quit":
+            quit()
+
         body = self.parent.parent.body
         test_results = self.parent.parent.test_results
         section_content = {
-            "Summary": test_results.Sections["TEST_SESSION_STARTS"].content
-            + test_results.Sections["LAST_LINE"].content,
+            "Summary": test_results.Sections["LAST_LINE"].content + test_results.Sections["TEST_SESSION_STARTS"].content,
             "Warnings": test_results.Sections["WARNINGS_SUMMARY"].content,
             "Errors": test_results.Sections["ERRORS_SECTION"].content,
             "Full Output": test_results.unmarked_output,
@@ -111,48 +87,34 @@ class Tabs(Widget):
             await body.update(Text.from_ansi(section_content[label]))
         # Render tree info
         elif self.tabs[label].content_type == "tree":
-            # self.parent.parent.body.visible = False
-            # with contextlib.suppress(Exception):
-            #     del self.parent.parent.view.named_widgets[f"{self.tree_name}"]
             self.parent.parent.view.refresh()
             self.tree_name = tree_names[label]
             await body.update(eval(f"self.parent.parent.{self.tree_name}"))
-        await self.view.dock()
 
-    def render(self):
+    def render(self) -> RenderableType:
+        # Build up renderable Text instance from a series of Tabs;
+        # this simulates a tabbed widget as a workaround until Textual's
+        # Tabs object has been released
         text = Text()
-        text.append("┊ ")
+        text.append("│ ")
         for tab_name in self.tabs:
             text.append(self.tabs[tab_name].rich_text)
-            text.append(" ┊ ")
+            text.append(" │ ")
             self.tabs[tab_name].rich_text.on(click=f"clicked_tab('{tab_name}')")
-        return text
+        return Panel(text, height=3)
 
 
 class TuiApp(App):
     async def on_load(self, event: events.Load) -> None:
         # Get test result sections
         self.test_results = Results()
+        # self.summary_results = self.test_results.Sections["LAST_LINE"].content
         self.summary_results = self.test_results.Sections["LAST_LINE"].content.replace(
             "=", ""
         )
         await self.bind("q", "quit", "Quit")
-        await self.bind("b", "view.toggle('sidebar')", "Toggle Tree")
 
     async def on_mount(self) -> None:
-        # Create and dock header widget
-        self.test_results = Results()
-        self.summary_results = self.test_results.Sections["LAST_LINE"].content.replace(
-            "=", ""
-        )
-        self.header = Header(style="bold white on black")
-        self.header.title = Text.from_ansi(self.summary_results)
-        await self.view.dock(self.header, edge="top", size=1)
-
-        # Create and dock footer widget
-        self.footer = TuiFooter()
-        await self.view.dock(self.footer, edge="bottom")
-
         tabs = {
             "Summary": Tab("Summary", "cyan bold underline", content_type="section"),
             "Passes": Tab("Passes", "green", content_type="tree"),
@@ -163,18 +125,17 @@ class TuiApp(App):
             "Warnings": Tab("Warnings", "yellow", content_type="section"),
             "Errors": Tab("Errors", "magenta", content_type="section"),
             "Full Output": Tab("Full Output", "cyan", content_type="section"),
+            "Quit": Tab("Quit (Q)", "white", content_type="quit"),
         }
         self.tabs = Tabs(tabs)
-        await self.view.dock(self.tabs, edge="top", size=2)
+        await self.view.dock(self.tabs, edge="top", size=3)
 
-        # Body (to display full sections or result trees)
+        # Body (to display result sections or result trees)
         self.body = ScrollView(
             Text.from_ansi(
-                self.test_results.Sections["TEST_SESSION_STARTS"].content
-                + self.test_results.Sections["LAST_LINE"].content
-            )
+                self.test_results.Sections["LAST_LINE"].content + self.test_results.Sections["TEST_SESSION_STARTS"].content + self.test_results.Sections["LAST_LINE"].content + self.test_results.Sections["SHORT_TEST_SUMMARY"].content
+            ), auto_width=True
         )
-        # await self.view.dock(self.body, edge="top")
         await self.view.dock(self.body)
 
         # Define the results trees
@@ -262,7 +223,6 @@ class TuiApp(App):
         await self.body.update(text)
 
 
-# TuiApp().run()
 def main():
     app = TuiApp()
     app.run()

@@ -9,10 +9,8 @@ from types import SimpleNamespace
 from _pytest.config import Config, create_terminal_writer
 from _pytest._io.terminalwriter import TerminalWriter
 from _pytest.reports import TestReport
-from pytest_tui.tui_textual_tabs import main as tui1
-from pytest_tui.tui_pytermtk import main as tui2
-from pytest_tui.tui_textual1 import main as tui3
-from pytest_tui.tui_textual2 import main as tui4
+from pytest_tui.tui1 import main as tui1
+from pytest_tui.tui2 import main as tui2
 from pytest_tui.utils import (
     test_session_starts_matcher,
     errors_section_matcher,
@@ -57,16 +55,6 @@ def pytest_addoption(parser):
         "--tui2",
         action="store_true",
         help="automatically launch text user interface 'tui2' (pytermtk)",
-    )
-    group.addoption(
-        "--tui3",
-        action="store_true",
-        help="automatically launch text user interface 'tui3' (textual)",
-    )
-    group.addoption(
-        "--tui4",
-        action="store_true",
-        help="automatically launch text user interface 'tui4' (textual)",
     )
     group.addoption(
         "--tuin",
@@ -125,8 +113,6 @@ def pytest_configure(config: Config) -> None:
             config.option.tui,
             config.option.tui1,
             config.option.tui2,
-            config.option.tui3,
-            config.option.tui4,
             config.option.tuin,
         ]
     ):
@@ -250,8 +236,6 @@ def pytest_unconfigure(config: Config):
             config.option.tui,
             config.option.tui1,
             config.option.tui2,
-            config.option.tui3,
-            config.option.tui4,
             config.option.tuin,
         ]
     ):
@@ -270,8 +254,6 @@ def pytui_tui(config: Config) -> None:
             config.option.tui,
             config.option.tui1,
             config.option.tui2,
-            config.option.tui3,
-            config.option.tui4,
             config.option.tuin,
         ]
     ):
@@ -284,10 +266,6 @@ def pytui_tui(config: Config) -> None:
             tui1()
         elif config.getoption("--tui2"):
             tui2()
-        elif config.getoption("--tui3"):
-            tui3()
-        elif config.getoption("--tui4"):
-            tui4()
         elif not config.getoption("--tuin"):
             print("Invalid pytest-tui option")
         capmanager.resume_global_capture()

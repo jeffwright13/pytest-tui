@@ -32,8 +32,6 @@ RELEASE_INSTRUCTIONS
 8 Verify Textual TUIs:
   pytest --tui1
   pytest --tui2
-  pytest --tui3
-  pytest --tui4
 
 9 Verify No-TUI:
   pytest --tuin
