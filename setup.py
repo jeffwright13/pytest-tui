@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name="pytest-tui",
-    version="0.9.2",
+    version="0.9.3",
     author="Jeff Wright",
     author_email="jeff.washcloth@gmail.com",
     license="MIT",
@@ -30,7 +30,7 @@ setup(
         "pyTermTk>=0.9.0a43",
         "single-source>=0.2.0",
         "strip-ansi>=0.1.1",
-        "textual==0.1.17",
+        "textual>=0.1.18",
     ],
     classifiers=[
         "Framework :: Pytest",

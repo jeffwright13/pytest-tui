@@ -1,16 +1,15 @@
 from typing import Dict
 from rich.console import RenderableType
-from textual.keys import Keys
 from rich.panel import Panel
 from rich.text import Text
 from textual import events
 from textual.app import App
 from textual.widget import Widget
 from textual.widgets import (
-    TreeControl,
     ScrollView,
     TreeClick,
 )
+from pytest_tui._tree_control import TreeControl
 from pytest_tui.utils import Results
 
 
@@ -60,7 +59,8 @@ class Tabs(Widget):
         body = self.parent.parent.body
         test_results = self.parent.parent.test_results
         section_content = {
-            "Summary": test_results.Sections["LAST_LINE"].content + test_results.Sections["TEST_SESSION_STARTS"].content,
+            "Summary": test_results.Sections["LAST_LINE"].content
+            + test_results.Sections["TEST_SESSION_STARTS"].content,
             "Warnings": test_results.Sections["WARNINGS_SUMMARY"].content,
             "Errors": test_results.Sections["ERRORS_SECTION"].content,
             "Full Output": test_results.unmarked_output,
@@ -108,7 +108,6 @@ class TuiApp(App):
     async def on_load(self, event: events.Load) -> None:
         # Get test result sections
         self.test_results = Results()
-        # self.summary_results = self.test_results.Sections["LAST_LINE"].content
         self.summary_results = self.test_results.Sections["LAST_LINE"].content.replace(
             "=", ""
         )
@@ -133,8 +132,11 @@ class TuiApp(App):
         # Body (to display result sections or result trees)
         self.body = ScrollView(
             Text.from_ansi(
-                self.test_results.Sections["LAST_LINE"].content + self.test_results.Sections["TEST_SESSION_STARTS"].content + self.test_results.Sections["LAST_LINE"].content + self.test_results.Sections["SHORT_TEST_SUMMARY"].content
-            ), auto_width=True
+                self.test_results.Sections["LAST_LINE"].content
+                + self.test_results.Sections["TEST_SESSION_STARTS"].content
+                + self.test_results.Sections["SHORT_TEST_SUMMARY"].content
+            ),
+            auto_width=True,
         )
         await self.view.dock(self.body)
 
