@@ -45,6 +45,8 @@ The intent it to make it easier for you to find the specific results you want so
 
 ## Usage
 
+### Running Tests
+
 Run the following command from the top-level directory of the codebase you want to test. (If you would like some dummy tests that will allow you to take pytest-tui for a testdrive, copy all the files at https://github.com/jeffwright13/pytest-tui/tree/main/tests into a folder called `tests/`).
 Now, launch the program as follows:
 
@@ -58,12 +60,20 @@ See 'pytest --help' for more info.
 
 To quit the Textual TUI, either click the Quit button, or press `Q`. To quit the PyTermTk TUI, click the Quit button in the upper right.
 
+### Looking at Results After Quitting TUI
+
 If you have already exited the TUI and would like to re-enter it with the same data generated from the last Pytest run, simply type:
 
 * `tui1` (to launch the Textual TUI)
 * `tui2` (to launch the PyTermTk TUI)
 
 You can run with the `--tuin` option to bypass auto-launch of the TUI. This allows you to gather results now, and look at them in any of the TUIs later.
+
+### Copy/Paste
+
+On Linux terminals, you can typically press and hold the SHIFT key on your keyboard to temporarily bypass TUI and access the terminal’s native mouse copy/paste functionality (commonly, click-drag-release or double-click to select text, middle-click to paste). This copy/paste works with the terminal’s selection buffer, as opposed to the TUI’s buffer. 
+
+On Windows, use the ALT key while click-dragging the mouse. Mac users can get the same effect with the Option key.
 
 ## Known Limitations / Issues
 - User interfaces need work:
