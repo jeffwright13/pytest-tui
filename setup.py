@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name="pytest-tui",
-    version="0.9.3",
+    version="0.9.4",
     author="Jeff Wright",
     author_email="jeff.washcloth@gmail.com",
     license="MIT",

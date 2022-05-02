@@ -153,8 +153,13 @@ class Results:
         self, unmarked_file_path: Path = UNMARKEDTERMINALOUTPUTFILE
     ) -> list:
         """Get full Pytest terminal output"""
-        with open(unmarked_file_path, "r") as umfile:
-            return umfile.read()
+        try:
+            with open(unmarked_file_path, "r") as umfile:
+                return umfile.read()
+        except FileNotFoundError as e:
+            raise FileNotFoundError(
+                f"Cannot find {unmarked_file_path}. Have you run pytest with the '--tui' option yet?"
+            ) from e
 
     def _deduplicate_reports(self) -> list:
         """
@@ -267,8 +272,13 @@ class Results:
 
     def _unpickle(self):
         """Unpack pickled Pytest TestReport objects from file"""
-        with open(REPORTFILE, "rb") as rfile:
-            return pickle.load(rfile)
+        try:
+            with open(REPORTFILE, "rb") as rfile:
+                return pickle.load(rfile)
+        except FileNotFoundError as e:
+            raise FileNotFoundError(
+                f"Cannot find {REPORTFILE}. Have you run pytest with the '--tui' option yet?"
+            ) from e
 
 
 class MarkedSections:
@@ -310,8 +320,13 @@ class MarkedSections:
         self, marked_file_path: Path = MARKEDTERMINALOUTPUTFILE
     ) -> list:
         """Return a list of all lines from the marked output file"""
-        with open(MARKEDTERMINALOUTPUTFILE, "r") as mfile:
-            return mfile.readlines()
+        try:
+            with open(MARKEDTERMINALOUTPUTFILE, "r") as mfile:
+                return mfile.readlines()
+        except FileNotFoundError as e:
+            raise FileNotFoundError(
+                f"Cannot find {MARKEDTERMINALOUTPUTFILE}. Have you run pytest with the '--tui' option yet?"
+            ) from e
 
     def _line_is_a_marker(self, line: str) -> bool:
         """Determine if the current line is a marker, or part of Pytest output"""
