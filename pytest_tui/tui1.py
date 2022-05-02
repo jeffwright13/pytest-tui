@@ -60,7 +60,8 @@ class Tabs(Widget):
         test_results = self.parent.parent.test_results
         section_content = {
             "Summary": test_results.Sections["LAST_LINE"].content
-            + test_results.Sections["TEST_SESSION_STARTS"].content,
+                + test_results.Sections["TEST_SESSION_STARTS"].content
+                + test_results.Sections["SHORT_TEST_SUMMARY"].content,
             "Warnings": test_results.Sections["WARNINGS_SUMMARY"].content,
             "Errors": test_results.Sections["ERRORS_SECTION"].content,
             "Full Output": test_results.unmarked_output,
