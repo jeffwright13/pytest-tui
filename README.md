@@ -1,11 +1,11 @@
 # pytest-tui
 ## A Pytest plugin that auto-launches a Text User Interface (TUI) for viewing test run results
 
-### Using PyTermTk:
-![output2](https://user-images.githubusercontent.com/4308435/162344632-552f1284-51a4-46c4-b389-0352636f65bb.gif)
-
-### ...using Textual TUI:
+### Using Textual TUI:
 ![2022-05-01 19 25 19](https://user-images.githubusercontent.com/4308435/166174159-b442a5b5-416d-42a0-badd-7401e9980e47.gif)
+
+### Using PyTermTk:
+![2022-05-01 19 32 28](https://user-images.githubusercontent.com/4308435/166174568-a1e921a8-fa30-4c3a-ab4a-a402bc50fb40.gif)
 
 ## Introduction
 When you run Pytest campaigns that produce a lot of terminal output (e.g. with many tests, very detailed output, or with multiple failures), the standard Pytest output can make it difficult to examine the results. You end up scrolling way back in the terminal, looking for that one test you want to examine more closely. Pytest-tui provides a Text User Interface (TUI) that aims to make it easier to find the information you're looking for.
@@ -14,13 +14,13 @@ Just run your Pytest campaigns like you normally would, adding the command line 
 
 Test results are categorized in the same way Pytest does it:
 
-- outcome [Pass|Fail|Error|Skipped|Xpass|Xfail]
-- output section [Summary|Full|Errors|Passes|Failures|Warnings].
+- By outcome:  `[Pass|Fail|Error|Skipped|Xpass|Xfail]`
+- By output section: `[Summary|Full|Errors|Passes|Failures|Warnings]`
 
 The intent it to make it easier for you to find the specific results you want so you can examine it without all the other results getting in your way.
 
 ## Features
-- Choice of two TUIs: Textual and PyTermTk
+- Choice of two TUIs: [Textual](https://github.com/Textualize/textual) or [PyTermTk](https://pypi.org/project/pyTermTk/)
 - Ability to immediately launch TUIs with existing data using console scripts
 - ANSI text markup support - whatever the output on your console looks like is how things are going to show up in the TUI
 - Mouse and keyboard support (including scrolling)
