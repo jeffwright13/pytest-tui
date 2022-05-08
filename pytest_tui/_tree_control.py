@@ -195,7 +195,6 @@ class TreeControl(Generic[NodeDataType], Widget):
         self.padding = padding
 
     hover_node: Reactive[NodeID | None] = Reactive(None)
-    last_hover_node: Reactive[NodeID | None] = Reactive(None)
     cursor: Reactive[NodeID] = Reactive(NodeID(0), layout=True)
     cursor_line: Reactive[int] = Reactive(0, repaint=False)
     show_cursor: Reactive[bool] = Reactive(False, layout=True)
