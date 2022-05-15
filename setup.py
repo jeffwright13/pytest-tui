@@ -49,6 +49,7 @@ setup(
         "console_scripts": [
             "tui1 = pytest_tui.tui1:main",
             "tui2 = pytest_tui.tui2:main",
+            "tui3 = pytest_tui.tui3:main",
         ],
     },
 )

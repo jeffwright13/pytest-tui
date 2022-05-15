@@ -11,6 +11,7 @@ from _pytest._io.terminalwriter import TerminalWriter
 from _pytest.reports import TestReport
 from pytest_tui.tui1 import main as tui1
 from pytest_tui.tui2 import main as tui2
+from pytest_tui.tui3 import main as tui3
 from pytest_tui.utils import (
     test_session_starts_matcher,
     errors_section_matcher,
@@ -57,11 +58,15 @@ def pytest_addoption(parser):
         help="automatically launch text user interface 'tui2' (pytermtk)",
     )
     group.addoption(
+        "--tui3",
+        action="store_true",
+        help="automatically launch text user interface 'tui3' (pytermgui)",
+    )
+    group.addoption(
         "--tuin",
         action="store_true",
         help="generate pytest-tui output files, but do not launch user interface",
     )
-
 
 def add_ansi_to_report(config: Config, report: TestReport):
     """
@@ -93,6 +98,11 @@ def pytest_report_teststatus(report: TestReport, config: Config):
         add_ansi_to_report(config, report)
     reports.append(report)
 
+    """Put snowflake tests into a separate group from other failures."""
+    if report.when == "call" and 'snowflake' in report.keywords.keys() and report.keywords["snowflake"]:
+        return 'snowflake', '❄', ('SNOWFLAKE', {"cyan": True})
+
+
 
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config: Config) -> None:
@@ -113,6 +123,7 @@ def pytest_configure(config: Config) -> None:
             config.option.tui,
             config.option.tui1,
             config.option.tui2,
+            config.option.tui3,
             config.option.tuin,
         ]
     ):
@@ -236,6 +247,7 @@ def pytest_unconfigure(config: Config):
             config.option.tui,
             config.option.tui1,
             config.option.tui2,
+            config.option.tui3,
             config.option.tuin,
         ]
     ):
@@ -254,6 +266,7 @@ def pytui_tui(config: Config) -> None:
             config.option.tui,
             config.option.tui1,
             config.option.tui2,
+            config.option.tui3,
             config.option.tuin,
         ]
     ):
@@ -266,6 +279,8 @@ def pytui_tui(config: Config) -> None:
             tui1()
         elif config.getoption("--tui2"):
             tui2()
+        elif config.getoption("--tui3"):
+            tui3()
         elif not config.getoption("--tuin"):
             print("Invalid pytest-tui option")
         capmanager.resume_global_capture()

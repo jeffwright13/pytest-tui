@@ -30,6 +30,10 @@ def error_fixture():
     logger.debug(fake_data())
     assert 0
 
+def test_aa_ok():
+    print("This test doesn't have much to say, and it fails - not OK!!")
+    assert 0
+
 
 def test_a_ok():
     print("This test doesn't have much to say, but it passes - ok!!")

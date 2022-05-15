@@ -28,8 +28,18 @@ def error_fixture():
     assert 0
 
 
+def test_aa_ok():
+    print("This test doesn't have much to say, but it passes - so OK!!")
+    logger.critical(fake_data())
+    logger.error(fake_data())
+    logger.warning(fake_data())
+    logger.info(fake_data())
+    logger.debug(fake_data())
+    pass
+
+
 def test_a_ok():
-    print("This test doesn't have much to say, but it passes - ok!!")
+    print("This test doesn't have much to say, but it passes - so OK!!")
     logger.critical(fake_data())
     logger.error(fake_data())
     logger.warning(fake_data())
