@@ -198,10 +198,8 @@ class Results:
             #     and test_info.nodeid == report.nodeid
             # ):
             #     test_info.text = report.longreprtext
-            print("")
             if hasattr(report, "ansi") and test_info.nodeid == report.nodeid:
                 test_info.text = report.ansi.val
-            print("")
 
     def _update_test_result_by_testname(self, nodeid: str, result: str) -> None:
         for test_result in self.test_results:
