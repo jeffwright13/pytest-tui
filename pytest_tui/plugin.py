@@ -9,8 +9,6 @@ from types import SimpleNamespace
 from _pytest.config import Config, create_terminal_writer
 from _pytest._io.terminalwriter import TerminalWriter
 from _pytest.reports import TestReport
-from pytest_tui.tui1 import main as tui1
-from pytest_tui.tui2 import main as tui2
 from pytest_tui.utils import (
     test_session_starts_matcher,
     errors_section_matcher,
@@ -263,8 +261,10 @@ def pytui_tui(config: Config) -> None:
         capmanager.suspend_global_capture(in_=True)
     finally:
         if config.getoption("--tui") or config.getoption("--tui1"):
+            from pytest_tui.tui1 import main as tui1
             tui1()
         elif config.getoption("--tui2"):
+            from pytest_tui.tui2 import main as tui2
             tui2()
         elif not config.getoption("--tuin"):
             print("Invalid pytest-tui option")
