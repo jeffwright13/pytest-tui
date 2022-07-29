@@ -120,6 +120,7 @@ def pytest_configure(config: Config) -> None:
             config.option.tui1,
             config.option.tui2,
             config.option.tuin,
+            config.tuihtml,
         ]
     ):
         tr = config.pluginmanager.getplugin("terminalreporter")
