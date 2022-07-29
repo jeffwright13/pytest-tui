@@ -5,7 +5,8 @@ from tkinter import scrolledtext
 from pytest_tui.utils import Results
 from rich.text import Text as richText
 from strip_ansi import strip_ansi
-
+from ansi2html import Ansi2HTMLConverter
+from tkhtmlview import HTMLLabel, HTMLScrolledText
 
 def get_summary_results(results: Results) -> str:
     return results.Sections["LAST_LINE"].content.replace("=", "")
@@ -22,9 +23,14 @@ class TkApp:
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
 
-        summary_results = ttk.Label(
+        summary_html_inline = Ansi2HTMLConverter(inline=True).convert(get_summary_results(self.test_results))
+        summary_html = Ansi2HTMLConverter().convert(get_summary_results(self.test_results))
+        # summary_results = ttk.Label(
+        summary_results = HTMLLabel(
             self.mainframe,
-            text=strip_ansi(get_summary_results(self.test_results))
+            # text=strip_ansi(get_summary_results(self.test_results))
+            text="<p style='color:red;'>==================== <p style='color:red;'><b>15 failed</p>, <p style='color:green;'>15 passed</p>, <p style='color:yellow;'>5 skipped\x1b[</b>, <p style='color:yellow;'>6 xfailed</>, <p style='color:yellow;'>3 xpassed\x1b[</b>, <p style='color:yellow;'>22 warnings</p>, <p style='color:red;'><b>9 errors</><p style='color:red;'> in 18.90s\x1b[</b><p style='color:red;'> =====================</p>\n"
+            # text=summary_html
         ).grid(column=0, row=0, sticky=(W, E))
 
         quit_button = ttk.Button(self.mainframe, text="Quit", command=self.mainframe.quit).grid(
@@ -49,6 +55,8 @@ class TkApp:
         width = len(self.test_results.Sections["TEST_SESSION_STARTS"].content.split("\n")[0])
         height = 60
         self.tab_frame_summary = ttk.Frame(self.notebook)
+        # stext = HTMLScrolledText(self.tab_frame_summary, width=width, height=height)
+        # stext.insert(END, strip_ansi(self.test_results.Sections["TEST_SESSION_STARTS"].content + self.test_results.Sections["SHORT_TEST_SUMMARY"].content))
         stext = scrolledtext.ScrolledText(self.tab_frame_summary, width=width, height=height)
         stext.insert(END, strip_ansi(self.test_results.Sections["TEST_SESSION_STARTS"].content + self.test_results.Sections["SHORT_TEST_SUMMARY"].content))
         stext.pack(fill=BOTH, side=LEFT, expand=True)

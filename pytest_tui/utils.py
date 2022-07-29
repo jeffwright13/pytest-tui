@@ -362,3 +362,62 @@ class MarkedSections:
                 self.Sections[section_name].content += line
         self.Sections["LAST_LINE"].content = lines[-1]
         return self.Sections
+
+class AnsiDecoder():
+    CODES_TO_COLORS = {
+        "0m": "reset",
+        "1m": "bold",
+        "31m": "red",
+        "32m": "green",
+        "33m": "yellow",
+        "34m": "blue",
+        "35m": "magenta",
+        "36m": "cyan",
+        "37m": "white",
+        "38m": None, # (256-color or RGB)
+        "39m": "default",
+        "91m": "bright red",
+        "92m": "bright green",
+        "93m": "bright yellow",
+        "94m": "bright blue",
+        "95m": "bright magenta",
+        "96m": "bright cyan",
+        "97m": "bright white",
+    }
+
+    CODES_TO_HTML = {
+        "0m": "</>",
+        "1m": "<b>",
+        "31m": "<p style='color:'red;'>",
+        "32m": "<p style='color:'green;'>",
+        "33m": "<p style='color:'yellow;'>",
+        "34m": "<p style='color:blue;'>",
+        "35m": "<p style='color:'magenta;'>",
+        "36m": "<p style='color:'cyan;'>",
+        "37m": "<p style='color:'white;'>",
+        "38m": None, # (256-color or RGB)
+        "39m": "default",
+        "91m": "<b style='color:'red;'>",
+        "92m": "<b style='color:'green;'>",
+        "93m": "<b style='color:'yellow;'>",
+        "94m": "<b style='color:blue;'>",
+        "95m": "<b style='color:'magenta;'>",
+        "96m": "<b style='color:'cyan;'>",
+        "97m": "<b style='color:'white;'>",
+    }
+
+
+    def __init__(self, ansi_file: Path):
+        self.ansi_file = ansi_file
+
+    def _extract_ansi_codes(self, lines: list):
+        matcher = r"(\x9B|\x1B\[)([0-?]*[ -\/]*[@-~])"
+        matches = []
+        for line in lines:
+            match = re.findall(matcher, line)
+            if match:
+                matches.append(match)
+        return matches
+
+    def replace_ansi_with_html(line: str) -> str:
+        pass

@@ -14,3 +14,6 @@ def test_foo2(fixt):
 
 def test_foo3(fixt):
     assert 0
+
+def test_foo4(fixt):
+    assert 0
