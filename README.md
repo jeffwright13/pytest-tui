@@ -35,6 +35,7 @@ The intent it to make it easier for you to find the specific results you want so
 - Not supported: plugins that take over the console in other ways, like
   - `pytest-sugar`
   - `pytest-emoji-output`
+- Option to export console output to HTML (`pytest --tuihtml`)
 
 ## Requirements
 - Pytest >= 6.2.5
@@ -64,7 +65,6 @@ To quit the Textual TUI, either click the Quit button, or press `Q`. To quit the
 
 `pytest demo-tests/`
 
-
 ### Looking at Results After Quitting TUI
 
 If you have already exited the TUI and would like to re-enter it with the same data generated from the last Pytest run, simply type:
@@ -79,6 +79,11 @@ You can run with the `--tuin` option to bypass auto-launch of the TUI. This allo
 On Linux terminals, you can typically press and hold the SHIFT key on your keyboard to temporarily bypass TUI and access the terminal’s native mouse copy/paste functionality (commonly, click-drag-release or double-click to select text, middle-click to paste). This copy/paste works with the terminal’s selection buffer, as opposed to the TUI’s buffer.
 
 On Windows, use the ALT key while click-dragging the mouse. Mac users can get the same effect with the Option key.
+
+## HTML Export
+Invoke with option `tuihtml` to produce a HTML file that mirrors the full console output from your test run. Outputfile is named `output_html.html`. This topion can be either called by itself, or in conjuction with the other `tui` options.
+
+`pytest --tuihtml`
 
 ## Known Limitations / Issues
 - User interfaces need work:
