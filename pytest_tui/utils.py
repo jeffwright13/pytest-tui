@@ -12,6 +12,7 @@ LOGO = "█▓▒▒░░░Pytest-TUI░░░▒▒▓█"
 REPORTFILE = Path.cwd() / "report_objects.bin"
 MARKEDTERMINALOUTPUTFILE = Path.cwd() / "marked_output.bin"
 UNMARKEDTERMINALOUTPUTFILE = Path.cwd() / "unmarked_output.bin"
+HTMLOUTPUTFILE = Path.cwd() / "output_html.html"
 
 # regex matching patterns for Pytest sections
 test_session_starts_matcher = re.compile(r"^==.*\stest session starts\s==+")

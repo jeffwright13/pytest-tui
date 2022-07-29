@@ -21,7 +21,10 @@ from pytest_tui.utils import (
     REPORTFILE,
     MARKEDTERMINALOUTPUTFILE,
     UNMARKEDTERMINALOUTPUTFILE,
+    HTMLOUTPUTFILE,
 )
+
+from ansi2html import Ansi2HTMLConverter
 
 
 # Don't collect tests from any of these files
@@ -58,6 +61,11 @@ def pytest_addoption(parser):
         "--tuin",
         action="store_true",
         help="generate pytest-tui output files, but do not launch user interface",
+    )
+    group.addoption(
+        "--tuihtml",
+        action="store_true",
+        help="export full console output to HTML file",
     )
 
 
@@ -228,6 +236,21 @@ def pytest_unconfigure(config: Config):
         with open(REPORTFILE, "wb") as report_file:
             pickle.dump(reports, report_file)
 
+    # Write console output to HTML
+    if config.option.tuihtml:
+        conv = Ansi2HTMLConverter()
+
+        with open(UNMARKEDTERMINALOUTPUTFILE, "r") as f:
+            lines = f.readlines()
+        for line in lines:
+            line = line.replace('"""', '"')
+        ansi = "".join(lines)
+
+        html = conv.convert(ansi)
+
+        with open(HTMLOUTPUTFILE, "w") as html_file:
+            html_file.write(html)
+
     # Launch the selected TUI
     if any(
         [
@@ -262,9 +285,11 @@ def pytui_tui(config: Config) -> None:
     finally:
         if config.getoption("--tui") or config.getoption("--tui1"):
             from pytest_tui.tui1 import main as tui1
+
             tui1()
         elif config.getoption("--tui2"):
             from pytest_tui.tui2 import main as tui2
+
             tui2()
         elif not config.getoption("--tuin"):
             print("Invalid pytest-tui option")

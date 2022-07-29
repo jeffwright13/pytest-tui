@@ -25,6 +25,7 @@ setup(
     py_modules=["pytest_tui"],
     python_requires=">=3.8",
     install_requires=[
+        "ansi2html>=1.8.0",
         "Faker>=13.0.0",
         "pytest>=6.2.5",
         "pyTermTk>=0.9.0a43",
