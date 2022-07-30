@@ -2,9 +2,12 @@ import re
 import pickle
 import tempfile
 import pytest
+import webbrowser
 
 from io import StringIO
 from types import SimpleNamespace
+
+from ansi2html import Ansi2HTMLConverter
 
 from _pytest.config import Config, create_terminal_writer
 from _pytest._io.terminalwriter import TerminalWriter
@@ -23,8 +26,6 @@ from pytest_tui.utils import (
     UNMARKEDTERMINALOUTPUTFILE,
     HTMLOUTPUTFILE,
 )
-
-from ansi2html import Ansi2HTMLConverter
 
 
 # Don't collect tests from any of these files
@@ -248,7 +249,6 @@ def pytest_unconfigure(config: Config):
         ansi = "".join(lines)
 
         html = conv.convert(ansi)
-
         with open(HTMLOUTPUTFILE, "w") as html_file:
             html_file.write(html)
 
@@ -258,6 +258,7 @@ def pytest_unconfigure(config: Config):
             config.option.tui,
             config.option.tui1,
             config.option.tui2,
+            config.option.tuihtml,
             config.option.tuin,
         ]
     ):
@@ -276,10 +277,12 @@ def pytui_tui(config: Config) -> None:
             config.option.tui,
             config.option.tui1,
             config.option.tui2,
+            config.option.tuihtml,
             config.option.tuin,
         ]
     ):
         return
+
     capmanager = config.pluginmanager.getplugin("capturemanager")
     try:
         capmanager.suspend_global_capture(in_=True)
@@ -288,10 +291,18 @@ def pytui_tui(config: Config) -> None:
             from pytest_tui.tui1 import main as tui1
 
             tui1()
+
         elif config.getoption("--tui2"):
             from pytest_tui.tui2 import main as tui2
 
             tui2()
+
+        elif config.getoption("--tuihtml"):
+            from pytest_tui.html import main as tuihtml
+
+            tuihtml()
+            webbrowser.open(f"file://{HTMLOUTPUTFILE._str}")
+
         elif not config.getoption("--tuin"):
             print("Invalid pytest-tui option")
         capmanager.resume_global_capture()
