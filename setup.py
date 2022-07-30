@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name="pytest-tui",
-    version="0.9.6",
+    version="0.9.7",
     author="Jeff Wright",
     author_email="jeff.washcloth@gmail.com",
     license="MIT",
@@ -44,12 +44,13 @@ setup(
         "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
     ],
-    keywords="pytest testing tui output logs fail pytermtk textual single-source",
+    keywords="pytest testing tui html output logs fail pytermtk textual single-source",
     entry_points={
         "pytest11": ["pytest_tui = pytest_tui.plugin"],
         "console_scripts": [
             "tui1 = pytest_tui.tui1:main",
             "tui2 = pytest_tui.tui2:main",
+            "tuihtml = pytest_tui.html:main",
         ],
     },
 )

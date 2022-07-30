@@ -81,7 +81,7 @@ On Linux terminals, you can typically press and hold the SHIFT key on your keybo
 On Windows, use the ALT key while click-dragging the mouse. Mac users can get the same effect with the Option key.
 
 ## HTML Export
-Invoke with option `tuihtml` to produce a HTML file that mirrors the full console output from your test run. Outputfile is named `output_html.html`. This topion can be either called by itself, or in conjuction with the other `tui` options.
+Invoke with option `--tuihtml` to produce an HTML file with expandable/collapsible results sections. The output file is named `output_html.html` and is automatically launched upon completion of the test run, just as with the TUIs. This option can be either called by itself, or in conjuction with the other `tui` options.
 
 `pytest --tuihtml`
 

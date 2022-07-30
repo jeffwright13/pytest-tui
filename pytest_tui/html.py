@@ -80,7 +80,7 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
     if not test: test = "<p>No output</p>"
     html_out += test + test_end
 
-    html_out += "<p><b>" + "FAILURES" + "</b></p>"
+    html_out += "<hr><p><b>" + "FAILURES" + "</b></p>"
     for node in page.results.tests_failures:
         html_out +=  button_start + node + button_end
         test = clean(conv.convert(page.results.tests_failures[node], full=False))
