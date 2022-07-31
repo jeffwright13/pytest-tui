@@ -301,7 +301,7 @@ def pytui_tui(config: Config) -> None:
             from pytest_tui.html import main as tuihtml
 
             tuihtml()
-            webbrowser.open(f"file://{HTMLOUTPUTFILE._str}")
+            # webbrowser.open(f"file://{HTMLOUTPUTFILE._str}")
 
         elif not config.getoption("--tuin"):
             print("Invalid pytest-tui option")

@@ -6,6 +6,14 @@ from pytest_tui import __version__
 import os
 import re
 import time
+import webbrowser
+
+BODY_FOREGROUND_COLOR = "AAAAAA"
+BODY_BACKGROUND_COLOR = "000000"
+INV_FOREGROUND_COLOR = "000000"
+INV_BACKGROUND_COLOR = "AAAAAA"
+COLLAPSIBLE_FOREGROUND_COLOR = "AAAAAA"
+COLLAPSIBLE_BACKGROUND_COLOR = "000000"
 
 
 class HtmlPage:
@@ -32,7 +40,7 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
     conv = Ansi2HTMLConverter()
     page = HtmlPage()
 
-    header = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <title>Test Report</title> <style type="text/css"> .ansi2html-content { display: inline; white-space: pre-wrap; word-wrap: break-word; } .body_foreground { color: #AAAAAA; } .body_background { background-color: #000000; } .inv_foreground { color: #000000; } .inv_background { background-color: #AAAAAA; } .ansi1 { font-weight: bold; } .ansi31 { color: #aa0000; } .ansi32 { color: #00aa00; } .ansi33 { color: #aa5500; } .collapsible { font-weight: bold; color: #AAAAAA; background-color: #000000; cursor: pointer; width: 100%; border: none; text-align: left; outline: none; font-size: 15px; } .active, .collapsible:hover { } .content {  display: none; overflow: hidden; } </style> </head> <body class="body_foreground body_background" style="font-size: normal;"> <pre class="ansi2html-content">"""
+    header = f"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <title>Test Report</title> <style type="text/css"> .ansi2html-content {{ display: inline; white-space: pre-wrap; word-wrap: break-word; }} .body_foreground {{ color: #{BODY_FOREGROUND_COLOR}; }} .body_background {{ background-color: #{BODY_BACKGROUND_COLOR}; }} .inv_foreground {{ color: #{INV_FOREGROUND_COLOR}; }} .inv_background {{ background-color: #{INV_BACKGROUND_COLOR}; }} .ansi1 {{ font-weight: bold; }} .ansi31 {{ color: #aa0000; }} .ansi32 {{ color: #00aa00; }} .ansi33 {{ color: #aa5500; }} .collapsible {{ font-weight: bold; color: #{COLLAPSIBLE_FOREGROUND_COLOR}; background-color: #{COLLAPSIBLE_BACKGROUND_COLOR}; cursor: pointer; width: 100%; border: none; text-align: left; outline: none; font-size: 15px; }} .active, .collapsible:hover {{ }} .content {{ display: none; overflow: hidden; }} </style> </head> <body class="body_foreground body_background" style="font-size: normal;"> <pre class="ansi2html-content">"""
 
     button_start = """<button type="button" class="collapsible">"""
     button_end = """</button> <div class="content"> <p>"""
@@ -56,7 +64,7 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
 
     # Sections
     for section in ["Start", "Summary", "Warnings", "Errors", "Full Output"]:
-        html_out += "<hr> <p> <b>" + section.upper() + "</b> </p>"
+        html_out += "<hr> <h3>" + section.upper() + "</h3>"
         html_out += button_start + section + button_end
         test = clean(conv.convert(page.sections[section], full=False))
         if not test:
@@ -79,6 +87,9 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
     html_out += trailer
     with open(HTMLOUTPUTFILE, "w") as f:
         f.write(html_out)
+
+    # Open in browser
+    webbrowser.open(f"file://{HTMLOUTPUTFILE._str}")
 
 
 if __name__ == "__main__":
