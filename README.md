@@ -1,5 +1,5 @@
 # pytest-tui
-## A Pytest plugin that auto-launches a Text User Interface (TUI) for viewing test run results
+## A Pytest plugin that auto-launches a Text User Interface (TUI) or an HTML page for viewing test run results
 
 ### Using Textual TUI:
 ![2022-05-01 19 25 19](https://user-images.githubusercontent.com/4308435/166174159-b442a5b5-416d-42a0-badd-7401e9980e47.gif)
