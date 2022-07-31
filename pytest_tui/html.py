@@ -1,5 +1,5 @@
-from pytest_tui.utils import Results
 from ansi2html import Ansi2HTMLConverter
+from pytest_tui.utils import Results
 from pytest_tui.utils import HTMLOUTPUTFILE
 from pytest_tui import __version__
 
@@ -21,12 +21,12 @@ class HtmlPage:
             "Errors": self.results.Sections["ERRORS_SECTION"].content,
             "Full Output": self.results.unmarked_output,
         }
-        self.summary = self.results.Sections["LAST_LINE"].content.replace(
-            "=", ""
-        )
+        self.summary = self.results.Sections["LAST_LINE"].content.replace("=", "")
+
 
 def clean(text: str) -> str:
     return re.sub("\\n+", "\\n", text)
+
 
 def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
     conv = Ansi2HTMLConverter()
@@ -43,83 +43,37 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
     trailer = """</pre>""" + script + """</body> </html>"""
 
     html_out = header + "<h1>report.html</h1 s>"
-
-    (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(HTMLOUTPUTFILE)
+    html_out += clean(
+        conv.convert(
+            page.results.Sections["LAST_LINE"].content.replace("=", "").strip(),
+            full=False,
+        )
+    )
+    (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(
+        HTMLOUTPUTFILE
+    )
     html_out += f"<p>Report generated on {time.ctime(mtime)} by pytest-tui version {__version__}</p>"
 
-    # html_out += clean(conv.convert(page.results.Sections["LAST_LINE"].content))
-
     # Sections
-    html_out += "<hr><p><b>" + "TEST SESSION START" + "</b></p>"
-    html_out += button_start + "Test Session Start" + button_end
-    test = clean(conv.convert(page.sections["Start"]))
-    if not test: test = "<p>No output</p>"
-    html_out += test + test_end
-
-    html_out += "<hr><p><b>" + "SUMMARY" + "</b></p>"
-    html_out += button_start + "Summary" + button_end
-    test = clean(conv.convert(page.sections["Summary"]))
-    if not test: test = "<p>No output</p>"
-    html_out += test + test_end
-
-    html_out += "<hr><p><b>" + "WARNINGS" + "</b></p>"
-    html_out += button_start + "Warnings" + button_end
-    test = clean(conv.convert(page.sections["Warnings"]))
-    if not test: test = "<p>No output</p>"
-    html_out += test + test_end
-
-    html_out += "<hr><p><b>" + "ERRORS" + "</b></p>"
-    html_out += button_start + "Errors" + button_end
-    test = clean(conv.convert(page.sections["Errors"]))
-    if not test: test = "<p>No output</p>"
-    html_out += test + test_end
-
-    html_out += "<hr><p><b>" + "FULL OUTPUT" + "</b></p>"
-    html_out += button_start + "Full Output" + button_end
-    test = clean(conv.convert(page.sections["Full Output"]))
-    if not test: test = "<p>No output</p>"
-    html_out += test + test_end
-
-    html_out += "<hr><p><b>" + "FAILURES" + "</b></p>"
-    for node in page.results.tests_failures:
-        html_out +=  button_start + node + button_end
-        test = clean(conv.convert(page.results.tests_failures[node], full=False))
-        if not test: test = "<p>No output</p>"
+    for section in ["Start", "Summary", "Warnings", "Errors", "Full Output"]:
+        html_out += "<hr> <p> <b>" + section.upper() + "</b> </p>"
+        html_out += button_start + section + button_end
+        test = clean(conv.convert(page.sections[section], full=False))
+        if not test:
+            test = "<p>No output</p>"
         html_out += test + test_end
 
-    html_out += "<hr><p><b>" + "PASSES" + "</b></p>"
-    for node in page.results.tests_passes:
-        html_out +=  button_start + node + button_end
-        test = clean(conv.convert(page.results.tests_passes[node], full=False))
-        if not test: test = "<p>No output</p>"
-        html_out += test + test_end
-
-    html_out += "<hr><p><b>" + "SKIPPED" + "</b></p>"
-    for node in page.results.tests_skipped:
-        html_out +=  button_start + node + button_end
-        test = clean(conv.convert(page.results.tests_skipped[node], full=False))
-        if not test: test = "<p>No output</p>"
-        html_out += test + test_end
-
-    html_out += "<hr><p><b>" + "ERRORS" + "</b></p>"
-    for node in page.results.tests_errors:
-        html_out +=  button_start + node + button_end
-        test = clean(conv.convert(page.results.tests_errors[node], full=False))
-        html_out += test + test_end
-
-    html_out += "<hr><p><b>" + "XPASSES" + "</b></p>"
-    for node in page.results.tests_xpasses:
-        html_out +=  button_start + node + button_end
-        test = clean(conv.convert(page.results.tests_xpasses[node], full=False))
-        if not test: test = "<p>No output</p>"
-        html_out += test + test_end
-
-    html_out += "<hr><p><b>" + "XFAILS" + "</b></p>"
-    for node in page.results.tests_xfails:
-        html_out +=  button_start + node + button_end
-        test = clean(conv.convert(page.results.tests_xfails[node], full=False))
-        if not test: test = "<p>No output</p>"
-        html_out += test + test_end
+    # Test Results
+    for result in ["failures", "passes", "skipped", "errors", "xpasses", "xfails"]:
+        html_out += "<hr> <p> <b>" + result.upper() + "</b> </p>"
+        for node in eval(f"page.results.tests_{result}"):
+            html_out += button_start + node + button_end
+            test = clean(
+                conv.convert(eval(f"page.results.tests_{result}[node]"), full=False)
+            )
+            if not test:
+                test = "<p>No output</p>"
+            html_out += test + test_end
 
     # Final trailer and file write
     html_out += trailer
