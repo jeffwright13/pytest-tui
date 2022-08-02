@@ -1,0 +1,16 @@
+What is the difference between an Outcome (which only seems to be one of Pass/Fail/Skip), and a result (which could be any of those, PLUS XF, XP, Err, Warn, or even Rerun or possibly something else if aplugin is installed)?
+Why is there this seeming distinction in the code? Does that distinction remain consistent in vernacular use of the terms "Outcome" and "Result?"
+There are multiple third-part plugins that don't get the same tallies as the console stats: pytest-html, pytest-json, pytest-tui. Their tallies don't agree with what Pytest itself claims on the final `=== short test summary info ===` line in the console at the end of a test run. And if anything shoul be correct, it's that, right? To wit:
+  console: 17 failed, 19 passed, 5 skipped, 7 xfailed, 4 xpassed, 21 warnings, 9 errors
+  pytest-html: 17 failed, 17 passed, 5 skipped, 7 xfailed, 4 xpassed, 8 errors ()
+  pytest-json: 16 failed, 17 passed, 5 skipped, 7 xfailed, 4 xpassed, 9 errors (57)
+  pytest-tui: 16 failed, 17 passed, 5 skipped, 7 xfailed, 4 xpassed, 9 errors
+Discrepancies:
+  pytest-tui misses FAILED:
+    test_issue_1004.py::test_foo3  <= https://github.com/pytest-dev/pytest/issues/1004
+  pytest-tui misses PASSED:
+    test_hoefling.py::test_4
+
+Confusion on this is all over the web. A couple of choice examples of this confusion:
+  https://stackoverflow.com/questions/51711988/how-can-i-access-the-overall-test-result-of-a-pytest-test-run-during-runtime
+  ...

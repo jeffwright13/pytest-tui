@@ -37,6 +37,7 @@ def test_a_ok():
     logger.debug(fake_data())
     pass
 
+
 def test_b_fail():
     logger.critical(fake_data())
     logger.error(fake_data())
@@ -66,6 +67,8 @@ def test_d1_skip_inline():
 
 
 pytest.mark.skip(reason="Skipping this test with decorator.")
+
+
 def test_d2_skip():
     logger.critical(fake_data())
     logger.error(fake_data())
@@ -296,7 +299,9 @@ def test_12_fails_and_has_stdout(capsys):
 
 
 def test_13_passes_and_has_stdout(capsys):
-    print("This test passes. This message is a 'print' and is consumed by Pytest via stdout.")  # stdout is consumed by pytest
+    print(
+        "This test passes. This message is a 'print' and is consumed by Pytest via stdout."
+    )  # stdout is consumed by pytest
     logger.critical(fake_data())
     logger.error(fake_data())
     logger.warning(fake_data())

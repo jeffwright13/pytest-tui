@@ -94,6 +94,35 @@ def add_ansi_to_report(config: Config, report: TestReport):
     reporter._tw = original_writer
 
 
+
+#=================================
+def pytest_sessionstart(session):
+    session.results = {}
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    result = outcome.get_result()
+    if result.when == 'call':
+        item.session.results[item] = result
+
+def pytest_sessionfinish(session, exitstatus):
+    print('run status code:', exitstatus)
+    # passed = sum(1 for result in session.results.values() if result.passed)
+    # failed = sum(1 for result in session.results.values() if result.failed)
+    # xpassed = sum(1 for result in session.results.values() if result.xpassed)
+    # xfailed = sum(1 for result in session.results.values() if result.xfailed)
+    # skipped = sum(1 for result in session.results.values() if result.skipped)
+    # print(f'passed {passed}')
+    # print(f'failed {failed}')
+    # print(f'xpassed {xpassed}')
+    # print(f'xfailed {xfailed}')
+    # print(f'skipped {skipped}')
+    # print(f'total {passed + failed + xpassed + xfailed + skipped}')
+    # print("")
+
+#=================================
+
 def pytest_report_teststatus(report: TestReport, config: Config):
     """Construct list(s) of individual TestReport instances"""
     if hasattr(report, "longreprtext") and report.longreprtext:

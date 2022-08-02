@@ -69,6 +69,8 @@ def test_d1_skip():
 
 
 pytest.mark.skip(reason="Skipping this test with decorator.")
+
+
 def test_d2_skip():
     logger.critical(fake_data())
     logger.error(fake_data())

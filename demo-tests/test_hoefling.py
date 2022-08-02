@@ -53,13 +53,3 @@ def test_3(f):
     logger.info(LOREM)
     logger.debug(LOREM)
     assert True
-
-
-@pytest.fixture
-def g():
-    yield
-    raise RuntimeError("teardown error")
-
-
-def test_4(g):
-    assert True
