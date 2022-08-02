@@ -13,7 +13,7 @@ def read(fname):
 
 setup(
     name="pytest-tui",
-    version="0.9.8.3",
+    version="1.0.0",
     author="Jeff Wright",
     author_email="jeff.washcloth@gmail.com",
     license="MIT",
@@ -26,10 +26,10 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "ansi2html>=1.8.0",
-        "Faker>=13.0.0",
+        "Faker>=13.15.0",
         "pytest>=6.2.5",
-        "pyTermTk>=0.9.0a43",
-        "single-source>=0.2.0",
+        "pyTermTk>=0.10.8a0",
+        "single-source>=0.3.0",
         "strip-ansi>=0.1.1",
         "textual>=0.1.18",
     ],

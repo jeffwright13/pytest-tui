@@ -39,7 +39,7 @@ def clean(text: str) -> str:
     return re.sub("\\n+", "\\n", text)
 
 
-def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
+def main(autolaunch: bool = True):  # sourcery skip: low-code-quality, use-fstring-for-concatenation
     conv = Ansi2HTMLConverter()
     page = HtmlPage()
 
@@ -94,7 +94,8 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
         f.write(html_out)
 
     # Open in browser
-    webbrowser.open(f"file://{HTMLOUTPUTFILE._str}")
+    if autolaunch:
+        webbrowser.open(f"file://{HTMLOUTPUTFILE._str}")
 
 
 if __name__ == "__main__":

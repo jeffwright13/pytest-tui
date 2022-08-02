@@ -296,7 +296,7 @@ def pytui_tui(config: Config) -> None:
         elif config.getoption("--tuihtml"):
             from pytest_tui.html import main as tuihtml
 
-            tuihtml()
+            tuihtml(autolaunch=False) if config.getoption("--tuin") else tuihtml(autolaunch=True)
 
         elif not config.getoption("--tuin"):
             print("Invalid pytest-tui option")

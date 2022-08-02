@@ -21,6 +21,7 @@ The intent it to make it easier for you to find the specific results you want so
 
 ## Features
 - Choice of two TUIs: [Textual](https://github.com/Textualize/textual) or [PyTermTk](https://pypi.org/project/pyTermTk/)
+- Option to export console output to HTML (`pytest --tuihtml`)
 - Ability to immediately launch TUIs with existing data using console scripts
 - ANSI text markup support - whatever the output on your console looks like is how things are going to show up in the TUI
 - Mouse and keyboard support (including scrolling)
@@ -31,11 +32,11 @@ The intent it to make it easier for you to find the specific results you want so
   - `pytest-clarity`
   - `pytest-emoji`
   - `pytest-icdiff`
+  - `pytest-rerunfailures`
   - etc.
 - Not supported: plugins that take over the console in other ways, like
   - `pytest-sugar`
   - `pytest-emoji-output`
-- Option to export console output to HTML (`pytest --tuihtml`)
 
 ## Requirements
 - Pytest >= 6.2.5
@@ -74,28 +75,32 @@ If you have already exited the TUI and would like to re-enter it with the same d
 
 You can run with the `--tuin` option to bypass auto-launch of the TUI. This allows you to gather results now, and look at them in any of the TUIs later.
 
-### Copy/Paste
+### TUI Copy/Paste
 
 On Linux terminals, you can typically press and hold the SHIFT key on your keyboard to temporarily bypass TUI and access the terminal’s native mouse copy/paste functionality (commonly, click-drag-release or double-click to select text, middle-click to paste). This copy/paste works with the terminal’s selection buffer, as opposed to the TUI’s buffer.
 
 On Windows, use the ALT key while click-dragging the mouse. Mac users can get the same effect with the Option key.
 
 ## HTML Export
-Invoke with option `--tuihtml` to produce an HTML file with expandable/collapsible results sections. The output file is named `output_html.html` and is automatically launched upon completion of the test run, just as with the TUIs. This option can be either called by itself, or in conjuction with the other `tui` options.
+Specifying option `--tuihtml` on the command line produce an HTML file with expandable/collapsible results/sections. This option can be either called by itself, or in conjuction with the other `tui` options. The output file is located at `<cwd>/results/output_html.html`. By default, the HTML file is automatically launched, just as with the TUIs, using the system default browser upon completion of the test run; and, as with the TUIs, autolaunch can be suppressed by specifying command line topn `--tuin`.
 
 `pytest --tuihtml`
+
+An example of the output is [here](https://drive.google.com/file/d/1p2wwPtLVUwz8Q9fe-B6mPXYqSJ-j7HVL/view?usp=sharing). You will notice that the HTML page resembles the
 
 ## Known Limitations / Issues
 - User interfaces need work:
   - Overall layouts need optimization
   - PyTermTk interface may get corrupted if resized
   - Textual interface can be slow, esp. if run within an IDE
-  - Textual interface #1 (`tui2`) requires user to toggle All (`A`) to see test outputs if the number of tests is large
+  - HTML output file is like a sausage factory: pleasant enough, until you look inside
 - Not fully tested with all combinations of output formats. Probably some use-cases where things won't work 100% right.
-- `pytest-tui` is currently incompatible with `--tb=native` and will cause an INTERNALERROR if run together.
+- `pytest-tui` is currently incompatible with `--tb=native`, and will cause an INTERNALERROR if the two options are specificed together.
 
 ## History
 This project was originally envisioned to only show test failures, and allow the user to 'fold' the details of the failed tests by clicking a line so that the details would alternately show/hide. As development progressed, it became clear that what was really needed was a real TUI, one that organized the output in such a way that all of Pytest's output was available in a more streamlined way.
+
+The TUIs came first...and exactly zero people besides the author found them useful. The HTML output feature was put into place because of some limitations found in the output of the popular plugin `pytest-html`...specifically, miscounted totals in some corner cases, and no color-coded output.
 
 ## Issues
 If you encounter any problems, have feedback or requests, or anything else, please [file an issue](https://github.com/jeffwright13/pytest-tui/issues/new), along with a detailed description.
@@ -103,7 +108,7 @@ If you encounter any problems, have feedback or requests, or anything else, plea
 ## Contributing
 Contributions are very welcome. Please run pyflakes and black on any code before submitting a PR.
 
-I have tried to make the TUIs as clean as possible, but I am not a UI expert and I am sure many improvements could be made. If you are slick with user interfaces, I would love some help!
+I have tried to make the TUIs and the HTML page as clean as possible, but I am not a UI expert and I am sure many improvements could be made. If you are slick with user interfaces, I would love some help!
 
 ## License
 Distributed under the terms of the MIT license, "pytest-tui" is free and open source software.
