@@ -96,6 +96,7 @@ def add_ansi_to_report(config: Config, report: TestReport):
 
 
 #=================================
+# from https://stackoverflow.com/questions/51711988/how-can-i-access-the-overall-test-result-of-a-pytest-test-run-during-runtime
 def pytest_sessionstart(session):
     session.results = {}
 
