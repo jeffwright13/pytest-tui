@@ -21,7 +21,7 @@ errors_section_matcher = re.compile(r"^==.*\sERRORS\s==+")
 failures_section_matcher = re.compile(r"^==.*\sFAILURES\s==+")
 warnings_summary_matcher = re.compile(r"^==.*\swarnings summary\s.*==+")
 passes_section_matcher = re.compile(r"^==.*\sPASSES\s==+")
-rerun_section_matcher = re.compile(r"^==.*\srerun test summary info\s==+")
+rerun_summary_matcher = re.compile(r"^==.*\srerun test summary info\s==+")
 short_test_summary_matcher = re.compile(r"^==.*\sshort test summary info\s.*==+")
 short_test_summary_test_matcher = re.compile(
     r"^(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)\s+(?:\[\d+\]\s)?(\S+)(?:.*)?$"
@@ -42,6 +42,7 @@ MARKERS = {
     "pytest_tui_failures_section": "~~>PYTEST_TUI_FAILURES_SECTION<~~",
     "pytest_tui_warnings_summary": "~~>PYTEST_TUI_WARNINGS_SUMMARY<~~",
     "pytest_tui_passes_section": "~~>PYTEST_TUI_PASSES_SECTION<~~",
+    "pytest_tui_rerun_summary": "~~>PYTEST_TUI_RERUN_SUMMARY<~~",
     "pytest_tui_short_test_summary": "~~>PYTEST_TUI_SHORT_TEST_SUMMARY<~~",
     "pytest_tui_last_line": "~~>PYTEST_TUI_LAST_LINE<~~",
 }
@@ -155,6 +156,11 @@ class Results:
             ),
             "PASSES_SECTION": SectionInfo(
                 name="PASSES_SECTION", label="Passes", matcher=passes_section_matcher
+            ),
+            "RERUN_SUMMARY": SectionInfo(
+                name="RERUN_SUMMARY",
+                label="Rerun",
+                matcher=rerun_summary_matcher,
             ),
             "SHORT_TEST_SUMMARY": SectionInfo(
                 name="SHORT_TEST_SUMMARY",
@@ -346,6 +352,7 @@ class MarkedSections:
                 MARKERS["pytest_tui_failures_section"],
                 MARKERS["pytest_tui_passes_section"],
                 MARKERS["pytest_tui_warnings_summary"],
+                MARKERS["pytest_tui_rerun_summary"],
                 MARKERS["pytest_tui_short_test_summary"],
                 MARKERS["pytest_tui_last_line"],
             )

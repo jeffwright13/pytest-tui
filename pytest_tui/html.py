@@ -1,12 +1,12 @@
-from ansi2html import Ansi2HTMLConverter
-from pytest_tui.utils import Results
-from pytest_tui.utils import HTMLOUTPUTFILE
-from pytest_tui import __version__
-
 import os
 import re
 import time
 import webbrowser
+
+from ansi2html import Ansi2HTMLConverter
+
+from pytest_tui import __version__
+from pytest_tui.utils import HTMLOUTPUTFILE, Results
 
 BODY_FOREGROUND_COLOR = "AAAAAA"
 BODY_BACKGROUND_COLOR = "000000"
@@ -28,6 +28,7 @@ class HtmlPage:
             "Summary": self.results.Sections["LAST_LINE"].content
             + self.results.Sections["SHORT_TEST_SUMMARY"].content,
             "Warnings": self.results.Sections["WARNINGS_SUMMARY"].content,
+            "Rerun": self.results.Sections["RERUN_SUMMARY"].content,
             "Errors": self.results.Sections["ERRORS_SECTION"].content,
             "Full Output": self.results.unmarked_output,
         }
@@ -65,7 +66,7 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
     html_out += f"<p>Report generated on {time.ctime(mtime)} by pytest-tui version {__version__}</p>"
 
     # Sections
-    for section in ["Start", "Summary", "Warnings", "Errors", "Full Output"]:
+    for section in page.sections:
         html_out += "<hr> <h3>" + section.upper() + "</h3>"
         html_out += button_start + section + button_end
         test = clean(conv.convert(page.sections[section], full=False))

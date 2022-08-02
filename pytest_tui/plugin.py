@@ -14,6 +14,7 @@ from pytest_tui.utils import (HTMLOUTPUTFILE, MARKEDTERMINALOUTPUTFILE,
                               MARKERS, REPORTFILE, UNMARKEDTERMINALOUTPUTFILE,
                               errors_section_matcher, failures_section_matcher,
                               lastline_matcher, passes_section_matcher,
+                              rerun_summary_matcher,
                               short_test_summary_matcher,
                               test_session_starts_matcher,
                               warnings_summary_matcher)
@@ -153,6 +154,11 @@ def pytest_configure(config: Config) -> None:
                 if re.search(passes_section_matcher, s):
                     config._pytui_marked_outputfile.write(
                         (MARKERS["pytest_tui_passes_section"] + "\n").encode("utf-8")
+                    )
+
+                if re.search(rerun_summary_matcher, s):
+                    config._pytui_marked_outputfile.write(
+                        (MARKERS["pytest_tui_rerun_summary"] + "\n").encode("utf-8")
                     )
 
                 if re.search(short_test_summary_matcher, s):
