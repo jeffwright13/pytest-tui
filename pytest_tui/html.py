@@ -76,14 +76,16 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
     # Test Results
     for result in ["failures", "passes", "skipped", "errors", "xpasses", "xfails"]:
         html_out += "<hr> <p> <b>" + result.upper() + "</b> </p>"
-        for node in eval(f"page.results.tests_{result}"):
-            html_out += button_start + node + button_end
-            test = clean(
-                conv.convert(eval(f"page.results.tests_{result}[node]"), full=False)
-            )
-            if not test:
-                test = "<p>No output</p>"
-            html_out += test + test_end
+        nodes = eval(f"page.results.tests_{result}")
+        if nodes:
+            for node in nodes:
+                html_out += button_start + node + button_end
+                test = clean(
+                    conv.convert(eval(f"page.results.tests_{result}[node]"), full=False)
+                )
+                if not test:
+                    test = "<p>No output</p>"
+                html_out += test + test_end
 
     # Final trailer and file write
     html_out += trailer

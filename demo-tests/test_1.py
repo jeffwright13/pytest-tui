@@ -1,9 +1,10 @@
-import pytest
-import faker
 import logging
 import random
 import sys
 import warnings
+
+import faker
+import pytest
 
 LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
 logger = logging.getLogger()
@@ -256,6 +257,27 @@ def test_10_fail_capturing(capsys):
     print("FAIL this stdout is also captured")
     print("FAIL this stderr is also captured", file=sys.stderr)
     logger.warning("FAIL this log is also captured")
+    logger.critical(fake_data())
+    logger.error(fake_data())
+    logger.warning(fake_data())
+    logger.info(fake_data())
+    logger.debug(fake_data())
+    assert False
+
+
+def test_10b_failed_capturing(capsys):
+    print("FAILED this stdout is captured")
+    print("FAILED this stderr is captured", file=sys.stderr)
+    logger.warning("FAILED this log is captured")
+    with capsys.disabled():
+        print("FAILED stdout not captured, going directly to sys.stdout")
+        print(
+            "FAILED stderr not captured, going directly to sys.stderr", file=sys.stderr
+        )
+        logger.warning("FAIL is this log captured?")
+    print("FAILED this stdout is also captured")
+    print("FAILED this stderr is also captured", file=sys.stderr)
+    logger.warning("FAILED this log is also captured")
     logger.critical(fake_data())
     logger.error(fake_data())
     logger.warning(fake_data())
