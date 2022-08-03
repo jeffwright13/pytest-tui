@@ -1,6 +1,7 @@
 import pickle
 import re
 import tempfile
+from concurrent.futures.thread import ThreadPoolExecutor
 from io import StringIO
 from types import SimpleNamespace
 
@@ -10,6 +11,9 @@ from _pytest.config import Config, create_terminal_writer
 from _pytest.reports import TestReport
 from ansi2html import Ansi2HTMLConverter
 
+from pytest_tui.html import main as tuihtml
+from pytest_tui.tui1 import main as tui1
+from pytest_tui.tui2 import main as tui2
 from pytest_tui.utils import (HTMLOUTPUTFILE, MARKEDTERMINALOUTPUTFILE,
                               MARKERS, REPORTFILE, UNMARKEDTERMINALOUTPUTFILE,
                               errors_section_matcher, failures_section_matcher,
@@ -264,10 +268,8 @@ def pytest_unconfigure(config: Config):
 def pytui_tui(config: Config) -> None:
     """
     Final code invocation after Pytest run has completed.
-    This method calls the Pytui TUI to display final results.
+    Will call either or both of TUI / HTML code is specified on cmd line.
     """
-    # disable capturing while TUI runs to avoid error `redirected stdin is pseudofile, has
-    # no fileno()`; adapted from https://githubmemory.com/repo/jsbueno/terminedia/issues/25
     if not any(
         [
             config.option.tui,
@@ -279,25 +281,24 @@ def pytui_tui(config: Config) -> None:
     ):
         return
 
-    capmanager = config.pluginmanager.getplugin("capturemanager")
     try:
+        # disable capturing while TUI runs to avoid error `redirected stdin is pseudofile, has
+        # no fileno()`; adapted from https://githubmemory.com/repo/jsbueno/terminedia/issues/25
+        capmanager = config.pluginmanager.getplugin("capturemanager")
         capmanager.suspend_global_capture(in_=True)
+
     finally:
-        if config.getoption("--tui") or config.getoption("--tui1"):
-            from pytest_tui.tui1 import main as tui1
+        with ThreadPoolExecutor() as executor:
+            if config.getoption("--tuihtml"):
+                if config.getoption("--tuin"):
+                    executor.submit(tuihtml(autolaunch=False))
+                else:
+                    executor.submit(tuihtml(autolaunch=True))
 
-            tui1()
+        if not config.getoption("--tuin"):
+            if config.getoption("--tui") or config.getoption("--tui1"):
+                tui1()
+            elif config.getoption("--tui2"):
+                tui2()
 
-        elif config.getoption("--tui2"):
-            from pytest_tui.tui2 import main as tui2
-
-            tui2()
-
-        elif config.getoption("--tuihtml"):
-            from pytest_tui.html import main as tuihtml
-
-            tuihtml(autolaunch=False) if config.getoption("--tuin") else tuihtml(autolaunch=True)
-
-        elif not config.getoption("--tuin"):
-            print("Invalid pytest-tui option")
         capmanager.resume_global_capture()
