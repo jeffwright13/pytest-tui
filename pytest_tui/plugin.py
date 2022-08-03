@@ -261,7 +261,7 @@ def pytest_unconfigure(config: Config):
             config.option.tuihtml,
             config.option.tuin,
         ]
-    ):
+    ) and not config.option.collectonly:
         pytui_tui(config)
 
 

@@ -12,6 +12,7 @@ and this project tries to adhere to [Semantic Versioning](https://semver.org/spe
 ## [1.1.0] - 2022-08-02
 
 - Implement threading in final testing stage so that HTML and TUI can be launched at the same time.
+- Fix --co bug where TUIs were called although no tests had been run.
 - Add this changelog.
 
 ## [1.0.0] - 2022-08-01
