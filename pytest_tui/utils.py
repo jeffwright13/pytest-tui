@@ -273,7 +273,7 @@ class Results:
                 title = outcome = None
 
     def _get_result_by_outcome(self, outcome: str) -> None:
-        """Read final `shirt test summary info` section and extract test outcomes"""
+        """Read final `short test summary info` section and extract test outcomes"""
         for test_name, test_outcome in self.Outcomes.items():
             return {
                 test_result.nodeid: test_result.text
