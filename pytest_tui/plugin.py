@@ -39,29 +39,29 @@ def pytest_addoption(parser):
     """Define the plugin's option flags as presented by Pytest"""
     group = parser.getgroup("tui")
     group.addoption(
-        "--tui",
-        action="store_true",
-        help="automatically launch default text user interface after run is finished",
-    )
-    group.addoption(
-        "--tui1",
+        "--tui", "--tui1", "--t1",
         action="store_true",
         help="automatically launch text user interface 'tui1' (textual) [DEFAULT]",
     )
     group.addoption(
-        "--tui2",
+        "--tui2", "--t2",
         action="store_true",
         help="automatically launch text user interface 'tui2' (pytermtk)",
     )
     group.addoption(
-        "--tuin",
+        "--tuin", "--tn",
         action="store_true",
         help="generate pytest-tui output files, but do not launch user interface",
     )
     group.addoption(
-        "--tuihtml",
+        "--tuihtml", "--th",
         action="store_true",
         help="export full console output to HTML file",
+    )
+    group.addoption(
+        "--tuihtmldark", "--td",
+        action="store_true",
+        help="use 'dark' styling for HTML file (default is 'light')",
     )
 
 
@@ -117,6 +117,7 @@ def pytest_configure(config: Config) -> None:
             config.option.tui2,
             config.option.tuin,
             config.option.tuihtml,
+            config.option.tuihtmldark,
         ]
     ):
         tr = config.pluginmanager.getplugin("terminalreporter")

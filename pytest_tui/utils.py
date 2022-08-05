@@ -13,7 +13,8 @@ RESULTS_DIR.mkdir(exist_ok=True)
 REPORTFILE = RESULTS_DIR / "report_objects.bin"
 MARKEDTERMINALOUTPUTFILE = RESULTS_DIR / "marked_output.bin"
 UNMARKEDTERMINALOUTPUTFILE = RESULTS_DIR / "unmarked_output.bin"
-HTMLOUTPUTFILE = RESULTS_DIR / "output_html.html"
+HTMLOUTPUTFILE = RESULTS_DIR / "tui_report.html"
+Path(HTMLOUTPUTFILE).touch(exist_ok=True)
 
 # regex matching patterns for Pytest sections
 test_session_starts_matcher = re.compile(r"^==.*\stest session starts\s==+")
@@ -25,6 +26,10 @@ rerun_summary_matcher = re.compile(r"^==.*\srerun test summary info\s==+")
 short_test_summary_matcher = re.compile(r"^==.*\sshort test summary info\s.*==+")
 short_test_summary_test_matcher = re.compile(
     r"^(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)\s+(?:\[\d+\]\s)?(\S+)(?:.*)?$"
+)
+warnings_summary_test_matcher = re.compile(
+    # r"^([^\n]+:{1,2}[^\n]+)\n(([^\n]+)\n)*"
+    r"^([^\n]+:{1,2}[^\n]+)\n([^\n]+\n)+"
 )
 lastline_matcher = re.compile(r"^==.*in\s\d+.\d+s.*=+")
 section_name_matcher = re.compile(r"~~>PYTEST_TUI_(\w+)")
@@ -114,6 +119,21 @@ class Results:
         self.tests_all.update(self.tests_skipped) if self.tests_skipped else None
         self.tests_all.update(self.tests_xfails) if self.tests_xfails else None
         self.tests_all.update(self.tests_xpasses) if self.tests_xpasses else None
+
+        self.Warnings = self._find_warnings()
+
+    def _find_warnings(self):
+        """
+        Find the warning results.
+        """
+        warnings = {}
+        warning_section = self.Sections["WARNINGS_SUMMARY"]
+        match = warnings_summary_test_matcher.match(strip_ansi(warning_section.content))
+        if match:
+            testname = match.group(1)
+            warning = match.group(2)
+            warnings[testname] = warning
+        return warnings
 
     def _find_test_outcomes(self):
         """
