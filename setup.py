@@ -13,12 +13,12 @@ def read(fname):
 
 setup(
     name="pytest-tui",
-    version="1.0.2",
+    version="1.0.3",
     author="Jeff Wright",
     author_email="jeff.washcloth@gmail.com",
     license="MIT",
     url="https://github.com/jeffwright13/pytest-tui",
-    description="Text User Interface (TUI) for Pytest, automatically launched after your test run is finished",
+    description="Text User Interface (TUI) for Pytest, with optional auto-launch and HTML export",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     packages=find_packages(),
@@ -32,6 +32,7 @@ setup(
         "single-source>=0.3.0",
         "strip-ansi>=0.1.1",
         "textual>=0.1.18",
+        "typer>=0.6.1",
     ],
     classifiers=[
         "Framework :: Pytest",
@@ -48,9 +49,9 @@ setup(
     entry_points={
         "pytest11": ["pytest_tui = pytest_tui.plugin"],
         "console_scripts": [
-            "tui1 = pytest_tui.tui1:main",
-            "tui2 = pytest_tui.tui2:main",
-            "tuihtml = pytest_tui.html:main",
+            "tuiconfig = pytest_tui.__main__:tui_config",
+            "tui = pytest_tui.__main__:tui_launch",
+            "tuih = pytest_tui.html:main",
         ],
     },
 )

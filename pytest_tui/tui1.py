@@ -1,17 +1,15 @@
 from typing import Dict
+
 from rich.console import RenderableType
 from rich.panel import Panel
 from rich.text import Text
 from textual import events
 from textual.app import App
 from textual.widget import Widget
-from textual.widgets import (
-    ScrollView,
-    TreeClick,
-)
+from textual.widgets import ScrollView, TreeClick
+
 from pytest_tui._tree_control import TreeControl
 from pytest_tui.utils import Results
-
 
 TREE_WIDTH = 120
 SECTIONS = {

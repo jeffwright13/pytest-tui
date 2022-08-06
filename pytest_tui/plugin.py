@@ -12,10 +12,10 @@ from _pytest.reports import TestReport
 from ansi2html import Ansi2HTMLConverter
 
 from pytest_tui.html import main as tuihtml
-from pytest_tui.tui1 import main as tui1
-from pytest_tui.tui2 import main as tui2
+from pytest_tui.__main__ import tui_launch
 from pytest_tui.utils import (HTMLOUTPUTFILE, MARKEDTERMINALOUTPUTFILE,
-                              MARKERS, REPORTFILE, UNMARKEDTERMINALOUTPUTFILE,
+                              MARKERS, REPORTOBJECTSFILE,
+                              UNMARKEDTERMINALOUTPUTFILE,
                               errors_section_matcher, failures_section_matcher,
                               lastline_matcher, passes_section_matcher,
                               rerun_summary_matcher,
@@ -39,29 +39,9 @@ def pytest_addoption(parser):
     """Define the plugin's option flags as presented by Pytest"""
     group = parser.getgroup("tui")
     group.addoption(
-        "--tui", "--tui1", "--t1",
+        "--tui",
         action="store_true",
-        help="automatically launch text user interface 'tui1' (textual) [DEFAULT]",
-    )
-    group.addoption(
-        "--tui2", "--t2",
-        action="store_true",
-        help="automatically launch text user interface 'tui2' (pytermtk)",
-    )
-    group.addoption(
-        "--tuin", "--tn",
-        action="store_true",
-        help="generate pytest-tui output files, but do not launch user interface",
-    )
-    group.addoption(
-        "--tuihtml", "--th",
-        action="store_true",
-        help="export full console output to HTML file",
-    )
-    group.addoption(
-        "--tuihtmldark", "--td",
-        action="store_true",
-        help="use 'dark' styling for HTML file (default is 'light')",
+        help="Enable the pytest-tui plugin. Both text user interface (TUI) and HTML output are supported.",
     )
 
 
@@ -110,19 +90,11 @@ def pytest_configure(config: Config) -> None:
         "A"  # force "display all" mode so all results can be shown
     )
 
-    if any(
-        [
-            config.option.tui,
-            config.option.tui1,
-            config.option.tui2,
-            config.option.tuin,
-            config.option.tuihtml,
-            config.option.tuihtmldark,
-        ]
-    ):
+    if hasattr(config.option, "tui"):
         tr = config.pluginmanager.getplugin("terminalreporter")
         if tr is not None:
             # identify and mark the very first line of terminal output
+            # ???? IS THIS STILL NEEDED?
             try:
                 config._pytuifirsttime
             except AttributeError:
@@ -236,11 +208,11 @@ def pytest_unconfigure(config: Config):
             unmarked_file.write(unmarkedsessionlog)
 
         # Write the reports list to file
-        with open(REPORTFILE, "wb") as report_file:
+        with open(REPORTOBJECTSFILE, "wb") as report_file:
             pickle.dump(reports, report_file)
 
     # Write console output to HTML
-    if config.option.tuihtml:
+    if hasattr(config.option, "tuihtml"):
         conv = Ansi2HTMLConverter()
 
         with open(UNMARKEDTERMINALOUTPUTFILE, "r") as f:
@@ -253,16 +225,7 @@ def pytest_unconfigure(config: Config):
         with open(HTMLOUTPUTFILE, "w") as html_file:
             html_file.write(html)
 
-    # Launch the selected TUI
-    if any(
-        [
-            config.option.tui,
-            config.option.tui1,
-            config.option.tui2,
-            config.option.tuihtml,
-            config.option.tuin,
-        ]
-    ):
+    if hasattr(config.option, "tui") or hasattr(config.option, "tuihtml"):
         pytui_tui(config)
 
 
@@ -271,35 +234,16 @@ def pytui_tui(config: Config) -> None:
     Final code invocation after Pytest run has completed.
     Will call either or both of TUI / HTML code is specified on cmd line.
     """
-    if not any(
-        [
-            config.option.tui,
-            config.option.tui1,
-            config.option.tui2,
-            config.option.tuihtml,
-            config.option.tuin,
-        ]
-    ):
-        return
-
     try:
         # disable capturing while TUI runs to avoid error `redirected stdin is pseudofile, has
         # no fileno()`; adapted from https://githubmemory.com/repo/jsbueno/terminedia/issues/25
         capmanager = config.pluginmanager.getplugin("capturemanager")
         capmanager.suspend_global_capture(in_=True)
-
     finally:
         with ThreadPoolExecutor() as executor:
-            if config.getoption("--tuihtml"):
-                if config.getoption("--tuin"):
-                    executor.submit(tuihtml(autolaunch=False))
-                else:
-                    executor.submit(tuihtml(autolaunch=True))
-
-        if not config.getoption("--tuin"):
-            if config.getoption("--tui") or config.getoption("--tui1"):
-                tui1()
-            elif config.getoption("--tui2"):
-                tui2()
+            if config.getoption("--tuihtml", None):
+                 executor.submit(tuihtml(autolaunch=True))
+        if config.getoption("--tui", None):
+                tui_launch()
 
         capmanager.resume_global_capture()
