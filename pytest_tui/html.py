@@ -18,8 +18,7 @@ class HtmlPage:
         self.config_parser = configparser.ConfigParser()
         try:
             self.config_parser.read(CONFIGFILE)
-        except:
-            print("No config file found.")
+        except Exception:
             Cli().apply_default_config()
             self.config_parser.read(CONFIGFILE)
 
@@ -104,7 +103,7 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
         f.write(html_out)
 
     # Open in browser
-    if page.config_parser["HTML"].get("autolaunch") == "True":
+    if page.config_parser["HTML"].get("autolaunch_html") == "True":
         webbrowser.open(f"file://{HTMLOUTPUTFILE._str}")
 
 

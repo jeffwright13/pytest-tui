@@ -36,9 +36,9 @@ class DefaultConfig:
 
     def __init__(self):
         self.tui = "tui1"
-        self.autolaunch_html = False
         self.colortheme = "light"
         self.colortheme_colors = self.HTML_LIGHT_THEME
+        self.autolaunch_html = False
 
 
 class Cli:
@@ -49,7 +49,6 @@ class Cli:
         try:
             self.config_parser.read(CONFIGFILE)
         except:
-            print("No config file found.")
             self.apply_default_config()
 
     def _clear_terminal(self) -> None:
@@ -70,7 +69,7 @@ class Cli:
 
     def menu_items(self) -> dict:
         return {
-            "Apply default config settings": self.apply_default_config,
+            "Apply default config settings": self.apply_default_config_plus_enter,
             "Display current config settings": self.display_current_config,
             "Select TUI": self.select_tui,
             "Select HTML light or dark theme": self.select_html_light_dark,
@@ -80,15 +79,24 @@ class Cli:
         }
 
     def read_config_file(self) -> None:
-        self.config_parser.read(CONFIGFILE)
+        try:
+            self.config_parser.read(CONFIGFILE)
+        except:
+            self.apply_default_config()
+        if not (
+            self.config_parser.has_section("TUI")
+            and self.config_parser.has_section("HTML")
+            and self.config_parser.has_section("HTML_COLOR_THEME")
+        ):
+            self.apply_default_config()
+
+    def apply_default_config_plus_enter(self) -> None:
+        """Wrapper around 'apply_default_config' to allow for Enter prompt afterwards."""
+        self.apply_default_config()
+        self._enter_to_continue()
 
     def apply_default_config(self) -> None:
         """Generate default config, store in local config_parser instance, and write it to file."""
-        self.config_parser["DEFAULT"] = {
-            "tui": self.default_config.tui,
-            "colortheme": self.default_config.colortheme,
-            "colortheme_colors": self.default_config.colortheme_colors,
-        }
         if not self.config_parser.has_section("TUI"):
             self.config_parser.add_section("TUI")
         self.config_parser.set("TUI", "tui", self.default_config.tui)
@@ -96,7 +104,7 @@ class Cli:
             self.config_parser.add_section("HTML")
         self.config_parser.set("HTML", "colortheme", self.default_config.colortheme)
         self.config_parser.set(
-            "HTML", "autolaunch_html", self.default_config.autolaunch_html
+            "HTML", "autolaunch_html", str(self.default_config.autolaunch_html)
         )
         if not self.config_parser.has_section("HTML_COLOR_THEME"):
             self.config_parser.add_section("HTML_COLOR_THEME")
@@ -119,7 +127,6 @@ class Cli:
         """Write the current config settings to the config file."""
         with open(CONFIGFILE, "w+") as configfile:
             self.config_parser.write(configfile)
-        self._enter_to_continue()
 
     def select_tui(self) -> None:
         self._clear_terminal()
@@ -133,6 +140,7 @@ class Cli:
             self.config_parser.add_section("TUI")
         self.config_parser.set("TUI", "tui", tui)
         self.write_current_config_to_file()
+        self._enter_to_continue()
 
     def select_html_light_dark(self) -> None:
         self._clear_terminal()
@@ -146,7 +154,18 @@ class Cli:
         if not self.config_parser.has_section("HTML"):
             self.config_parser.add_section("HTML")
         self.config_parser.set("HTML", "colortheme", colortheme)
+
+        self.colortheme_colors = (
+            self.default_config.HTML_LIGHT_THEME
+            if colortheme == "light"
+            else self.default_config.HTML_DARK_THEME
+        )
+
+        for key in self.colortheme_colors:
+            self.config_parser.set("HTML_COLOR_THEME", key, self.colortheme_colors[key])
+
         self.write_current_config_to_file()
+        self._enter_to_continue()
 
     def define_custom_html_theme(self) -> None:
         self._clear_terminal()
@@ -187,14 +206,16 @@ class Cli:
         self.config_parser.set("HTML_COLOR_THEME", "HOVER_BACKGROUND_COLOR", val)
 
         self.write_current_config_to_file()
+        self._enter_to_continue()
 
     def set_html_auto_launch(self) -> None:
         self._clear_terminal()
-        autolaunch = YesNo("Auto-launch HTML when generated: ").launch()
+        autolaunch_html = YesNo("Auto-launch HTML when generated: ").launch()
         if not self.config_parser.has_section("HTML"):
             self.config_parser.add_section("HTML")
-        self.config_parser.set("HTML", "autolaunch", str(autolaunch))
+        self.config_parser.set("HTML", "autolaunch_html", str(autolaunch_html))
         self.write_current_config_to_file()
+        self._enter_to_continue()
 
     def quit(self) -> None:
         self._clear_terminal()
