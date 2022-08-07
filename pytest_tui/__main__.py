@@ -2,28 +2,17 @@ import configparser
 import platform
 import subprocess
 import sys
-from pathlib import Path
 
 from blessed import Terminal
 from bullet import Bullet, Input, YesNo, colors
-# from rich import print
-from single_source import get_version
-from pytest_tui.utils import CONFIGFILE
-from pytest_tui.tui2 import main as tui2
+from rich import print
+
 from pytest_tui.tui1 import main as tui1
+from pytest_tui.tui2 import main as tui2
+from pytest_tui.utils import CONFIGFILE
 
 
-class Config:
-    TUI_DEFAULT = {
-        "tui": "tui1",
-        "autolaunch": False,
-    }
-
-    HTML_DEFAULT = {
-        "autolaunch": False,
-        "color_theme": "light",
-    }
-
+class DefaultConfig:
     HTML_LIGHT_THEME = {
         "BODY_FOREGROUND_COLOR": "000000",
         "BODY_BACKGROUND_COLOR": "EEEEEE",
@@ -44,30 +33,32 @@ class Config:
         "HOVER_FOREGROUND_COLOR": "111111",
         "HOVER_BACKGROUND_COLOR": "999999",
     }
-    HTML_DEFAULT_COLORS = HTML_LIGHT_THEME
 
     def __init__(self):
-        self.config = configparser.ConfigParser()
-        self.config.read(CONFIGFILE)
-        print(f"{self.config}")
+        self.tui = "tui1"
+        self.autolaunch_html = False
+        self.colortheme = "light"
+        self.colortheme_colors = self.HTML_LIGHT_THEME
 
 
 class Cli:
     def __init__(self):
         self.term = Terminal()
-        self.config = Config()
-        self.tui = "tui1"
-        self.tui_auto = "False"
-        self.html_auto = "False"
-        self.html_theme = "light"
+        self.default_config = DefaultConfig()
+        self.config_parser = configparser.ConfigParser()
+        try:
+            self.config_parser.read(CONFIGFILE)
+        except:
+            print("No config file found.")
+            self.apply_default_config()
 
-    def _clear_terminal(self):
+    def _clear_terminal(self) -> None:
         if platform.system() == "Windows":
             subprocess.Popen("cls", shell=True).communicate()
         else:
             print("\033c", end="")
 
-    def _enter_to_continue(self):
+    def _enter_to_continue(self) -> None:
         print("\nPress ENTER to continue...")
         with self.term.cbreak():
             while not self.term.inkey(timeout=0.01).lower():
@@ -77,94 +68,133 @@ class Cli:
     def _prompt(self) -> str:
         return "==> pytest-tui configuration menu <==\n"
 
-    def _menu_items(self) -> dict:
+    def menu_items(self) -> dict:
         return {
-            "Apply default config settings": self.configure_default,
-            "Display config settings": self.show_config,
-            "Select TUI ": self.configure_tui,
-            "Enable TUI autolaunch": self.configure_tui_auto,
-            "Enable HTML autolaunch": self.configure_html_auto,
-            "Select HTML light or dark theme": self.configure_html_theme,
+            "Apply default config settings": self.apply_default_config,
+            "Display current config settings": self.display_current_config,
+            "Select TUI": self.select_tui,
+            "Select HTML light or dark theme": self.select_html_light_dark,
+            "Set HTML auto-launch option": self.set_html_auto_launch,
+            "Define custom HTML color theme": self.define_custom_html_theme,
             "Quit": self.quit,
         }
 
-    def configure_default(self) -> None:
+    def read_config_file(self) -> None:
+        self.config_parser.read(CONFIGFILE)
+
+    def apply_default_config(self) -> None:
+        """Generate default config, store in local config_parser instance, and write it to file."""
+        self.config_parser["DEFAULT"] = {
+            "tui": self.default_config.tui,
+            "colortheme": self.default_config.colortheme,
+            "colortheme_colors": self.default_config.colortheme_colors,
+        }
+        if not self.config_parser.has_section("TUI"):
+            self.config_parser.add_section("TUI")
+        self.config_parser.set("TUI", "tui", self.default_config.tui)
+        if not self.config_parser.has_section("HTML"):
+            self.config_parser.add_section("HTML")
+        self.config_parser.set("HTML", "colortheme", self.default_config.colortheme)
+        self.config_parser.set(
+            "HTML", "autolaunch_html", self.default_config.autolaunch_html
+        )
+        if not self.config_parser.has_section("HTML_COLOR_THEME"):
+            self.config_parser.add_section("HTML_COLOR_THEME")
+        for key in self.default_config.colortheme_colors:
+            self.config_parser.set(
+                "HTML_COLOR_THEME", key, self.default_config.colortheme_colors[key]
+            )
+        self.write_current_config_to_file()
+
+    def display_current_config(self) -> None:
+        """Print the current config settings to the terminal."""
         self._clear_terminal()
-        print(f"Setting config file {CONFIGFILE} to default values...")
-        config = configparser.ConfigParser()
-        config["TUI"] = self.config.TUI_DEFAULT
-        config["HTML"] = self.config.HTML_DEFAULT
-        with open(CONFIGFILE, "w+") as configfile:
-            config.write(configfile)
+        for section in self.config_parser.sections():
+            print(f"{section}:")
+            for option in self.config_parser.options(section):
+                print(f"  {option}: {self.config_parser.get(section, option)}")
         self._enter_to_continue()
 
-    def write_config(self) -> None:
-        config = configparser.ConfigParser()
-        config["TUI"] = {
-            "tui": self.tui,
-            "autolaunch": self.tui_auto,
-        }
-        config["HTML"] = {
-            "autolaunch": self.html_auto,
-            "color_theme": self.html_theme,
-        }
+    def write_current_config_to_file(self) -> None:
+        """Write the current config settings to the config file."""
         with open(CONFIGFILE, "w+") as configfile:
-            config.write(configfile)
+            self.config_parser.write(configfile)
+        self._enter_to_continue()
 
-    def configure_tui(self) -> None:
+    def select_tui(self) -> None:
         self._clear_terminal()
-        self.tui = Input(
+        tui = Input(
             "Enter the TUI you would like to use ['tui1' | 'tui2']: ", strip=True
         ).launch()
-        if self.tui not in ["tui1", "tui2"]:
-            self.configure_tui()
+        if tui not in ["tui1", "tui2"]:
+            self.select_tui()
             return
-        self.write_config()
-        # self._enter_to_continue()
-        self._clear_terminal()
+        if not self.config_parser.has_section("TUI"):
+            self.config_parser.add_section("TUI")
+        self.config_parser.set("TUI", "tui", tui)
+        self.write_current_config_to_file()
 
-    def configure_tui_auto(self) -> None:
+    def select_html_light_dark(self) -> None:
         self._clear_terminal()
-        self.tui_auto = YesNo("Autolaunch the TUI? ").launch()
-        self.write_config()
-        # self._enter_to_continue()
-        self._clear_terminal()
-
-    def configure_html_theme(self) -> None:
-        self._clear_terminal()
-        self.html_theme = Input(
-            "Enter the HTML theme you would like to use ['light' | 'dark']: ", strip=True
+        colortheme = Input(
+            "Enter the HTML theme you would like to use ['light' | 'dark']: ",
+            strip=True,
         ).launch()
-        if self.html_theme not in ["light", "dark"]:
-            self.configure_html_theme()
+        if colortheme not in ["light", "dark"]:
+            self.select_html_light_dark()
             return
-        self.write_config()
-        # self._enter_to_continue()
-        self._clear_terminal()
+        if not self.config_parser.has_section("HTML"):
+            self.config_parser.add_section("HTML")
+        self.config_parser.set("HTML", "colortheme", colortheme)
+        self.write_current_config_to_file()
 
-    def configure_html_auto(self) -> None:
+    def define_custom_html_theme(self) -> None:
         self._clear_terminal()
-        self.html_auto = YesNo("Autolaunch HTML report? ").launch()
-        self.write_config()
-        # self._enter_to_continue()
-        self._clear_terminal()
+        if not self.config_parser.has_section("HTML_COLOR_THEME"):
+            self.config_parser.add_section("HTML_COLOR_THEME")
 
-    def show_config(self) -> None:
-        self._clear_terminal()
-        config = configparser.ConfigParser()
-        try:
-            with open(CONFIGFILE, "r") as configfile:
-                config.read_file(configfile)
-                for section in config.sections():
-                    print(f"{section}:")
-                    for key in config[section]:
-                        print(f"  {key}: {config[section][key]}")
-        except:
-            print("No config file found. Setting to default values...")
-            self.configure_default()
-        finally:
-            self._enter_to_continue()
+        val = Input(
+            "Enter BODY_FOREGROUND_COLOR value in hex (#xxxxx): ", strip=True
+        ).launch()
+        self.config_parser.set("HTML_COLOR_THEME", "BODY_FOREGROUND_COLOR", val)
+        val = Input(
+            "Enter BODY_BACKGROUND_COLOR value in hex (#xxxxx): ", strip=True
+        ).launch()
+        self.config_parser.set("HTML_COLOR_THEME", "BODY_BACKGROUND_COLOR", val)
+        val = Input(
+            "Enter INV_FOREGROUND_COLOR value in hex (#xxxxx): ", strip=True
+        ).launch()
+        self.config_parser.set("HTML_COLOR_THEME", "INV_FOREGROUND_COLOR", val)
+        val = Input(
+            "Enter INV_BACKGROUND_COLOR value in hex (#xxxxx): ", strip=True
+        ).launch()
+        self.config_parser.set("HTML_COLOR_THEME", "INV_BACKGROUND_COLOR", val)
+        val = Input(
+            "Enter COLLAPSIBLE_FOREGROUND_COLOR value in hex (#xxxxx): ", strip=True
+        ).launch()
+        self.config_parser.set("HTML_COLOR_THEME", "COLLAPSIBLE_FOREGROUND_COLOR", val)
+        val = Input(
+            "Enter COLLAPSIBLE_BACKGROUND_COLOR value in hex (#xxxxx): ", strip=True
+        ).launch()
+        self.config_parser.set("HTML_COLOR_THEME", "COLLAPSIBLE_BACKGROUND_COLOR", val)
+        val = Input(
+            "Enter HOVER_FOREGROUND_COLOR value in hex (#xxxxx): ", strip=True
+        ).launch()
+        self.config_parser.set("HTML_COLOR_THEME", "HOVER_FOREGROUND_COLOR", val)
+        val = Input(
+            "Enter HOVER_BACKGROUND_COLOR value in hex (#xxxxx): ", strip=True
+        ).launch()
+        self.config_parser.set("HTML_COLOR_THEME", "HOVER_BACKGROUND_COLOR", val)
 
+        self.write_current_config_to_file()
+
+    def set_html_auto_launch(self) -> None:
+        self._clear_terminal()
+        autolaunch = YesNo("Auto-launch HTML when generated: ").launch()
+        if not self.config_parser.has_section("HTML"):
+            self.config_parser.add_section("HTML")
+        self.config_parser.set("HTML", "autolaunch", str(autolaunch))
+        self.write_current_config_to_file()
 
     def quit(self) -> None:
         self._clear_terminal()
@@ -175,7 +205,7 @@ class Cli:
         self._clear_terminal()
         cli = Bullet(
             # prompt = self._prompt(),
-            choices=list(self._menu_items().keys()),
+            choices=list(self.menu_items().keys()),
             bullet="==> ",
             word_color=colors.bright(colors.foreground["white"]),
             word_on_switch=colors.bright(colors.foreground["black"]),
@@ -185,17 +215,21 @@ class Cli:
         menu_item = cli.launch()
         while True:
             self._clear_terminal()
-            self._menu_items()[menu_item]()
+            self.menu_items()[menu_item]()
             menu_item = cli.launch()
-            # self._clear_terminal()
+
 
 def tui_launch():
-    config = Config().config
-    print("")
+    tuicli = Cli()
+    tuicli.read_config_file()
+    tui1() if tuicli.config_parser.get("TUI", "tui") == "tui1" else tui2()
+
 
 def tui_config():
     tuicli = Cli()
+    tuicli.read_config_file()
     tuicli.run()
+
 
 if __name__ == "__main__":
     tui_config()

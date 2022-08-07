@@ -11,8 +11,8 @@ from _pytest.config import Config, create_terminal_writer
 from _pytest.reports import TestReport
 from ansi2html import Ansi2HTMLConverter
 
-from pytest_tui.html import main as tuihtml
 from pytest_tui.__main__ import tui_launch
+from pytest_tui.html import main as tuihtml
 from pytest_tui.utils import (HTMLOUTPUTFILE, MARKEDTERMINALOUTPUTFILE,
                               MARKERS, REPORTOBJECTSFILE,
                               UNMARKEDTERMINALOUTPUTFILE,
@@ -242,8 +242,8 @@ def pytui_tui(config: Config) -> None:
     finally:
         with ThreadPoolExecutor() as executor:
             if config.getoption("--tuihtml", None):
-                 executor.submit(tuihtml(autolaunch=True))
+                executor.submit(tuihtml(autolaunch=True))
         if config.getoption("--tui", None):
-                tui_launch()
+            tui_launch()
 
         capmanager.resume_global_capture()

@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import codecs
-from setuptools import setup, find_packages
+import os
+
+from setuptools import find_packages, setup
 
 
 def read(fname):
@@ -49,7 +50,7 @@ setup(
     entry_points={
         "pytest11": ["pytest_tui = pytest_tui.plugin"],
         "console_scripts": [
-            "tuiconfig = pytest_tui.__main__:tui_config",
+            "tuiconf = pytest_tui.__main__:tui_config",
             "tui = pytest_tui.__main__:tui_launch",
             "tuih = pytest_tui.html:main",
         ],

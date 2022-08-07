@@ -29,10 +29,7 @@ short_test_summary_matcher = re.compile(r"^==.*\sshort test summary info\s.*==+"
 short_test_summary_test_matcher = re.compile(
     r"^(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)\s+(?:\[\d+\]\s)?(\S+)(?:.*)?$"
 )
-warnings_summary_test_matcher = re.compile(
-    # r"^([^\n]+:{1,2}[^\n]+)\n(([^\n]+)\n)*"
-    r"^([^\n]+:{1,2}[^\n]+)\n([^\n]+\n)+"
-)
+warnings_summary_test_matcher = re.compile(r"^([^\n]+:{1,2}[^\n]+)\n([^\n]+\n)+")
 lastline_matcher = re.compile(r"^==.*in\s\d+.\d+s.*=+")
 section_name_matcher = re.compile(r"~~>PYTEST_TUI_(\w+)")
 standard_test_matcher = re.compile(
