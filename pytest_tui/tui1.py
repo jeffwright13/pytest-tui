@@ -1,17 +1,16 @@
+from sys import exit
 from typing import Dict
+
 from rich.console import RenderableType
 from rich.panel import Panel
 from rich.text import Text
 from textual import events
 from textual.app import App
 from textual.widget import Widget
-from textual.widgets import (
-    ScrollView,
-    TreeClick,
-)
+from textual.widgets import ScrollView, TreeClick
+
 from pytest_tui._tree_control import TreeControl
 from pytest_tui.utils import Results
-
 
 TREE_WIDTH = 120
 SECTIONS = {
@@ -109,6 +108,8 @@ class TuiApp(App):
     async def on_load(self, event: events.Load) -> None:
         # Get test result sections
         self.test_results = Results()
+        if not self.test_results.tests_all:
+            exit()
         self.summary_results = self.test_results.Sections["LAST_LINE"].content.replace(
             "=", ""
         )

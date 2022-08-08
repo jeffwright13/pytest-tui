@@ -56,6 +56,7 @@ coverage.xml
 # Pytest and plugins
 .pytest_cache
 report.html
+pytest_tui_files/
 
 # Translations
 *.mo

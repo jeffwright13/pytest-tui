@@ -1,21 +1,18 @@
 from __future__ import annotations
 
-
 from typing import Generic, Iterator, NewType, TypeVar
 
 import rich.repr
 from rich.console import RenderableType
+from rich.padding import PaddingDimensions
 from rich.text import Text, TextType
 from rich.tree import Tree
-from rich.padding import PaddingDimensions
-
 from textual import events
-from textual.reactive import Reactive
 from textual._types import MessageTarget
-from textual.widget import Widget
 from textual.message import Message
 from textual.messages import CursorMove
-
+from textual.reactive import Reactive
+from textual.widget import Widget
 
 NodeID = NewType("NodeID", int)
 

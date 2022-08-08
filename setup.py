@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 import codecs
-from setuptools import setup, find_packages
+import os
+
+from setuptools import find_packages, setup
 
 
 def read(fname):
@@ -13,12 +14,12 @@ def read(fname):
 
 setup(
     name="pytest-tui",
-    version="1.0.1",
+    version="1.1.0",
     author="Jeff Wright",
     author_email="jeff.washcloth@gmail.com",
     license="MIT",
     url="https://github.com/jeffwright13/pytest-tui",
-    description="Text User Interface (TUI) for Pytest, automatically launched after your test run is finished",
+    description="Text User Interface (TUI) for Pytest, with optional auto-launch and HTML export",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     packages=find_packages(),
@@ -26,12 +27,17 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "ansi2html>=1.8.0",
+        "blessed>=1.19.1",
+        "bullet>=2.2.0",
+        "click>=8.1.0",
         "Faker>=13.15.0",
+        "iniconfig>=1.1.0",
         "pytest>=6.2.5",
         "pyTermTk>=0.10.8a0",
         "single-source>=0.3.0",
         "strip-ansi>=0.1.1",
         "textual>=0.1.18",
+        "typer>=0.6.1",
     ],
     classifiers=[
         "Framework :: Pytest",
@@ -48,9 +54,9 @@ setup(
     entry_points={
         "pytest11": ["pytest_tui = pytest_tui.plugin"],
         "console_scripts": [
-            "tui1 = pytest_tui.tui1:main",
-            "tui2 = pytest_tui.tui2:main",
-            "tuihtml = pytest_tui.html:main",
+            "tuiconf = pytest_tui.__main__:tui_config",
+            "tui = pytest_tui.__main__:tui_launch",
+            "tuih = pytest_tui.html:main",
         ],
     },
 )
