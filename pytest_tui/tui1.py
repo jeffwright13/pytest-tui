@@ -1,3 +1,4 @@
+from sys import exit
 from typing import Dict
 
 from rich.console import RenderableType
@@ -107,6 +108,8 @@ class TuiApp(App):
     async def on_load(self, event: events.Load) -> None:
         # Get test result sections
         self.test_results = Results()
+        if not self.test_results.tests_all:
+            exit()
         self.summary_results = self.test_results.Sections["LAST_LINE"].content.replace(
             "=", ""
         )

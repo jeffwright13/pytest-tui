@@ -5,6 +5,7 @@ import time
 import webbrowser
 
 from ansi2html import Ansi2HTMLConverter
+from strip_ansi import strip_ansi
 
 from pytest_tui import __version__
 from pytest_tui.__main__ import Cli
@@ -34,20 +35,32 @@ class HtmlPage:
         }
         self.summary = self.results.Sections["LAST_LINE"].content.replace("=", "")
 
+    def read_environment(self) -> None:
+        e = strip_ansi(self.results.Sections["TEST_SESSION_STARTS"].content).split(
+            "\n"
+        )[1:]
+        idx = e.index("collecting ... ")
+        self.environment = e[:idx]
 
-def clean(text: str) -> str:
-    return re.sub("\\n+", "\\n", text)
+    def create_env_table(self) -> None:
+        self.read_environment()
+        self.environment_table = "".join(
+            f"<tr><td>{line}</td></tr>" for line in self.environment
+        )
+
+    def clean(self, text: str) -> str:
+        return re.sub("\\n+", "\\n", text)
 
 
 def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
 
     conv = Ansi2HTMLConverter()
     page = HtmlPage()
+    page.create_env_table()
 
     header = f"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <title>Test Report</title> <style type="text/css"> .ansi2html-content {{ display: inline; white-space: pre-wrap; word-wrap: break-word; }} .body_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_FOREGROUND_COLOR')}; }} .body_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_BACKGROUND_COLOR')}; }} .inv_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_FOREGROUND_COLOR')}; }} .inv_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_BACKGROUND_COLOR')}; }} .ansi1 {{ font-weight: bold; }} .ansi31 {{ color: #aa0000; }} .ansi32 {{ color: #00aa00; }} .ansi33 {{ color: #aa5500; }} .collapsible {{ font-weight: bold; color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_BACKGROUND_COLOR')}; cursor: pointer; width: 100%; border: none; text-align: left; outline: none; font-size: 15px; }} .active, .collapsible:hover {{ foreground-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_BACKGROUND_COLOR')}; /* Green */ color: white; }} .content {{ display: none; overflow: hidden; }} </style> </head> <body class="body_foreground body_background" style="font-size: normal;"> <pre class="ansi2html-content">"""
 
-    environ = """<div><input type="button" id="env_button" onclick="toggle_env()" value="Show Environment" /> </div> <table id="environment"> <tr> <td>Account Server Version</td> <td>6.0.1</td></tr> <tr> <td>Core Version</td> <td>5.14.0</td></tr> <tr> <td>Project Version</td> <td>36</td></tr> <tr> <td>REST Server Version</td> <td>5.19.4</td></tr> <tr> <td>Site Name</td> <td>Refrigerator (basement) </td></tr> <tr> <td>Site Timezone</td> <td>UTC</td></tr> <tr> <td>JAVA_HOME</td> <td>/Users/user/Library/Java/JavaVirtualMachines/corretto-11.0.12/Contents/Home</td></tr> <tr> <td>Packages</td> <td>{"pluggy": "0.13.1", "py": "1.11.0", "pytest": "6.2.5"}</td></tr> <tr> <td>Platform</td> <td>macOS-12.4-x86_64-i386-64bit</td></tr> <tr> <td>Plugins</td> <td>{"Faker": "13.15.1", "automock": "0.8.0", "bdd": "5.0.0", "cov": "3.0.0", "forked": "1.4.0", "html": "3.1.1", "metadata": "2.0.1", "mock": "3.8.1", "mock-generator": "1.2.0", "pytest_check": "1.0.5", "repeat": "0.9.1", "rerunfailures": "10.2", "timeout": "2.1.0", "tui": "1.0.1", "xdist": "2.5.0"}</td></tr> <tr> <td>Python</td> </table>"""
-
+    environ = f"""<div> <input type="button" id="env_button" onclick="toggle_env()" value="Show Environment"/></div> <table id="environment"> {page.environment_table} </table>"""
     environ_script = """<script type="text/javascript"> const content = document.getElementById("environment"); content.style.display = "none"; function toggle_env() { if (content.style.display === "none") { content.style.display = "block"; } else { content.style.display = "none"; } } </script>"""
 
     button_start = """<button type="button" class="collapsible">"""
@@ -59,7 +72,7 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
     trailer = """</pre>""" + button_script + """<hr> </body> </html>"""
 
     html_out = header + f"<h1>{HTMLOUTPUTFILE.stem}</h1>"
-    html_out += clean(
+    html_out += page.clean(
         conv.convert(
             page.results.Sections["LAST_LINE"].content.replace("=", "").strip(),
             full=False,
@@ -77,7 +90,7 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
     for section in page.sections:
         # html_out += "<hr> <h2>" + section.upper() + "</h2>"
         html_out += button_start + section + button_end
-        test = clean(conv.convert(page.sections[section], full=False))
+        test = page.clean(conv.convert(page.sections[section], full=False))
         if not test:
             test = "<p>No output</p>"
         html_out += test + test_end
@@ -90,7 +103,7 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
         if nodes:
             for node in nodes:
                 html_out += button_start + node + button_end
-                test = clean(
+                test = page.clean(
                     conv.convert(eval(f"page.results.tests_{result}[node]"), full=False)
                 )
                 if not test:

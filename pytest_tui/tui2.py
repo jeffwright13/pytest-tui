@@ -1,3 +1,5 @@
+from sys import exit
+
 import TermTk as ttk
 
 from pytest_tui.utils import OUTCOMES, Results
@@ -7,6 +9,8 @@ class TkTui:
     def __init__(self) -> None:
         # Instantiate pytest-tui's Results object, and populate w/ data
         self.test_results = Results()
+        if not self.test_results.tests_all:
+            exit()
         self.summary_results = (
             self.test_results.Sections["LAST_LINE"]
             .content.replace("=", "")

@@ -38,7 +38,7 @@ class DefaultConfig:
         self.tui = "tui1"
         self.colortheme = "light"
         self.colortheme_colors = self.HTML_LIGHT_THEME
-        self.autolaunch_html = False
+        self.autolaunch_html = True
 
 
 class Cli:

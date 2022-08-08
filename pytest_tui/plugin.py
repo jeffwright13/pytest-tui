@@ -240,10 +240,9 @@ def pytui_tui(config: Config) -> None:
         capmanager = config.pluginmanager.getplugin("capturemanager")
         capmanager.suspend_global_capture(in_=True)
     finally:
+
         with ThreadPoolExecutor() as executor:
-            if config.getoption("--tuihtml", None):
-                executor.submit(tuihtml(autolaunch=True))
-        if config.getoption("--tui", None):
-            tui_launch()
+            executor.submit(tuihtml)
+        tui_launch()
 
         capmanager.resume_global_capture()
