@@ -1,28 +1,33 @@
 # pytest-tui
 ## A Pytest plugin that auto-launches a Text User Interface (TUI) or an HTML page for viewing test run results
 
-### Using Textual TUI:
+### Using Textual:
 ![2022-05-01 19 25 19](https://user-images.githubusercontent.com/4308435/166174159-b442a5b5-416d-42a0-badd-7401e9980e47.gif)
 
 ### Using PyTermTk:
 ![2022-05-01 19 32 28](https://user-images.githubusercontent.com/4308435/166174568-a1e921a8-fa30-4c3a-ab4a-a402bc50fb40.gif)
 
-## Introduction
-When you run Pytest campaigns that produce a lot of terminal output (e.g. with many tests, very detailed output, or with multiple failures), the standard Pytest output can make it difficult to examine the results. You end up scrolling way back in the terminal, looking for that one test you want to examine more closely. Pytest-tui provides a Text User Interface (TUI) that aims to make it easier to find the information you're looking for.
+### Using HTML:
+![2022-08-08 01 56 44](https://user-images.githubusercontent.com/4308435/183372960-f274b370-95e6-4252-b056-ab1225fe878e.gif)
 
-Just run your Pytest campaigns like you normally would, adding the command line option `--tui`. Your test session will proceed as it always does, giving you its familiar terminal output while running. Then, at the end of the session, either a TUI of your choice is launched and your results are displayed on-screen for you to examine. When you're done, exit the TUI and you are placed back into the terminal where you were before it was launched. Alternatively, you can have `pytest-tui` launch a single web page in yur default browser. Wait, what? You need to look at those results again? Well, you *could* scroll back in the terminal like you've done in the past. Or, you could execute any of the built-in scripts (e.g. "tui1" or "tuihtml") and you're back to where things were at the end of the run. Easy.
+## Introduction
+When you run Pytest campaigns that produce a lot of terminal output (e.g. with many tests, very detailed output, or with multiple failures), the standard Pytest output can make it difficult to examine the results. You end up scrolling way back in the terminal, looking for that one test you want to examine more closely. Pytest-tui provides a Text User Interface (TUI) and an HTML export feature that aim to make it easier to find the information you're looking for.
 
 Test results are categorized in the same way Pytest does it:
 
-- By outcome:  `[Pass|Fail|Error|Skipped|Xpass|Xfail]`
+- By outcome: `[Pass|Fail|Error|Skipped|Xpass|Xfail]`
 - By output section: `[Summary|Full|Errors|Passes|Failures|Warnings]`
 
 The intent it to make it easier for you to find the specific results you want so you can examine it without all the other results getting in your way.
 
+How does it work in practice? Easy. You just run your Pytest campaigns like you normally would, adding the command line option `--tui` (for example, `pytest --tui test_dir`). Your test session will proceed as it always does, showing you the familiar terminal output while running. Then, at the end of the session, the TUI of your choice is launched and the results are displayed on-screen for you to examine. When you're done, just exit the TUI and you are placed back into the terminal where you were before it was launched. Wait, what? You need to look at those results again? Well, you *could* scroll back in the terminal like you've always done in the past. Or, you could execute the built-in console script `tui`, and you're back to where things were at the end of the run. Easy.
+
+You can also configure `pytest-tui` to launch a single web page, using your default browser, giving you the same information. Output sections and individual test results are expandable/collapsible, and test summary statistics are displayed for convenience. As with the TUIs, the HTML page retains the original pytest ANSI-encoded color output, lending a familiar look and feel. By default, the HTML page will be created and will launch automatically upon completion of a test run, but you can also do so manually using the `tuih` console script.
+
 ## Features
 - Choice of two TUIs: [Textual](https://github.com/Textualize/textual) or [PyTermTk](https://pypi.org/project/pyTermTk/)
-- Option to export console output to HTML (`pytest --tuihtml`)
-- Ability to immediately launch TUIs with existing data using console scripts
+- Option to export console output to HTML
+- Ability to immediately launch TUIs with previous test run data using console scripts
 - ANSI text markup support - whatever the output on your console looks like is how things are going to show up in the TUI
 - Mouse and keyboard support (including scrolling)
 - Support for all output formats/modes:
@@ -53,13 +58,19 @@ Run the following command from the top-level directory of the codebase you want 
 
 `pytest --tui`
 
-This will launch the default TUI. You can optionally specify a different TUI by adding a number (1, 2) to the end of the `--tui` option:
-
-`pytest --tui [--tui1|--tui2|--tuin] <other-pytest-options>`
-
-See `pytest --help` for more info.
+This will launch the default TUI. You can optionally specify a different TUI, using the `tuiconf` configuration script (details below).
 
 To quit the Textual TUI, either click the Quit button, or press `Q`. To quit the PyTermTk TUI, click the Quit button in the upper right.
+
+### Configuration Script
+
+You can change the behavior of `pytest-tui` using the built-in configuration script `tuiconf`. When executed from the command line, this script provides a menu-drive configuration utility that allows customizing some aspects of the plugin.
+
+The following items are customizeable:
+- Choice of TUI (Textual or PyTermTk)
+- HTML light or dark theme
+- HTML page autolaunch
+- Custom HTML color scheme
 
 ### Demo Tests
  If you would like some dummy tests that will allow you to take pytest-tui for a testdrive, copy all the files at https://github.com/jeffwright13/pytest-tui/tree/main/demo-tests into a folder called `demo-tests/`. Then:
@@ -68,12 +79,7 @@ To quit the Textual TUI, either click the Quit button, or press `Q`. To quit the
 
 ### Looking at Results After Quitting TUI
 
-If you have already exited the TUI and would like to re-enter it with the same data generated from the last Pytest run, simply type:
-
-`tui1` (to launch the Textual TUI)
-`tui2` (to launch the PyTermTk TUI)
-
-You can run with the `--tuin` option to bypass auto-launch of the TUI. This allows you to gather results now, and look at them in any of the TUIs later.
+If you have already exited the TUI and would like to re-enter it with the same data generated from the last Pytest run, simply type `tui`.
 
 ### TUI Copy/Paste
 
@@ -82,11 +88,7 @@ On Linux terminals, you can typically press and hold the SHIFT key on your keybo
 On Windows, use the ALT key while click-dragging the mouse. Mac users can get the same effect with the Option key.
 
 ## HTML Export
-Specifying option `--tuihtml` on the command line produce an HTML file with expandable/collapsible results/sections. This option can be either called by itself, or in conjuction with the other `tui` options. The output file is located at `<cwd>/results/output_html.html`. By default, the HTML file is automatically launched, just as with the TUIs, using the system default browser upon completion of the test run; and, as with the TUIs, autolaunch can be suppressed by specifying command line topn `--tuin`.
-
-`pytest --tuihtml`
-
-An example of the output is [here](https://drive.google.com/file/d/1p2wwPtLVUwz8Q9fe-B6mPXYqSJ-j7HVL/view?usp=sharing). You will notice that the HTML page resembles the
+The HTML output file is located at `<cwd>/pytest_tui_files/output_html.html`. By default, the HTML file is automatically launched via browser, just as with the TUIs, using the system default browser upon completion of the test run. HTML autolaunch can be suppressed through the configuration console script `tuiconf`.
 
 ## Known Limitations / Issues
 - User interfaces need work:
