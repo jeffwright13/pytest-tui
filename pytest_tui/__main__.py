@@ -103,7 +103,7 @@ class Cli:
             self.config_parser.add_section("TUI")
         self.config_parser.set("TUI", "tui", self.default_config.tui)
         self.config_parser.set(
-            "TUI", "autolaunch_tui", self.default_config.autolaunch_tui
+            "TUI", "autolaunch_tui", str(self.default_config.autolaunch_tui)
         )
         if not self.config_parser.has_section("HTML"):
             self.config_parser.add_section("HTML")
