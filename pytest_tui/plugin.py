@@ -1,3 +1,4 @@
+import configparser
 import pickle
 import re
 import tempfile
@@ -11,11 +12,11 @@ from _pytest.config import Config, create_terminal_writer
 from _pytest.reports import TestReport
 from ansi2html import Ansi2HTMLConverter
 
-from pytest_tui.__main__ import tui_launch
+from pytest_tui.__main__ import Cli, tui_launch
 from pytest_tui.html import main as tuihtml
-from pytest_tui.utils import (HTMLOUTPUTFILE, MARKEDTERMINALOUTPUTFILE,
-                              MARKERS, REPORTOBJECTSFILE,
-                              UNMARKEDTERMINALOUTPUTFILE,
+from pytest_tui.utils import (CONFIGFILE, HTMLOUTPUTFILE,
+                              MARKEDTERMINALOUTPUTFILE, MARKERS,
+                              REPORTOBJECTSFILE, UNMARKEDTERMINALOUTPUTFILE,
                               errors_section_matcher, failures_section_matcher,
                               lastline_matcher, passes_section_matcher,
                               rerun_summary_matcher,
@@ -234,6 +235,13 @@ def pytui_tui(config: Config) -> None:
     Final code invocation after Pytest run has completed.
     Will call either or both of TUI / HTML code is specified on cmd line.
     """
+    config_parser = configparser.ConfigParser()
+    try:
+        config_parser.read(CONFIGFILE)
+    except Exception:
+        Cli().apply_default_config()
+        config_parser.read(CONFIGFILE)
+
     try:
         # disable capturing while TUI runs to avoid error `redirected stdin is pseudofile, has
         # no fileno()`; adapted from https://githubmemory.com/repo/jsbueno/terminedia/issues/25
@@ -243,6 +251,7 @@ def pytui_tui(config: Config) -> None:
 
         with ThreadPoolExecutor() as executor:
             executor.submit(tuihtml)
-        tui_launch()
+        if config_parser["TUI"].get("autolaunch_tui") == "True":
+            tui_launch()
 
         capmanager.resume_global_capture()

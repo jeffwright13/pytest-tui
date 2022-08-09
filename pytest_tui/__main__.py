@@ -36,6 +36,7 @@ class DefaultConfig:
 
     def __init__(self):
         self.tui = "tui1"
+        self.autolaunch_tui = False
         self.colortheme = "light"
         self.colortheme_colors = self.HTML_LIGHT_THEME
         self.autolaunch_html = True
@@ -72,8 +73,9 @@ class Cli:
             "Apply default config settings": self.apply_default_config_plus_enter,
             "Display current config settings": self.display_current_config,
             "Select TUI": self.select_tui,
+            "Set TUI autolaunch option": self.set_tui_autolaunch,
             "Select HTML light or dark theme": self.select_html_light_dark,
-            "Set HTML auto-launch option": self.set_html_auto_launch,
+            "Set HTML autolaunch option": self.set_html_autolaunch,
             "Define custom HTML color theme": self.define_custom_html_theme,
             "Quit": self.quit,
         }
@@ -100,6 +102,9 @@ class Cli:
         if not self.config_parser.has_section("TUI"):
             self.config_parser.add_section("TUI")
         self.config_parser.set("TUI", "tui", self.default_config.tui)
+        self.config_parser.set(
+            "TUI", "autolaunch_tui", self.default_config.autolaunch_tui
+        )
         if not self.config_parser.has_section("HTML"):
             self.config_parser.add_section("HTML")
         self.config_parser.set("HTML", "colortheme", self.default_config.colortheme)
@@ -139,6 +144,17 @@ class Cli:
         if not self.config_parser.has_section("TUI"):
             self.config_parser.add_section("TUI")
         self.config_parser.set("TUI", "tui", tui)
+        self.write_current_config_to_file()
+        self._enter_to_continue()
+
+    def set_tui_autolaunch(self) -> None:
+        self._clear_terminal()
+        autolaunch_tui = YesNo(
+            "Autolaunch TUI when test session is complete: "
+        ).launch()
+        if not self.config_parser.has_section("TUI"):
+            self.config_parser.add_section("TUI")
+        self.config_parser.set("TUI", "autolaunch_tui", str(autolaunch_tui))
         self.write_current_config_to_file()
         self._enter_to_continue()
 
@@ -208,7 +224,7 @@ class Cli:
         self.write_current_config_to_file()
         self._enter_to_continue()
 
-    def set_html_auto_launch(self) -> None:
+    def set_html_autolaunch(self) -> None:
         self._clear_terminal()
         autolaunch_html = YesNo("Auto-launch HTML when generated: ").launch()
         if not self.config_parser.has_section("HTML"):

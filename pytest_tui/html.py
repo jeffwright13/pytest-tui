@@ -1,9 +1,11 @@
 import configparser
+import json
 import os
 import re
 import time
 import webbrowser
 
+import json2table
 from ansi2html import Ansi2HTMLConverter
 from strip_ansi import strip_ansi
 
@@ -42,10 +44,24 @@ class HtmlPage:
         idx = e.index("collecting ... ")
         self.environment = e[:idx]
 
-    def create_env_table(self) -> None:
+    def create_meta_table(self) -> None:
         self.read_environment()
-        self.environment_table = "".join(
-            f"<tr><td>{line}</td></tr>" for line in self.environment
+        self.metadata = json.loads(
+            [line for line in self.environment if "metadata:" in line][0]
+            .lstrip("metadata: ")
+            .replace("'", '"')
+        )
+        self.metadata.pop("JAVA_HOME")
+        self.metadata_table = json2table.convert(
+            self.metadata,
+            build_direction="LEFT_TO_RIGHT",
+            table_attributes={
+                "id": "metadata",
+                "border": "1",
+                "text-align": "left",
+                "style": "width:100%",
+                "border-collapse": "collapse",
+            },
         )
 
     def clean(self, text: str) -> str:
@@ -56,12 +72,12 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
 
     conv = Ansi2HTMLConverter()
     page = HtmlPage()
-    page.create_env_table()
+    page.create_meta_table()
 
-    header = f"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <title>Test Report</title> <style type="text/css"> .ansi2html-content {{ display: inline; white-space: pre-wrap; word-wrap: break-word; }} .body_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_FOREGROUND_COLOR')}; }} .body_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_BACKGROUND_COLOR')}; }} .inv_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_FOREGROUND_COLOR')}; }} .inv_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_BACKGROUND_COLOR')}; }} .ansi1 {{ font-weight: bold; }} .ansi31 {{ color: #aa0000; }} .ansi32 {{ color: #00aa00; }} .ansi33 {{ color: #aa5500; }} .collapsible {{ font-weight: bold; color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_BACKGROUND_COLOR')}; cursor: pointer; width: 100%; border: none; text-align: left; outline: none; font-size: 15px; }} .active, .collapsible:hover {{ foreground-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_BACKGROUND_COLOR')}; /* Green */ color: white; }} .content {{ display: none; overflow: hidden; }} </style> </head> <body class="body_foreground body_background" style="font-size: normal;"> <pre class="ansi2html-content">"""
+    header = f"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <title>Test Report</title> <style type="text/css"> .ansi2html-content {{ display: inline; white-space: pre-wrap; word-wrap: break-word; }} .body_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_FOREGROUND_COLOR')}; }} .body_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_BACKGROUND_COLOR')}; }} .inv_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_FOREGROUND_COLOR')}; }} .inv_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_BACKGROUND_COLOR')}; }} .ansi1 {{ font-weight: bold; }} .ansi31 {{ color: #aa0000; }} .ansi32 {{ color: #00aa00; }} .ansi33 {{ color: #aa5500; }} .collapsible {{ font-weight: normal; color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_BACKGROUND_COLOR')}; cursor: pointer; width: 100%; border: none; text-align: left; outline: none; font-size: 15px; }} .active, .collapsible:hover {{ foreground-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_BACKGROUND_COLOR')}; /* Green */ color: white; }} .content {{ display: none; overflow: hidden; }} </style> </head> <body class="body_foreground body_background" style="font-size: normal;"> <pre class="ansi2html-content">"""
 
-    environ = f"""<div> <input type="button" id="env_button" onclick="toggle_env()" value="Show Environment"/></div> <table id="environment"> {page.environment_table} </table>"""
-    environ_script = """<script type="text/javascript"> const content = document.getElementById("environment"); content.style.display = "none"; function toggle_env() { if (content.style.display === "none") { content.style.display = "block"; } else { content.style.display = "none"; } } </script>"""
+    metadata_button = f"""<div> <input type="button" id="meta_button" onclick="toggle_meta()" value="Metadata"/></div> {page.metadata_table}"""
+    metadata_script = """<script type="text/javascript"> const content = document.getElementById("metadata"); content.style.display = "none"; function toggle_meta() { if (content.style.display === "none") { content.style.display = "block"; } else { content.style.display = "none"; } } </script>"""
 
     button_start = """<button type="button" class="collapsible">"""
     button_end = """</button> <div class="content"> <p>"""
@@ -71,7 +87,7 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
 
     trailer = """</pre>""" + button_script + """<hr> </body> </html>"""
 
-    html_out = header + f"<h1>{HTMLOUTPUTFILE.stem}</h1>"
+    html_out = header + f"<h1>{HTMLOUTPUTFILE.stem}</h1>" + "<hr>"
     html_out += page.clean(
         conv.convert(
             page.results.Sections["LAST_LINE"].content.replace("=", "").strip(),
@@ -83,7 +99,7 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
         HTMLOUTPUTFILE
     )
     html_out += f"<h4> Report generated on {time.ctime(mtime)} by pytest-tui version {__version__}</h4>"
-    html_out += environ + environ_script
+    html_out += metadata_button + metadata_script
 
     # Sections
     html_out += "<hr> <h2>" + "OUTPUT SECTIONS" + "</h2>"

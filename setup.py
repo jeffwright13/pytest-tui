@@ -32,6 +32,7 @@ setup(
         "click>=8.1.0",
         "Faker>=13.15.0",
         "iniconfig>=1.1.0",
+        "json2table>=1.1.5",
         "pytest>=6.2.5",
         "pyTermTk>=0.10.8a0",
         "single-source>=0.3.0",
