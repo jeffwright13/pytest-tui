@@ -14,7 +14,7 @@ def read(fname):
 
 setup(
     name="pytest-tui",
-    version="1.1.1",
+    version="test-1.1.2",
     author="Jeff Wright",
     author_email="jeff.washcloth@gmail.com",
     license="MIT",
@@ -29,9 +29,9 @@ setup(
         "ansi2html>=1.8.0",
         "blessed>=1.19.1",
         "bullet>=2.2.0",
-        "click>=8.1.0",
+        "click>=8.1.3",
         "Faker>=13.15.0",
-        "iniconfig>=1.1.0",
+        "iniconfig>=1.1.1",
         "json2table>=1.1.5",
         "pytest-metadata>=2.0.2",
         "pytest>=6.2.5",
@@ -39,7 +39,6 @@ setup(
         "single-source>=0.3.0",
         "strip-ansi>=0.1.1",
         "textual>=0.1.18",
-        "typer>=0.6.1",
     ],
     classifiers=[
         "Framework :: Pytest",

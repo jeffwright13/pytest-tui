@@ -1,52 +1,45 @@
 RELEASE_INSTRUCTIONS
 --------------------
-1 Verify package installs and runs correctly locally (from toplevel):
+- Verify package installs and runs correctly locally (from toplevel):
   cd <dev-direcory>
   pip install -e .
 
-2 Install/upgrade build & release tools:
+- Install/upgrade build & release tools:
   pip install --upgrade setuptools wheel twine
 
-3 Clear out old builds:
+- Clear out old builds:
   rm dist/*
 
-4 Build:
+- Build:
   python setup.py sdist bdist_wheel
 
-5 Publish to TestPyPi:
+- Publish to TestPyPi:
   python -m twine upload --repository testpypi dist/*
 
-6 Test the installation in a fresh directory:
+- Test the installation in a fresh directory:
   cd ~
   mkdir pytest-tui-testing
   cd pytest-tui-testing
-  pyenv local 3.9.9
+  pyenv local 3.10.5
   python -m venv venv
   source venv/bin/activate
   python -m pip install --index-url https://test.pypi.org/simple/ pytest-tui
-  mkdir -p ./tests/ && p ../pytest-tui/tests/* ./tests/
+  mkdir -p ./demo-tests/ && cp ../pytest-tui/demo-tests/* ./demo-tests/
 
-7 Verify PyTermTk TUI:
+- Verify basic functionality without plugin:
+  pytest
+
+- Verify basic functionality with plugin:
   pytest --tui
 
-8 Verify Textual TUIs:
-  pytest --tui1
-  pytest --tui2
+- Run through battery of tests (flesh this out):
+  use tuiconf
+  try both TUIs
+  try both light and dark themes
+  try custom coloring
 
-9 Verify No-TUI:
-  pytest --tuin
+- Make any adjustments required, then git-commit and push, then start over at step 1
 
-10 Make any adjustments required, then git-commit and push, then start over at step 1
-
-11 Publish to Pypi:
+- Publish to Pypi:
   cd <dev-directory>
   python -m twine upload dist/*
-
-11 Test the installation as per Step 6
-
-12 Run a test run to make sure it works (verify TUI):
-  pytest --tui
-
-App A Encode screencasts to /webm for posting on GitHub
-  ffmpeg -i "<filename>.mp4" -b:v 0 -crf 30 -pass 1 -an -f webm -y /dev/null
-  ffmpeg -i "filename.mp4" -b:v 0 -crf 30 -pass 2 outputfile.webm
