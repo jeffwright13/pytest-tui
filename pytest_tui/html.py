@@ -1,9 +1,8 @@
 import configparser
 import json
-import os
 import re
-import time
 import webbrowser
+from datetime import datetime, timezone
 
 import json2table
 from ansi2html import Ansi2HTMLConverter
@@ -11,7 +10,7 @@ from strip_ansi import strip_ansi
 
 from pytest_tui import __version__
 from pytest_tui.__main__ import Cli
-from pytest_tui.utils import CONFIGFILE, HTMLOUTPUTFILE, Results
+from pytest_tui.utils import CONFIGFILE, HTMLOUTPUTFILE, OUTCOMES, Results
 
 
 class HtmlPage:
@@ -74,58 +73,80 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
     page = HtmlPage()
     page.create_meta_table()
 
+    header = f"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <title>Test Report</title> <style type="text/css" > .ansi2html-content {{ display: inline; white-space: pre-wrap; word-wrap: break-word; }} .body_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_FOREGROUND_COLOR')}; }} .body_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_BACKGROUND_COLOR')}; }} .inv_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_FOREGROUND_COLOR')}; }} .inv_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_BACKGROUND_COLOR')}; }} .ansi1 {{ font-weight: bold; }} .ansi31 {{ color: #aa0000; }} .ansi32 {{ color: #00aa00; }} .ansi33 {{ color: #aa5500; }} .collapsible {{ font-weight: normal; color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_BACKGROUND_COLOR')}; cursor: pointer; width: 100%; border: none; text-align: left; outline: none; font-size: 15px; }} .active, .collapsible:hover {{ foreground-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_BACKGROUND_COLOR')}; color: white; }} .content {{ display: none; overflow: hidden; }} </style> </head> <body class="body_foreground body_background" style="font-size: normal; font-family: monospace, monospace;"> <pre class="ansi2html-content">"""
 
-
-    header = f"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <title>Test Report</title> <style type="text/css"> .ansi2html-content {{ display: inline; white-space: pre-wrap; word-wrap: break-word; }} .body_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_FOREGROUND_COLOR')}; }} .body_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_BACKGROUND_COLOR')}; }} .inv_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_FOREGROUND_COLOR')}; }} .inv_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_BACKGROUND_COLOR')}; }} .ansi1 {{ font-weight: bold; }} .ansi31 {{ color: #aa0000; }} .ansi32 {{ color: #00aa00; }} .ansi33 {{ color: #aa5500; }} .collapsible {{ font-weight: normal; color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_BACKGROUND_COLOR')}; cursor: pointer; width: 100%; border: none; text-align: left; outline: none; font-size: 15px; }} .active, .collapsible:hover {{ foreground-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_BACKGROUND_COLOR')}; /* Green */ color: white; }} .content {{ display: none; overflow: hidden; }} </style> </head> <body class="body_foreground body_background" style="font-size: normal;"> <pre class="ansi2html-content">"""
-
-    metadata_button = f"""<div> <input type="button" id="meta_button" onclick="toggle_meta()" value="Metadata"/></div> {page.metadata_table}"""
-    metadata_script = """<script type="text/javascript"> const content = document.getElementById("metadata"); content.style.display = "none"; function toggle_meta() { if (content.style.display === "none") { content.style.display = "block"; } else { content.style.display = "none"; } } </script>"""
+    metadata_button = f"""<div> <input type="button" id="meta_button" onclick="toggle_meta()" value="Show / Hide"/> </div> {page.metadata_table}"""
+    metadata_script = """<script type="text/javascript"> const content = document.getElementById("metadata"); content.style.display = "none"; function toggle_meta() { if (content.style.display === "block") { content.style.display = "none"; } else { content.style.display = "block"; } } </script>"""
 
     section_or_result_button_start = """<button type="button" class="collapsible">"""
     section_or_result_button_end = """</button> <div class="content"> <p>"""
     section_or_result_end = """</p> </div>"""
     section_or_result_button_script = """<script> var coll = document.getElementsByClassName("collapsible"); var i; for (i = 0; i < coll.length; i++) { coll[i].addEventListener("click", function() { this.classList.toggle("active"); var content = this.nextElementSibling; if (content.style.display === "block") { content.style.display = "none"; } else { content.style.display = "block"; } }); } </script>"""
 
-    trailer = """</pre>""" + section_or_result_button_script + """<hr> </body> </html>"""
+    trailer = (
+        """</pre>""" + section_or_result_button_script + """<hr> </body> </html>"""
+    )
 
-    html_out = header + f"<h1>{HTMLOUTPUTFILE.stem}</h1>" + "<hr>"
+    html_out = (
+        header
+        + f"""<h2 style="font-family: Helvetica, Arial, sans-serif;">{HTMLOUTPUTFILE.stem}</h2>"""
+    )
+    html_out += f"""<h4> Report generated on {datetime.now(timezone.utc).replace(microsecond=0).strftime('%Y-%m-%d %H:%M:%S')} UTC by pytest-tui version {__version__}</h4><hr>"""
+
+    html_out += (
+        """<h3 style="font-family: Helvetica, Arial, sans-serif;">Summary</h3>"""
+    )
     html_out += page.clean(
         conv.convert(
             page.results.Sections["LAST_LINE"].content.replace("=", "").strip(),
             full=False,
         )
     )
+    html_out += """<hr>"""
 
-    (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(
-        HTMLOUTPUTFILE
+    html_out += (
+        """<h3 style="font-family: Helvetica, Arial, sans-serif;">Environment</h3>"""
     )
-    html_out += f"<h4> Report generated on {time.ctime(mtime)} by pytest-tui version {__version__}</h4>"
-    html_out += metadata_button + metadata_script
+    html_out += f"""{metadata_button} {metadata_script} <hr>"""
 
     # Sections
-    html_out += "<hr> <h2>" + "OUTPUT SECTIONS" + "</h2>"
+    html_out += """<h3 style="font-family: Helvetica, Arial, sans-serif;">Output Sections</h3>"""
     for section in page.sections:
-        # html_out += "<hr> <h2>" + section.upper() + "</h2>"
-        html_out += section_or_result_button_start + section + section_or_result_button_end
+        html_out += (
+            section_or_result_button_start + section + section_or_result_button_end
+        )
         test = page.clean(conv.convert(page.sections[section], full=False))
         if not test:
-            test = "<p>No output</p>"
+            test = "No output"
         html_out += test + section_or_result_end
+    html_out += """<hr>"""
 
-    # Test Results
-    html_out += "<hr> <h2>" + "INDIVIDUAL TEST RESULTS" + "</h2>"
-    for result in ["failures", "passes", "skipped", "errors", "xpasses", "xfails"]:
-        html_out += "<h3>" + result.title() + "</h3>"
-        nodes = eval(f"page.results.tests_{result}")
+    # Test Results By Outcome
+    html_out += """<h3 style="font-family: Helvetica, Arial, sans-serif;">Test Results By Outcome</h3>"""
+    for outcome in OUTCOMES:
+        html_out += f"""<h4 style="font-family: Helvetica, Arial, sans-serif;">{outcome.title()}</h4>"""
+        nodes = eval(f"page.results.tests_{outcome.lower()}")
         if nodes:
             for node in nodes:
-                html_out += section_or_result_button_start + node + section_or_result_button_end
-                test = page.clean(
-                    conv.convert(eval(f"page.results.tests_{result}[node]"), full=False)
-                )
+                html_out += f"""{section_or_result_button_start}{node}{section_or_result_button_end}"""
+                test = f"""<p>{page.clean(
+                    conv.convert(eval(f"page.results.tests_{outcome.lower()}[node]"), full=False)
+                )}</p>"""
                 if not test:
                     test = "<p>No output</p>"
                 html_out += test + section_or_result_end
+    html_out += """<hr>"""
+
+    # Test Results in Order of Execution
+    html_out += """<h3 style="font-family: Helvetica, Arial, sans-serif;">Test Results in Order of Execution</h3>"""
+    for testname, result in page.results.OutcomesChronological.items():
+        html_out += f"""<tr><td>{section_or_result_button_start}<b>{result}</b>      {testname}{section_or_result_button_end}</td></tr>"""
+        test = page.clean(
+            conv.convert(eval(f"page.results.tests_all['{testname}']"), full=False)
+        )
+        if not test:
+            test = "<p>No output</p>"
+        html_out += test + section_or_result_end
 
     # Final trailer and file write
     html_out += trailer

@@ -20,6 +20,7 @@ UNMARKEDTERMINALOUTPUTFILE = PYTEST_TUI_FILES_DIR / "unmarked_output.bin"
 
 # regex matching patterns for Pytest sections
 test_session_starts_matcher = re.compile(r"^==.*\stest session starts\s==+")
+test_session_starts_test_matcher = re.compile(r"^(.*\::\S+)\s")
 errors_section_matcher = re.compile(r"^==.*\sERRORS\s==+")
 failures_section_matcher = re.compile(r"^==.*\sFAILURES\s==+")
 warnings_summary_matcher = re.compile(r"^==.*\swarnings summary\s.*==+")
@@ -104,6 +105,7 @@ class Results:
         self._update_testinfo_text()
 
         self.Outcomes = self._find_test_outcomes()
+        self.OutcomesChronological = self._find_test_outcomes_chronological()
         self.tests_errors = self._get_result_by_outcome("ERROR")
         self.tests_failures = self._get_result_by_outcome("FAILED")
         self.tests_passes = self._get_result_by_outcome("PASSED")
@@ -147,6 +149,21 @@ class Results:
                 testname = match.group(2)
                 outcomes[testname] = outcome
         return outcomes
+
+    def _find_test_outcomes_chronological(self):
+        """
+        Find the outcome of each test.
+        """
+        outcomes_chronological = {}
+        summary_section = self.Sections["TEST_SESSION_STARTS"]
+        for line in summary_section.content.splitlines():
+            match = test_session_starts_test_matcher.match(strip_ansi(line))
+            if match:
+                testname = match.group(1)
+                for o in self.Outcomes:
+                    if o in line:
+                        outcomes_chronological[testname] = self.Outcomes[testname]
+        return outcomes_chronological
 
     def _init_sections(self):
         """
