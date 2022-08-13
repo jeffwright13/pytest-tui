@@ -200,10 +200,14 @@ def pytui_tui(config: Config) -> None:
     Will call either or both of TUI / HTML code is specified on cmd line.
     """
     config_parser = configparser.ConfigParser()
+
+    # Make sure the config file exists and has section content
     try:
         config_parser.read(CONFIGFILE)
+        assert len(config_parser.sections()) > 0
     except Exception:
         Cli().apply_default_config()
+    finally:
         config_parser.read(CONFIGFILE)
 
     try:
@@ -212,7 +216,6 @@ def pytui_tui(config: Config) -> None:
         capmanager = config.pluginmanager.getplugin("capturemanager")
         capmanager.suspend_global_capture(in_=True)
     finally:
-
         with ThreadPoolExecutor() as executor:
             executor.submit(tuihtml)
         if config_parser["TUI"].get("autolaunch_tui") == "True":
