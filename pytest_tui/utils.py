@@ -138,7 +138,10 @@ class Results:
 
     def _find_test_outcomes(self):
         """
-        Find the outcome of each test.
+        Find the outcome of each test, using the final console section delineated by
+        '=== short test summary info ==='. This section is chosen because it does not contain
+        any live-log content, making parsing much easier. However, it is also ordered by outcome,
+        instead of chronologically, so another pass has to be made later to get the chronology.
         """
         outcomes = {}
         summary_section = self.Sections["SHORT_TEST_SUMMARY"]
@@ -152,11 +155,18 @@ class Results:
 
     def _find_test_outcomes_chronological(self):
         """
-        Find the outcome of each test.
+        Sort test outcomes by chronological order. We have all results categorized by outcome, and
+        the '=== test session starts' section is already in chronological order, so we match each
+        categorized outcome to the '=== test session starts' section and sort by that.
+
+        All of these shenanigans could probably be removed if we also included other data (e.g.
+        execution time) in the outcome tuple, whcih currently only consistes of canonical test name
+        and outcome.
+
         """
         outcomes_chronological = {}
-        summary_section = self.Sections["TEST_SESSION_STARTS"]
-        for line in summary_section.content.splitlines():
+        test_session_starts_section = self.Sections["TEST_SESSION_STARTS"]
+        for line in test_session_starts_section.content.splitlines():
             match = test_session_starts_test_matcher.match(strip_ansi(line))
             if match:
                 testname = match.group(1)
