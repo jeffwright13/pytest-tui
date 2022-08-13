@@ -49,7 +49,7 @@ class Cli:
         self.config_parser = configparser.ConfigParser()
         try:
             self.config_parser.read(CONFIGFILE)
-        except:
+        except Exception:
             self.apply_default_config()
 
     def _clear_terminal(self) -> None:
@@ -83,7 +83,7 @@ class Cli:
     def read_config_file(self) -> None:
         try:
             self.config_parser.read(CONFIGFILE)
-        except:
+        except Exception:
             self.apply_default_config()
         if not (
             self.config_parser.has_section("TUI")

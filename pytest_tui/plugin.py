@@ -10,12 +10,10 @@ import pytest
 from _pytest._io.terminalwriter import TerminalWriter
 from _pytest.config import Config, create_terminal_writer
 from _pytest.reports import TestReport
-from ansi2html import Ansi2HTMLConverter
 
 from pytest_tui.__main__ import Cli, tui_launch
 from pytest_tui.html import main as tuihtml
-from pytest_tui.utils import (CONFIGFILE, HTMLOUTPUTFILE,
-                              MARKEDTERMINALOUTPUTFILE, MARKERS,
+from pytest_tui.utils import (CONFIGFILE, MARKEDTERMINALOUTPUTFILE, MARKERS,
                               REPORTOBJECTSFILE, UNMARKEDTERMINALOUTPUTFILE,
                               errors_section_matcher, failures_section_matcher,
                               lastline_matcher, passes_section_matcher,
@@ -79,105 +77,84 @@ def pytest_report_teststatus(report: TestReport, config: Config):
 
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config: Config) -> None:
-    """
-    Write console output to a file for use by TUI
-    This code works by looking at every line sent by Pytest to the terminal,
-    and based on its category, marking or not marking it
-    """
-    config.option.verbose = (
-        1  # force verbose mode for easier parsing of final test results
-    )
-    config.option.reportchars = (
-        "A"  # force "display all" mode so all results can be shown
-    )
+    if not hasattr(config.option, "tui"):
+        return
+    if not config.option.tui:
+        return
 
-    if hasattr(config.option, "tui"):
-        tr = config.pluginmanager.getplugin("terminalreporter")
-        if tr is not None:
-            # identify and mark the very first line of terminal output
-            # ???? IS THIS STILL NEEDED?
-            try:
-                config._pytuifirsttime
-            except AttributeError:
-                config._pytuifirsttime = True
+    config.option.verbose = 1  # easier parsing of final test results
+    config.option.reportchars = "A"  # "display all" mode so all results are shown
 
-            config._pytui_unmarked_outputfile = tempfile.TemporaryFile("wb+")
-            config._pytui_marked_outputfile = tempfile.TemporaryFile("wb+")
-            oldwrite = tr._tw.write
+    # Examine Pytest terminal output to mark different sections of the output.
+    # This code is based on the code in pytest's `pastebin.py`.
+    tr = config.pluginmanager.getplugin("terminalreporter")
+    if tr is not None:
+        config._pytui_unmarked_outputfile = tempfile.TemporaryFile("wb+")
+        config._pytui_marked_outputfile = tempfile.TemporaryFile("wb+")
+        oldwrite = tr._tw.write
 
-            # identify and mark each results section
-            def tee_write(s, **kwargs):
-                if re.search(test_session_starts_matcher, s):
-                    config._pytui_marked_outputfile.write(
-                        (MARKERS["pytest_tui_test_session_starts"] + "\n").encode(
-                            "utf-8"
-                        )
-                    )
+        # identify and mark each results section
+        def tee_write(s, **kwargs):
+            if re.search(test_session_starts_matcher, s):
+                config._pytui_marked_outputfile.write(
+                    (MARKERS["pytest_tui_test_session_starts"] + "\n").encode("utf-8")
+                )
+            if re.search(errors_section_matcher, s):
+                config._pytui_marked_outputfile.write(
+                    (MARKERS["pytest_tui_errors_section"] + "\n").encode("utf-8")
+                )
+            if re.search(failures_section_matcher, s):
+                config._pytui_marked_outputfile.write(
+                    (MARKERS["pytest_tui_failures_section"] + "\n").encode("utf-8")
+                )
+            if re.search(warnings_summary_matcher, s):
+                config._pytui_marked_outputfile.write(
+                    (MARKERS["pytest_tui_warnings_summary"] + "\n").encode("utf-8")
+                )
+            if re.search(passes_section_matcher, s):
+                config._pytui_marked_outputfile.write(
+                    (MARKERS["pytest_tui_passes_section"] + "\n").encode("utf-8")
+                )
+            if re.search(rerun_summary_matcher, s):
+                config._pytui_marked_outputfile.write(
+                    (MARKERS["pytest_tui_rerun_summary"] + "\n").encode("utf-8")
+                )
+            if re.search(short_test_summary_matcher, s):
+                config._pytui_marked_outputfile.write(
+                    (MARKERS["pytest_tui_short_test_summary"] + "\n").encode("utf-8")
+                )
+            if re.search(lastline_matcher, s):
+                config._pytui_marked_outputfile.write(
+                    (MARKERS["pytest_tui_last_line"] + "\n").encode("utf-8")
+                )
 
-                if re.search(errors_section_matcher, s):
-                    config._pytui_marked_outputfile.write(
-                        (MARKERS["pytest_tui_errors_section"] + "\n").encode("utf-8")
-                    )
+            # Write this line's origina pytest output text (plus markup) to console
+            oldwrite(s, **kwargs)
 
-                if re.search(failures_section_matcher, s):
-                    config._pytui_marked_outputfile.write(
-                        (MARKERS["pytest_tui_failures_section"] + "\n").encode("utf-8")
-                    )
+            # Markup this line's text by passing it to an instance of TerminalWriter's
+            # 'markup' method. Do not pass "flush" to the method, or it will throw an error.
+            s1 = s
+            kwargs.pop("flush") if "flush" in kwargs else None
+            s1 = TerminalWriter().markup(s, **kwargs)
 
-                if re.search(warnings_summary_matcher, s):
-                    config._pytui_marked_outputfile.write(
-                        (MARKERS["pytest_tui_warnings_summary"] + "\n").encode("utf-8")
-                    )
+            # Encode the marked up line so it can be written to the config object.
+            # The Pytest config object can be used by plugins for conveying staeful
+            # info across an entire test run session.
+            if isinstance(s1, str):
+                marked_up = s1.encode("utf-8")
+            config._pytui_marked_outputfile.write(marked_up)
 
-                if re.search(passes_section_matcher, s):
-                    config._pytui_marked_outputfile.write(
-                        (MARKERS["pytest_tui_passes_section"] + "\n").encode("utf-8")
-                    )
+            # Write this line's original (unmarked) text to unmarked file
+            s_orig = s
+            kwargs.pop("flush") if "flush" in kwargs else None
+            s_orig = TerminalWriter().markup(s, **kwargs)
+            if isinstance(s_orig, str):
+                unmarked_up = s_orig.encode("utf-8")
+            config._pytui_unmarked_outputfile.write(unmarked_up)
 
-                if re.search(rerun_summary_matcher, s):
-                    config._pytui_marked_outputfile.write(
-                        (MARKERS["pytest_tui_rerun_summary"] + "\n").encode("utf-8")
-                    )
-
-                if re.search(short_test_summary_matcher, s):
-                    config._pytui_marked_outputfile.write(
-                        (MARKERS["pytest_tui_short_test_summary"] + "\n").encode(
-                            "utf-8"
-                        )
-                    )
-
-                if re.search(lastline_matcher, s):
-                    config._pytui_marked_outputfile.write(
-                        (MARKERS["pytest_tui_last_line"] + "\n").encode("utf-8")
-                    )
-
-                # Write this line's text along with its markup info to console
-                oldwrite(s, **kwargs)
-
-                # Mark up this line's text by passing it to an instance of TerminalWriter's
-                # 'markup' method. Do not pass "flush" to the method   s it will throw an error.
-                s1 = s
-                kwargs.pop("flush") if "flush" in kwargs.keys() else None
-                s1 = TerminalWriter().markup(s, **kwargs)
-
-                # Encode the marked up line so it can be written to the config object.
-                # The Pytest config object can be used by plugins for conveying staeful
-                # info across an entire test run session.
-                if isinstance(s1, str):
-                    marked_up = s1.encode("utf-8")
-                config._pytui_marked_outputfile.write(marked_up)
-
-                # Write this line's original (unmarked) text to unmarked file
-                s_orig = s
-                kwargs.pop("flush") if "flush" in kwargs.keys() else None
-                s_orig = TerminalWriter().markup(s, **kwargs)
-                if isinstance(s_orig, str):
-                    unmarked_up = s_orig.encode("utf-8")
-                config._pytui_unmarked_outputfile.write(unmarked_up)
-
-            # Write to both terminal/console and tempfiles:
-            # _pytui_marked_outputfile, _pytui_unmarked_outputfile
-            tr._tw.write = tee_write
+        # Write to both terminal/console and tempfiles:
+        # _pytui_marked_outputfile, _pytui_unmarked_outputfile
+        tr._tw.write = tee_write
 
 
 def pytest_unconfigure(config: Config):
@@ -212,22 +189,9 @@ def pytest_unconfigure(config: Config):
         with open(REPORTOBJECTSFILE, "wb") as report_file:
             pickle.dump(reports, report_file)
 
-    # Write console output to HTML
-    if hasattr(config.option, "tuihtml"):
-        conv = Ansi2HTMLConverter()
-
-        with open(UNMARKEDTERMINALOUTPUTFILE, "r") as f:
-            lines = f.readlines()
-        for line in lines:
-            line = line.replace('"""', '"')
-        ansi = "".join(lines)
-
-        html = conv.convert(ansi)
-        with open(HTMLOUTPUTFILE, "w") as html_file:
-            html_file.write(html)
-
-    if hasattr(config.option, "tui") or hasattr(config.option, "tuihtml"):
-        pytui_tui(config)
+    if hasattr(config.option, "tui"):
+        if config.option.tui:
+            pytui_tui(config)
 
 
 def pytui_tui(config: Config) -> None:
