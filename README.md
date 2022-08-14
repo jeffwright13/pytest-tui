@@ -42,6 +42,7 @@ You can also configure `pytest-tui` to launch a single web page, using your defa
 - Not supported: plugins that take over the console in other ways, like
   - `pytest-sugar`
   - `pytest-emoji-output`
+  - `pytest-timestamp`
 
 ## Requirements
 - Pytest >= 6.2.5

@@ -1,8 +1,11 @@
 import configparser
+import itertools
 import pickle
 import re
 import tempfile
 from concurrent.futures.thread import ThreadPoolExecutor
+from dataclasses import dataclass
+from datetime import datetime
 from io import StringIO
 from types import SimpleNamespace
 
@@ -10,16 +13,21 @@ import pytest
 from _pytest._io.terminalwriter import TerminalWriter
 from _pytest.config import Config, create_terminal_writer
 from _pytest.reports import TestReport
+from strip_ansi import strip_ansi
 
 from pytest_tui.__main__ import Cli, tui_launch
 from pytest_tui.html import main as tuihtml
-from pytest_tui.utils import (CONFIGFILE, MARKEDTERMINALOUTPUTFILE, MARKERS,
-                              REPORTOBJECTSFILE, UNMARKEDTERMINALOUTPUTFILE,
+from pytest_tui.utils import (CONFIGFILE, MARKED_TERMINAL_OUTPUT_FILE, MARKERS,
+                              REPORT_OBJECTS_FILE,
+                              TEST_TUI_RESULT_OBJECTS_FILE,
+                              UNMARKED_TERMINAL_OUTPUT_FILE,
                               errors_section_matcher, failures_section_matcher,
                               lastline_matcher, passes_section_matcher,
                               rerun_summary_matcher,
                               short_test_summary_matcher,
+                              short_test_summary_test_matcher,
                               test_session_starts_matcher,
+                              test_session_starts_test_matcher,
                               warnings_summary_matcher)
 
 # Don't collect tests from any of these files
@@ -32,6 +40,15 @@ collect_ignore = [
 # each TestReport represents a single test's operation during one of
 # Pytest's three phases: setup | call | teardown
 reports = []
+tui_test_results = []
+
+
+@dataclass
+class TuiTestResult:
+    fqtn: str = ""
+    outcome: str = ""
+    start_time: datetime = None
+    duration: float = 0.0
 
 
 def pytest_addoption(parser):
@@ -75,6 +92,14 @@ def pytest_report_teststatus(report: TestReport, config: Config):
     reports.append(report)
 
 
+@pytest.hookimpl()
+def pytest_runtest_logstart(nodeid, location):
+    for tui_test_result in tui_test_results:
+        if tui_test_result.fqtn == nodeid:
+            tui_test_result.start_time = datetime.now().strftime("%m/%d/%Y %H:%M:%S.%f")
+            break
+
+
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config: Config) -> None:
     if not hasattr(config.option, "tui"):
@@ -96,37 +121,70 @@ def pytest_configure(config: Config) -> None:
         # identify and mark each results section
         def tee_write(s, **kwargs):
             if re.search(test_session_starts_matcher, s):
+                config._pytui_current_section = "test_session_starts"
                 config._pytui_marked_outputfile.write(
                     (MARKERS["pytest_tui_test_session_starts"] + "\n").encode("utf-8")
                 )
             if re.search(errors_section_matcher, s):
+                config._pytui_current_section = "errors"
                 config._pytui_marked_outputfile.write(
                     (MARKERS["pytest_tui_errors_section"] + "\n").encode("utf-8")
                 )
             if re.search(failures_section_matcher, s):
+                config._pytui_current_section = "failures"
                 config._pytui_marked_outputfile.write(
                     (MARKERS["pytest_tui_failures_section"] + "\n").encode("utf-8")
                 )
             if re.search(warnings_summary_matcher, s):
+                config._pytui_current_section = "warnings_summary"
                 config._pytui_marked_outputfile.write(
                     (MARKERS["pytest_tui_warnings_summary"] + "\n").encode("utf-8")
                 )
             if re.search(passes_section_matcher, s):
+                config._pytui_current_section = "passes"
                 config._pytui_marked_outputfile.write(
                     (MARKERS["pytest_tui_passes_section"] + "\n").encode("utf-8")
                 )
             if re.search(rerun_summary_matcher, s):
+                config._pytui_current_section = "rerun_summary"
                 config._pytui_marked_outputfile.write(
                     (MARKERS["pytest_tui_rerun_summary"] + "\n").encode("utf-8")
                 )
             if re.search(short_test_summary_matcher, s):
+                config._pytui_current_section = "short_test_summary"
                 config._pytui_marked_outputfile.write(
                     (MARKERS["pytest_tui_short_test_summary"] + "\n").encode("utf-8")
                 )
             if re.search(lastline_matcher, s):
+                config._pytui_current_section = "lastline"
                 config._pytui_marked_outputfile.write(
                     (MARKERS["pytest_tui_last_line"] + "\n").encode("utf-8")
                 )
+
+            # If this is an actual test outcome line in the initial `=== test session starts ==='
+            # section, populate the TuiTestResult's fully qualified test name field. Do not add duplicates
+            # (as may be encountered with plugins such as pytest-rerunfailures).
+            if config._pytui_current_section == "test_session_starts" and re.search(
+                test_session_starts_test_matcher, s
+            ):
+                fqtn = re.search(test_session_starts_test_matcher, s)[1]
+                if fqtn not in [t.fqtn for t in tui_test_results]:
+                    tui_test_results.append(TuiTestResult(fqtn=fqtn))
+
+            # If this is an actual test outcome line in the `=== short test summary info ===' section,
+            # populate the TuiTestResult's outcome field.
+            if config._pytui_current_section == "short_test_summary" and re.search(
+                short_test_summary_test_matcher, strip_ansi(s)
+            ):
+                outcome = re.search(
+                    short_test_summary_test_matcher, strip_ansi(s)
+                ).groups()[0]
+                fqtn = re.search(
+                    short_test_summary_test_matcher, strip_ansi(s)
+                ).groups()[1]
+                for tui_test_result in tui_test_results:
+                    if tui_test_result.fqtn == fqtn:
+                        tui_test_result.outcome = outcome
 
             # Write this line's origina pytest output text (plus markup) to console
             oldwrite(s, **kwargs)
@@ -158,40 +216,33 @@ def pytest_configure(config: Config) -> None:
 
 
 def pytest_unconfigure(config: Config):
-    """
-    Write terminal and test results info to files for use by TUI
-    """
-    # Write terminal output to file
+    # Populate test result objects with total durations, from each test's
+    # TestReport objeects.
+    for tui_test_result, test_report in itertools.product(tui_test_results, reports):
+        if test_report.nodeid == tui_test_result.fqtn:
+            tui_test_result.duration += test_report.duration
+
     if hasattr(config, "_pytui_marked_outputfile"):
-        # get terminal contents, then write file
         config._pytui_marked_outputfile.seek(0)
         markedsessionlog = config._pytui_marked_outputfile.read()
         config._pytui_marked_outputfile.close()
 
     if hasattr(config, "_pytui_unmarked_outputfile"):
-        # get terminal contents, then write file
         config._pytui_unmarked_outputfile.seek(0)
         unmarkedsessionlog = config._pytui_unmarked_outputfile.read()
         config._pytui_unmarked_outputfile.close()
-
-        # Undo our patching in the terminal reporter
         config.pluginmanager.getplugin("terminalreporter")
-
-        # Write marked-up results to file
-        with open(MARKEDTERMINALOUTPUTFILE, "wb") as marked_file:
+        with open(MARKED_TERMINAL_OUTPUT_FILE, "wb") as marked_file:
             marked_file.write(markedsessionlog)
-
-        # Write un-marked-up results to file
-        with open(UNMARKEDTERMINALOUTPUTFILE, "wb") as unmarked_file:
+        with open(UNMARKED_TERMINAL_OUTPUT_FILE, "wb") as unmarked_file:
             unmarked_file.write(unmarkedsessionlog)
-
-        # Write the reports list to file
-        with open(REPORTOBJECTSFILE, "wb") as report_file:
+        with open(REPORT_OBJECTS_FILE, "wb") as report_file:
             pickle.dump(reports, report_file)
+        with open(TEST_TUI_RESULT_OBJECTS_FILE, "wb") as test_result_file:
+            pickle.dump(tui_test_results, test_result_file)
 
-    if hasattr(config.option, "tui"):
-        if config.option.tui:
-            pytui_tui(config)
+    if hasattr(config.option, "tui") and config.option.tui:
+        pytui_tui(config)
 
 
 def pytui_tui(config: Config) -> None:

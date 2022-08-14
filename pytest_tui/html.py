@@ -10,7 +10,7 @@ from strip_ansi import strip_ansi
 
 from pytest_tui import __version__
 from pytest_tui.__main__ import Cli
-from pytest_tui.utils import CONFIGFILE, HTMLOUTPUTFILE, OUTCOMES, Results
+from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, OUTCOMES, Results
 
 
 class HtmlPage:
@@ -89,7 +89,7 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
 
     html_out = (
         header
-        + f"""<h2 style="font-family: Helvetica, Arial, sans-serif;">{HTMLOUTPUTFILE.stem}</h2>"""
+        + f"""<h2 style="font-family: Helvetica, Arial, sans-serif;">{HTML_OUTPUT_FILE.stem}</h2>"""
     )
     html_out += f"""<h4> Report generated on {datetime.now(timezone.utc).replace(microsecond=0).strftime('%Y-%m-%d %H:%M:%S')} UTC by pytest-tui version {__version__}</h4><hr>"""
 
@@ -150,12 +150,12 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
 
     # Final trailer and file write
     html_out += trailer
-    with open(HTMLOUTPUTFILE, "w+") as f:
+    with open(HTML_OUTPUT_FILE, "w+") as f:
         f.write(html_out)
 
     # Open in browser
     if page.config_parser["HTML"].get("autolaunch_html") == "True":
-        webbrowser.open(f"file://{HTMLOUTPUTFILE._str}")
+        webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
 
 
 if __name__ == "__main__":
