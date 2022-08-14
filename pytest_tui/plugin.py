@@ -41,7 +41,8 @@ collect_ignore = [
 # Pytest's three phases: setup | call | teardown
 reports = []
 tui_test_results = []
-
+skips = []
+skip_idx = -1
 
 @dataclass
 class TuiTestResult:
@@ -49,6 +50,11 @@ class TuiTestResult:
     outcome: str = ""
     start_time: datetime = None
     duration: float = 0.0
+    caplog: str = ""
+    capstderr: str = ""
+    capstdout: str = ""
+    longreprtext: str = ""
+    skipped_idx = None
 
 
 def pytest_addoption(parser):
@@ -87,8 +93,28 @@ def add_ansi_to_report(config: Config, report: TestReport):
 
 def pytest_report_teststatus(report: TestReport, config: Config):
     """Construct list(s) of individual TestReport instances"""
+
+    if hasattr(report, "caplog") and report.caplog:
+        for tui_test_result in tui_test_results:
+            if tui_test_result.fqtn == report.nodeid:
+                tui_test_result.caplog = report.caplog
+
+    if hasattr(report, "capstderr") and report.capstderr:
+        for tui_test_result in tui_test_results:
+            if tui_test_result.fqtn == report.nodeid:
+                tui_test_result.capstderr = report.capstderr
+
+    if hasattr(report, "capstdout") and report.capstdout:
+        for tui_test_result in tui_test_results:
+            if tui_test_result.fqtn == report.nodeid:
+                tui_test_result.capstdout = report.capstdout
+
     if hasattr(report, "longreprtext") and report.longreprtext:
         add_ansi_to_report(config, report)
+        for tui_test_result in tui_test_results:
+            if tui_test_result.fqtn == report.nodeid:
+                tui_test_result.longreprtext = report.ansi.val
+
     reports.append(report)
 
 
@@ -162,8 +188,8 @@ def pytest_configure(config: Config) -> None:
                 )
 
             # If this is an actual test outcome line in the initial `=== test session starts ==='
-            # section, populate the TuiTestResult's fully qualified test name field. Do not add duplicates
-            # (as may be encountered with plugins such as pytest-rerunfailures).
+            # section, populate the TuiTestResult's fully qualified test name field. Do not add
+            # duplicates (as may be encountered with plugins such as pytest-rerunfailures).
             if config._pytui_current_section == "test_session_starts" and re.search(
                 test_session_starts_test_matcher, s
             ):
@@ -176,15 +202,54 @@ def pytest_configure(config: Config) -> None:
             if config._pytui_current_section == "short_test_summary" and re.search(
                 short_test_summary_test_matcher, strip_ansi(s)
             ):
+
                 outcome = re.search(
                     short_test_summary_test_matcher, strip_ansi(s)
                 ).groups()[0]
-                fqtn = re.search(
-                    short_test_summary_test_matcher, strip_ansi(s)
-                ).groups()[1]
+                fqtn = re.search(short_test_summary_test_matcher, strip_ansi(s)).groups()[1]
+                print("")
+
                 for tui_test_result in tui_test_results:
                     if tui_test_result.fqtn == fqtn:
                         tui_test_result.outcome = outcome
+                        break
+
+            #     # We treat Skipped tests differently here, as Pytest displays their format in this section
+            #     # differently than in the `=== test session starts ===' section, truncating their fqtns and
+            #     # appending a line number instead of specifying their test names. It appears that these tests
+            #     # are reported in these sections in ascending order of line number, so we can use this as a
+            #     # way to correlate them with the order in which they were run. Unless the use takes specific
+            #     # steps to run them in a different order (not sure how they would do this), it should be fine.
+            #     # if outcome == "SKIPPED":
+            #     # # if False:
+            #     #     subbed = re.sub(r"(:\d+:).*", "", strip_ansi(s), 0, re.MULTILINE)
+            #     #     fqtn = re.search(short_test_summary_test_matcher, subbed).groups()[1]
+            #     #     possibles = sorted([tui_test_result for tui_test_result in tui_test_results if fqtn in tui_test_result.fqtn and tui_test_result.outcome == ""], key=lambda tui_test_result: tui_test_result.start_time)
+            #     #     if len(possibles) > 0:
+            #     #         if len(skips) > 0:
+            #     #             skips.append(possibles)
+
+            #         # for tui_test_result in tui_test_results:
+            #         #     if tui_test_result.fqtn == fqtn:
+            #         #         tui_test_result.outcome = outcome
+            #         #         break
+
+            #     for tui_test_result in tui_test_results:
+            #         if tui_test_result.fqtn == fqtn:
+            #             tui_test_result.outcome = outcome
+            #             break
+
+
+            #     else:
+            #         # fqtn = re.search(
+            #         #     short_test_summary_test_matcher, strip_ansi(s)
+            #         # ).groups()[1]
+            #         for tui_test_result in tui_test_results:
+            #             if fqtn == tui_test_result.fqtn:
+            #                 tui_test_result.outcome = outcome
+            #                 break
+            #             else:
+            #                 tui_test_result.outcome = "SKIPPED"
 
             # Write this line's origina pytest output text (plus markup) to console
             oldwrite(s, **kwargs)
@@ -236,8 +301,8 @@ def pytest_unconfigure(config: Config):
             marked_file.write(markedsessionlog)
         with open(UNMARKED_TERMINAL_OUTPUT_FILE, "wb") as unmarked_file:
             unmarked_file.write(unmarkedsessionlog)
-        with open(REPORT_OBJECTS_FILE, "wb") as report_file:
-            pickle.dump(reports, report_file)
+        # with open(REPORT_OBJECTS_FILE, "wb") as report_file:
+        #     pickle.dump(reports, report_file)
         with open(TEST_TUI_RESULT_OBJECTS_FILE, "wb") as test_result_file:
             pickle.dump(tui_test_results, test_result_file)
 
