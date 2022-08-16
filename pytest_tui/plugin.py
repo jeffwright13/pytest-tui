@@ -20,7 +20,7 @@ from pytest_tui.html import main as tuihtml
 from pytest_tui.utils import (CONFIGFILE, TERMINAL_OUTPUT_FILE, MARKERS,
                               TUI_RESULT_OBJECTS_FILE, TUI_SECTIONS_FILE,
                               TuiSections,
-                              TuiTestResult, errors_section_matcher,
+                              TuiTestResult, TuiTestResults, errors_section_matcher,
                               failures_section_matcher, lastline_matcher,
                               passes_section_matcher, rerun_summary_matcher,
                               short_test_summary_matcher,
@@ -38,8 +38,9 @@ collect_ignore = [
 # Globals to hold Pytest TestReport instances; and individual test result and
 # section objects
 _tui_reports = []
-_tui_test_results = []
+_tui_test_results = TuiTestResults()
 _tui_sections = TuiSections()
+_tui_terminal_out = ""
 
 
 def pytest_addoption(parser):
@@ -79,23 +80,23 @@ def pytest_report_teststatus(report: TestReport, config: Config):
     """Construct list(s) of individual TestReport instances"""
 
     if hasattr(report, "caplog") and report.caplog:
-        for tui_test_result in _tui_test_results:
+        for tui_test_result in _tui_test_results.test_results:
             if tui_test_result.fqtn == report.nodeid:
                 tui_test_result.caplog = report.caplog
 
     if hasattr(report, "capstderr") and report.capstderr:
-        for tui_test_result in _tui_test_results:
+        for tui_test_result in _tui_test_results.test_results:
             if tui_test_result.fqtn == report.nodeid:
                 tui_test_result.capstderr = report.capstderr
 
     if hasattr(report, "capstdout") and report.capstdout:
-        for tui_test_result in _tui_test_results:
+        for tui_test_result in _tui_test_results.test_results:
             if tui_test_result.fqtn == report.nodeid:
                 tui_test_result.capstdout = report.capstdout
 
     if hasattr(report, "longreprtext") and report.longreprtext:
         add_ansi_to_report(config, report)
-        for tui_test_result in _tui_test_results:
+        for tui_test_result in _tui_test_results.test_results:
             if tui_test_result.fqtn == report.nodeid:
                 tui_test_result.longreprtext = report.ansi.val
 
@@ -104,7 +105,7 @@ def pytest_report_teststatus(report: TestReport, config: Config):
 
 @pytest.hookimpl()
 def pytest_runtest_logstart(nodeid, location):
-    for tui_test_result in _tui_test_results:
+    for tui_test_result in _tui_test_results.test_results:
         if tui_test_result.fqtn == nodeid:
             tui_test_result.start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
             break
@@ -125,9 +126,6 @@ def pytest_configure(config: Config) -> None:
     tr = config.pluginmanager.getplugin("terminalreporter")
     if tr is not None:
 
-        # Holds entire terminal putput from the test session
-        config._tui_terminal_out = ""
-
         # Save the old terminal writer instance so we can restore it later
         oldwrite = tr._tw.write
 
@@ -135,35 +133,27 @@ def pytest_configure(config: Config) -> None:
         def tee_write(s, **kwargs):
             if re.search(test_session_starts_matcher, s):
                 config._tui_current_section = "test_session_starts"
-                # config._tui_marked += MARKERS["pytest_tui_test_session_starts"] + "\n"
-                _tui_sections.test_session_starts.content += s + "\n"
+                # _tui_sections.test_session_starts.content += s + "\n"
             if re.search(errors_section_matcher, s):
                 config._tui_current_section = "errors"
-                # config._tui_marked += MARKERS["pytest_tui_errors_section"] + "\n"
-                _tui_sections.errors.content += s + "\n"
+                # _tui_sections.errors.content += s + "\n"
             if re.search(failures_section_matcher, s):
                 config._tui_current_section = "failures"
-                # config._tui_marked += MARKERS["pytest_tui_failures_section"] + "\n"
-                _tui_sections.failures.content += s + "\n"
+                # _tui_sections.failures.content += s + "\n"
             if re.search(warnings_summary_matcher, s):
                 config._tui_current_section = "warnings_summary"
-                # config._tui_marked += MARKERS["pytest_tui_warnings_summary"] + "\n"
-                _tui_sections.warnings_summary.content += s + "\n"
+                # _tui_sections.warnings_summary.content += s + "\n"
             if re.search(passes_section_matcher, s):
                 config._tui_current_section = "passes"
-                # config._tui_marked += MARKERS["pytest_tui_passes_section"] + "\n"
-                _tui_sections.passes.content += s + "\n"
+                # _tui_sections.passes.content += s + "\n"
             if re.search(rerun_summary_matcher, s):
                 config._tui_current_section = "rerun_summary"
-                # config._tui_marked += MARKERS["pytest_tui_rerun_summary"] + "\n"
-                _tui_sections.rerun_summary.content += s + "\n"
+                # _tui_sections.rerun_summary.content += s + "\n"
             if re.search(short_test_summary_matcher, s):
                 config._tui_current_section = "short_test_summary"
-                # config._tui_marked += MARKERS["pytest_tui_short_test_summary"] + "\n"
-                _tui_sections.short_test_summary.content += s + "\n"
+                # _tui_sections.short_test_summary.content += s + "\n"
             if re.search(lastline_matcher, s):
                 config._tui_current_section = "lastline"
-                # config._tui_marked += MARKERS["pytest_tui_last_line"] + "\n"
                 _tui_sections.lastline.content += s + "\n"
             else:
                 exec(f"_tui_sections.{config._tui_current_section}.content += s")
@@ -175,8 +165,8 @@ def pytest_configure(config: Config) -> None:
                 test_session_starts_test_matcher, s
             ):
                 fqtn = re.search(test_session_starts_test_matcher, s)[1]
-                if fqtn not in [t.fqtn for t in _tui_test_results]:
-                    _tui_test_results.append(TuiTestResult(fqtn=fqtn))
+                if fqtn not in [t.fqtn for t in _tui_test_results.test_results]:
+                    _tui_test_results.test_results.append(TuiTestResult(fqtn=fqtn))
 
             # If this is an actual test outcome line in the `=== short test summary info ===' section,
             # populate the TuiTestResult's outcome field.
@@ -191,7 +181,7 @@ def pytest_configure(config: Config) -> None:
                     short_test_summary_test_matcher, strip_ansi(s)
                 ).groups()[1]
 
-                for tui_test_result in _tui_test_results:
+                for tui_test_result in _tui_test_results.test_results:
                     if tui_test_result.fqtn == fqtn:
                         tui_test_result.outcome = outcome
                         break
@@ -216,7 +206,8 @@ def pytest_configure(config: Config) -> None:
             s_orig = TerminalWriter().markup(s, **kwargs)
             if isinstance(s_orig, str):
                 unmarked_up = s_orig.encode("utf-8")
-            config._tui_terminal_out += str(unmarked_up)
+            global _tui_terminal_out
+            _tui_terminal_out += str(unmarked_up)
 
         # Write to both terminal/console and tempfiles:
         # _pytui_config._tui_marked, _pytui_config._tui_terminal_out
@@ -226,7 +217,7 @@ def pytest_configure(config: Config) -> None:
 def pytest_unconfigure(config: Config):
     # Populate test result objects with total durations, from each test's TestReport object.
     for tui_test_result, test_report in itertools.product(
-        _tui_test_results, _tui_reports
+        _tui_test_results.test_results, _tui_reports
     ):
         if test_report.nodeid == tui_test_result.fqtn:
             tui_test_result.duration += test_report.duration
@@ -238,7 +229,7 @@ def pytest_unconfigure(config: Config):
     # instead of specifying their test names. This plugin identifies all other test categories
     # (passed, failed, errors, etc.) and populates their fqtns and outcomes with the appropriate
     # values, leaving open one other possibility (Skipped).
-    for tui_test_result in _tui_test_results:
+    for tui_test_result in _tui_test_results.test_results:
         if tui_test_result.outcome == "":
             tui_test_result.outcome = "SKIPPED"
             # tui_test_result.duration = 0
@@ -246,11 +237,11 @@ def pytest_unconfigure(config: Config):
     config.pluginmanager.getplugin("terminalreporter")  # <= ???
 
     with open(TERMINAL_OUTPUT_FILE, "w") as file:
-        file.write(config._tui_terminal_out)
+        file.write(_tui_terminal_out)
     with open(TUI_RESULT_OBJECTS_FILE, "wb") as file:
         pickle.dump(_tui_test_results, file)
     with open(TUI_SECTIONS_FILE, "wb") as file:
-        pickle.dump(_tui_test_results, file)
+        pickle.dump(_tui_sections, file)
 
     if hasattr(config.option, "tui") and config.option.tui:
         pytui_tui(config)

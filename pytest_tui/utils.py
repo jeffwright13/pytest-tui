@@ -1,10 +1,10 @@
 import itertools
 import pickle
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Match
+from typing import List
 
 from strip_ansi import strip_ansi
 
@@ -74,8 +74,42 @@ class TuiTestResult:
     capstderr: str = ""
     capstdout: str = ""
     longreprtext: str = ""
-    skipped_idx = None
 
+    @staticmethod
+    def categories():
+        return ["fqtn", "outcome", "start_time", "duration", "caplog", "capstderr", "capstdout", "longreprtext"]
+
+    def to_list(self):
+        return [self.fqtn, self.outcome, self.start_time, self.duration, self.caplog, self.capstderr, self.capstdout, self.longreprtext]
+
+    def to_dict(self):
+        return {
+            "fqtn": self.fqtn,
+            "outcome": self.outcome,
+            "start_time": self.start_time,
+            "duration": self.duration,
+            "caplog": self.caplog,
+            "capstderr": self.capstderr,
+            "capstdout": self.capstdout,
+            "longreprtext": self.longreprtext,
+        }
+
+@dataclass
+class TuiTestResults:
+    test_results: List[TuiTestResult] = field(default_factory=list)
+
+    @staticmethod
+    def categories():
+        return TuiTestResult.categories()
+
+    def to_list(self):
+        return list(self.test_results)
+
+    def to_dict(self):
+        return {test_result.fqtn: test_result for test_result in self.test_results}
+
+    def to_dict_dict(self):
+        return {test_result.fqtn: test_result.to_dict() for test_result in self.test_results}
 
 @dataclass
 class TuiSection:
@@ -92,17 +126,17 @@ class TuiSections:
     warnings_summary: TuiSection = TuiSection(name="warnings_summary", content="")
     rerun_summary: TuiSection = TuiSection(name="rerun_summary", content="")
     short_test_summary: TuiSection = TuiSection(name="short_test_summary", content="")
-    lastline: TuiSection = TuiSection(name="last_line", content="")
+    lastline: TuiSection = TuiSection(name="lastline", content="")
 
 
 class Results:
     """
     This class holds all pertinent information for a given Pytest test run.
     """
-
     def __init__(self):
         self.tui_test_results = self._unpickle_tui_test_results()
         self.tui_sections = self._unpickle_tui_sections()
+        self.terminal_output = self._get_terminal_output()
 
     def _unpickle_tui_test_results(self):
         """Unpack pickled TuiTestResults from file"""
