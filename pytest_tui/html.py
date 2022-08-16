@@ -1,4 +1,5 @@
 import configparser
+import html
 import json
 import re
 import webbrowser
@@ -76,23 +77,35 @@ class HtmlPage:
 
     def create_results_table(self) -> None:
         """Create table of results"""
+        conv = Ansi2HTMLConverter()
         x = PrettyTable()
-        x.field_names = self.results.tui_test_results.categories()
+        x.field_names = ["Test Name", "Outcome", "Start Time", "Duration"]
         for test_result in self.results.tui_test_results.to_list():
-            x.add_row(test_result.to_list())
+            x.add_row(
+                [
+                    test_result.fqtn,
+                    test_result.outcome,
+                    test_result.start_time,
+                    test_result.duration,
+                ]
+            )
         x.format = True
 
         attributes = {
             "id": "results",
             "border": "1",
-            "text-align": "left",
             "style": "width:100%",
             "border-collapse": "collapse",
             "class": "data-table",
             "class": "sortable",
+            "text-align": "left",
         }
+
         results_table = x.get_html_string(attributes=attributes)
         self.results_table = results_table.replace("<tr", '<tr class="item"')
+        self.results_table = results_table.replace(
+            "text-align: center", "text-align: left"
+        )
         print("")
 
 
@@ -102,9 +115,7 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
     page = HtmlPage()
     page.create_meta_table()
 
-    header = f"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <title>Test Report</title>          <script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>       <style type="text/css" > .ansi2html-content {{ display: inline; white-space: pre-wrap; word-wrap: break-word; }} .body_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_FOREGROUND_COLOR')}; }} .body_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_BACKGROUND_COLOR')}; }} .inv_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_FOREGROUND_COLOR')}; }} .inv_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_BACKGROUND_COLOR')}; }} .ansi1 {{ font-weight: bold; }} .ansi31 {{ color: #aa0000; }} .ansi32 {{ color: #00aa00; }} .ansi33 {{ color: #aa5500; }} .ansi34 {{ color: #0000ff; }} .collapsible {{ font-weight: normal; color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_BACKGROUND_COLOR')}; cursor: pointer; width: 100%; border: none; text-align: left; outline: none; font-size: 15px; }} .active, .collapsible:hover {{ foreground-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_BACKGROUND_COLOR')}; color: white; }} .content {{ display: none; overflow: hidden; }} </style> </head> <body class="body_foreground body_background" style="font-size: normal; font-family: monospace, monospace;"> <pre class="ansi2html-content">"""
-
-    # sortable_css_js = """<link rel="stylesheet" href="sortable.min.css"/> <script src="sortable.min.js"> </script>"""
+    header = f"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <title>Test Report</title>          <script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>       <style> tr:nth-of-type(odd) {{ background-color:#ccc; }} </style>          <style type="text/css" > .ansi2html-content {{ display: inline; white-space: pre-wrap; word-wrap: break-word; }} .body_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_FOREGROUND_COLOR')}; }} .body_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_BACKGROUND_COLOR')}; }} .inv_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_FOREGROUND_COLOR')}; }} .inv_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_BACKGROUND_COLOR')}; }} .ansi1 {{ font-weight: bold; }} .ansi31 {{ color: #aa0000; }} .ansi32 {{ color: #00aa00; }} .ansi33 {{ color: #aa5500; }} .ansi34 {{ color: #0000ff; }} .collapsible {{ font-weight: normal; color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_BACKGROUND_COLOR')}; cursor: pointer; width: 100%; border: none; text-align: left; outline: none; font-size: 15px; }} .active, .collapsible:hover {{ foreground-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_BACKGROUND_COLOR')}; color: white; }} .content {{ display: none; overflow: hidden; }} </style> </head> <body class="body_foreground body_background" style="font-size: normal; font-family: monospace, monospace;"> <pre class="ansi2html-content">"""
 
     metadata_button = f"""<div> <input type="button" id="meta_button" onclick="toggle_meta()" value="Show / Hide"/> </div> {page.metadata_table}"""
     metadata_script = """<script type="text/javascript"> const content = document.getElementById("metadata"); content.style.display = "none"; function toggle_meta() { if (content.style.display === "block") { content.style.display = "none"; } else { content.style.display = "block"; } } </script>"""
@@ -142,13 +153,6 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
     html_out += f"""{metadata_button} {metadata_script} <hr>"""
 
     # Output Sections
-    # html_out += """<h3 style="font-family: Helvetica, Arial, sans-serif;">Output Sections</h3>"""
-
-    # results_button = f"""<div> <input type="button" id="results_button" onclick="toggle_results()" value="Show / Hide"/> </div> {page.results_table}"""
-    # results_script = """<script type="text/javascript"> const content = document.getElementById("metadata"); content.style.display = "none"; function toggle_results() { if (content.style.display === "block") { content.style.display = "none"; } else { content.style.display = "block"; } } </script>"""
-    # html_out += f"""{results_button} {results_script} <hr>"""
-
-    # Output Sections
     html_out += """<h3 style="font-family: Helvetica, Arial, sans-serif;">Output Sections</h3>"""
     for section in page.sections:
         html_out += (
@@ -168,6 +172,26 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
     html_out += (
         page.results_table + """<script> $('.sortable.table').tablesort(); </script>"""
     )
+
+    # Results List
+    html_out += """<h3 style="font-family: Helvetica, Arial, sans-serif;">Test Results (List)</h3>"""
+    for result in page.results.tui_test_results.to_list():
+        html_out += (
+            section_or_result_button_start + result.fqtn + section_or_result_button_end
+        )
+        test = page.clean(
+            conv.convert(
+                result.caplog
+                + result.capstderr
+                + result.capstdout
+                + result.longreprtext,
+                full=False,
+            )
+        )
+        if not test:
+            test = "No output"
+        html_out += test + section_or_result_end
+    html_out += """<hr>"""
 
     # Final trailer and file write
     html_out += trailer
