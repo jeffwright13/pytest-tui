@@ -10,7 +10,6 @@ import json2table
 from ansi2html import Ansi2HTMLConverter
 from prettytable import PrettyTable
 from strip_ansi import strip_ansi
-from tabulate import tabulate
 
 from pytest_tui import __version__
 from pytest_tui.__main__ import Cli
@@ -76,11 +75,12 @@ class HtmlPage:
         return re.sub("\\n+", "\\n", text)
 
     def create_results_table(self) -> None:
+
         """Create table of results"""
         conv = Ansi2HTMLConverter()
         x = PrettyTable()
-        x.field_names = ["Test Name", "Outcome", "Start Time", "Duration"]
         for test_result in self.results.tui_test_results.to_list():
+            x.field_names = ["Test Name", "Outcome", "Start Time", "Duration"]
             x.add_row(
                 [
                     test_result.fqtn,
@@ -89,6 +89,18 @@ class HtmlPage:
                     test_result.duration,
                 ]
             )
+            x.add_row(
+                [
+                    test_result.caplog
+                    + test_result.capstderr
+                    + test_result.capstdout
+                    + test_result.longreprtext,
+                    "",
+                    "",
+                    "",
+                ]
+            )
+
         x.format = True
 
         attributes = {
@@ -110,12 +122,13 @@ class HtmlPage:
 
 
 def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
-
     conv = Ansi2HTMLConverter()
     page = HtmlPage()
     page.create_meta_table()
 
-    header = f"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <title>Test Report</title>          <script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>       <style> tr:nth-of-type(odd) {{ background-color:#ccc; }} </style>          <style type="text/css" > .ansi2html-content {{ display: inline; white-space: pre-wrap; word-wrap: break-word; }} .body_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_FOREGROUND_COLOR')}; }} .body_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_BACKGROUND_COLOR')}; }} .inv_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_FOREGROUND_COLOR')}; }} .inv_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_BACKGROUND_COLOR')}; }} .ansi1 {{ font-weight: bold; }} .ansi31 {{ color: #aa0000; }} .ansi32 {{ color: #00aa00; }} .ansi33 {{ color: #aa5500; }} .ansi34 {{ color: #0000ff; }} .collapsible {{ font-weight: normal; color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_BACKGROUND_COLOR')}; cursor: pointer; width: 100%; border: none; text-align: left; outline: none; font-size: 15px; }} .active, .collapsible:hover {{ foreground-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_BACKGROUND_COLOR')}; color: white; }} .content {{ display: none; overflow: hidden; }} </style> </head> <body class="body_foreground body_background" style="font-size: normal; font-family: monospace, monospace;"> <pre class="ansi2html-content">"""
+    scripty = """<script src= "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"> </script> <script src= "https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js"> </script> <link rel="stylesheet" href= "https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css"> <link rel="stylesheet" type="text/css" href= "https://use.fontawesome.com/releases/v5.6.3/css/all.css"> <script type="text/javascript"> function showHideRow(row) { $("#" + row).toggle(); } </script> <style> body { margin: 0 auto; padding: 0px; text-align: left; width: 100%; font-family: Helvetica, Arial, sans-serif; } #wrapper { margin: 0 auto; padding: 0px; text-align: left; width: 995px; } #wrapper  h1 { margin-top: 50px; font-size: 45px; color: #585858; } #wrapper h1 p { font-size: 20px; } #table_detail { width: 500px; text-align: left; border-collapse: collapse; color: #2E2E2E; border: #A4A4A4; } #table_detail tr:hover { background-color: #F2F2F2; } #table_detail .hidden_row { display: none; } </style>"""
+
+    header = f"""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <title>Test Report</title>          <script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>       <style> tr:nth-of-type(odd) {{ background-color:#ccc; }} </style>        {scripty}          <style type="text/css" > .ansi2html-content {{ display: inline; white-space: pre-wrap; word-wrap: break-word; }} .body_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_FOREGROUND_COLOR')}; }} .body_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('BODY_BACKGROUND_COLOR')}; }} .inv_foreground {{ color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_FOREGROUND_COLOR')}; }} .inv_background {{ background-color: #{page.config_parser['HTML_COLOR_THEME'].get('INV_BACKGROUND_COLOR')}; }} .ansi1 {{ font-weight: bold; }} .ansi31 {{ color: #aa0000; }} .ansi32 {{ color: #00aa00; }} .ansi33 {{ color: #aa5500; }} .ansi34 {{ color: #0000ff; }} .collapsible {{ font-weight: normal; color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('COLLAPSIBLE_BACKGROUND_COLOR')}; cursor: pointer; width: 100%; border: none; text-align: left; outline: none; font-size: 15px; }} .active, .collapsible:hover {{ foreground-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_FOREGROUND_COLOR')}; background-color: #{page.config_parser['HTML_COLOR_THEME'].get('HOVER_BACKGROUND_COLOR')}; color: white; }} .content {{ display: none; overflow: hidden; }} </style> </head> <body class="body_foreground body_background" style="font-size: normal; font-family: Helvetica, Arial, sans-serif;"> <pre class="ansi2html-content">"""
 
     metadata_button = f"""<div> <input type="button" id="meta_button" onclick="toggle_meta()" value="Show / Hide"/> </div> {page.metadata_table}"""
     metadata_script = """<script type="text/javascript"> const content = document.getElementById("metadata"); content.style.display = "none"; function toggle_meta() { if (content.style.display === "block") { content.style.display = "none"; } else { content.style.display = "block"; } } </script>"""
@@ -166,9 +179,7 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
 
     # Results Table
     page.create_results_table()
-    html_out += (
-        """<h3 style="font-family: Helvetica, Arial, sans-serif;">Test Results</h3>\n"""
-    )
+    html_out += """<h3 style="font-family: Helvetica, Arial, sans-serif;">Test Results (Sortable Table)</h3>\n"""
     html_out += (
         page.results_table + """<script> $('.sortable.table').tablesort(); </script>"""
     )

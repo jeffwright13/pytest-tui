@@ -2,6 +2,7 @@
 	overflow: hidden;
 	border: 1px solid #ccc;
 	background-color: #f1f1f1;
+  	margin-right: 4px;
 }
 
 .tab button {
@@ -27,6 +28,18 @@
 	padding: 6px 12px;
 	border: 1px solid #ccc;
 	border-top: none;
+	-webkit-animation: fadeEffect 1s;
+    animation: fadeEffect 1s;
+}
+
+@-webkit-keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: .5;}
+}
+
+@keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1.5;}
 }
 
 .ansi2html-content {
@@ -40,11 +53,11 @@
 }
 
 .body_background {
-	background-color: #AAAAAA;
+	background-color: #EEEEEE;
 }
 
 .inv_foreground {
-	color: #AAAAAA;
+	color: #EEEEEE;
 }
 
 .inv_background {

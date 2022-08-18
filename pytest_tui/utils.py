@@ -17,7 +17,7 @@ CONFIGFILE = PYTEST_TUI_FILES_DIR / "config.ini"
 Path(CONFIGFILE).touch(exist_ok=True)
 TUI_RESULT_OBJECTS_FILE = PYTEST_TUI_FILES_DIR / "tui_result_objects.pickle"
 TUI_SECTIONS_FILE = PYTEST_TUI_FILES_DIR / "tui_sections.pickle"
-TERMINAL_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "terminal_output.txt"
+TERMINAL_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "terminal_output.ansi"
 
 # regex matching patterns for Pytest sections
 test_session_starts_matcher = re.compile(r"^==.*\stest session starts\s==+")
@@ -77,10 +77,28 @@ class TuiTestResult:
 
     @staticmethod
     def categories():
-        return ["fqtn", "outcome", "start_time", "duration", "caplog", "capstderr", "capstdout", "longreprtext"]
+        return [
+            "fqtn",
+            "outcome",
+            "start_time",
+            "duration",
+            "caplog",
+            "capstderr",
+            "capstdout",
+            "longreprtext",
+        ]
 
     def to_list(self):
-        return [self.fqtn, self.outcome, self.start_time, self.duration, self.caplog, self.capstderr, self.capstdout, self.longreprtext]
+        return [
+            self.fqtn,
+            self.outcome,
+            self.start_time,
+            self.duration,
+            self.caplog,
+            self.capstderr,
+            self.capstdout,
+            self.longreprtext,
+        ]
 
     def to_dict(self):
         return {
@@ -93,6 +111,7 @@ class TuiTestResult:
             "capstdout": self.capstdout,
             "longreprtext": self.longreprtext,
         }
+
 
 @dataclass
 class TuiTestResults:
@@ -109,7 +128,10 @@ class TuiTestResults:
         return {test_result.fqtn: test_result for test_result in self.test_results}
 
     def to_dict_dict(self):
-        return {test_result.fqtn: test_result.to_dict() for test_result in self.test_results}
+        return {
+            test_result.fqtn: test_result.to_dict() for test_result in self.test_results
+        }
+
 
 @dataclass
 class TuiSection:
@@ -133,6 +155,7 @@ class Results:
     """
     This class holds all pertinent information for a given Pytest test run.
     """
+
     def __init__(self):
         self.tui_test_results = self._unpickle_tui_test_results()
         self.tui_sections = self._unpickle_tui_sections()
