@@ -10,6 +10,7 @@ from io import StringIO
 from types import SimpleNamespace
 
 import pytest
+import tempfile
 from _pytest._io.terminalwriter import TerminalWriter
 from _pytest.config import Config, create_terminal_writer
 from _pytest.reports import TestReport
@@ -40,7 +41,7 @@ collect_ignore = [
 _tui_reports = []
 _tui_test_results = TuiTestResults()
 _tui_sections = TuiSections()
-_tui_terminal_out = ""
+_tui_terminal_out = tempfile.TemporaryFile("wb+")
 
 
 def pytest_addoption(parser):
@@ -207,7 +208,7 @@ def pytest_configure(config: Config) -> None:
             if isinstance(s_orig, str):
                 unmarked_up = s_orig.encode("utf-8")
             global _tui_terminal_out
-            _tui_terminal_out += str(unmarked_up)
+            _tui_terminal_out.write(unmarked_up)
 
         # Write to both terminal/console and tempfiles:
         # _pytui_config._tui_marked, _pytui_config._tui_terminal_out
@@ -236,8 +237,15 @@ def pytest_unconfigure(config: Config):
 
     config.pluginmanager.getplugin("terminalreporter")  # <= ???
 
-    with open(TERMINAL_OUTPUT_FILE, "w") as file:
-        file.write(_tui_terminal_out)
+    # Rewind the temp file containing all the raw ANSI lines sent to the terminal;
+    # read its contents;  then close it. Then, write info to file.
+    _tui_terminal_out.seek(0)
+    terminal_out = _tui_terminal_out.read()
+    _tui_terminal_out.close()
+    with open(TERMINAL_OUTPUT_FILE, "wb") as file:
+        file.write(terminal_out)
+
+    # Pickle the test reult and sections objects to files.
     with open(TUI_RESULT_OBJECTS_FILE, "wb") as file:
         pickle.dump(_tui_test_results, file)
     with open(TUI_SECTIONS_FILE, "wb") as file:
