@@ -15,21 +15,21 @@
 	transition: 0.3s;
 }
 
-.tab button:hover {
-	background-color: #ddd;
-}
-
-.tab button.active {
-	background-color: #ccc;
-}
-
 .tabcontent {
 	display: none;
 	padding: 6px 12px;
 	border: 1px solid #ccc;
 	border-top: none;
 	-webkit-animation: fadeEffect 1s;
-    animation: fadeEffect 1s;
+    animation: fadeEffect .5s;
+}
+
+.tab button:hover {
+	background-color: #ddd;
+}
+
+.tab button.active {
+	background-color: #ccc;
 }
 
 @-webkit-keyframes fadeEffect {

@@ -1,13 +1,13 @@
 import html
 import json
+from lib2to3.pytree import convert
 import webbrowser
 
 import json2table
 from ansi2html import Ansi2HTMLConverter
-from strip_ansi import strip_ansi
 
 from pytest_tui import __version__
-from pytest_tui.utils import Results
+from pytest_tui.utils import Results, TERMINAL_OUTPUT_FILE
 
 TABS = [
     "Summary",
@@ -31,6 +31,7 @@ TABS_SECTIONS = [
 ]
 TABS_RESULTS = ["Failures", "Passes", "Skipped", "Xfails", "Xpasses", "Reruns"]
 TAB_METADATA = ["Metadata"]
+TAB_FULL_OUTPUT = ["Full Output"]
 
 results = Results()
 
@@ -67,6 +68,7 @@ class TabContent:
         return self.get_all_items()
 
     def fetch_html(self):
+        reset = "\x1b[0m"
         return {
             key: self.converter.convert(value, full=False)
             for key, value in self.fetch_raw().items()
@@ -78,6 +80,7 @@ class HtmlPage:
         self,
     ):
         self.tab_content = TabContent().fetch_html()
+        pass
 
     def create_header(self) -> str:
         return """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <title>pytest-tui html report</title> <link rel="stylesheet" href="pytest_tui/styles.css"> </head> <body class="body_foreground body_background" style="font-size: normal;" >"""
@@ -86,19 +89,25 @@ class HtmlPage:
         return """</body> </html>"""
 
     def create_tabs(self) -> str:
+        # Create tabs for sections, results, full-out, metadata
         tabs_links = [
             f"""<button class="tablinks" onclick="openTab(event, '{section}')" >{section}</button>"""
-            for section in TAB_METADATA + TABS_SECTIONS
+            for section in TAB_METADATA + TABS_SECTIONS + TAB_FULL_OUTPUT
         ]
-        # tabs_links.append("""<button class="tablinks" onclick="openTab(event, 'Summary')" id="defaultOpen" >Summary</button>""")
         tab_links_section = """<div class="tab">""" + "".join(tabs_links) + """</div>"""
         tab_section_content = [
             f"""<div id="{section}" class="tabcontent"> <h3>{section}</h3> <pre><p>{self.tab_content[section]}</p></pre> </div>"""
             for section in TABS_SECTIONS
         ]
         tab_content_section = "".join(tab_section_content)
-        tab_metadata_content = f"""<div id="{TAB_METADATA[0]}" class="tabcontent"> <h3>{TAB_METADATA[0]}</h3> <pre><p>{self.get_metadata()}</p></pre> </div>"""
-        return tab_links_section + tab_content_section + tab_metadata_content
+        tab_metadata_content = f"""<div id="{TAB_METADATA[0]}" class="tabcontent"> <h3>{TAB_METADATA[0]}</h3> <p>{self.get_metadata()}</p> </div>"""
+        tab_fullout_content = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <h3>{TAB_FULL_OUTPUT[0]}</h3> <pre><p>{self.get_terminal_output()}</p></pre> </div>"""
+        return (
+            tab_links_section
+            + tab_content_section
+            + tab_metadata_content
+            + tab_fullout_content
+        )
 
     def create_tab_script(self) -> str:
         return """<script> function openTab(evt, tabName) { var i, tabcontent, tablinks; tabcontent = document.getElementsByClassName("tabcontent"); for (i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; } tablinks = document.getElementsByClassName("tablinks"); for (i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); } document.getElementById(tabName).style.display = "block"; evt.currentTarget.className += " active"; } </script>"""
@@ -112,13 +121,50 @@ class HtmlPage:
     def create_cdn(self) -> str:
         return """"""
 
+    # def get_terminal_output(self) -> str:
+    #     return results.tui_sections.lastline.content
+
+    def create_html(self) -> str:
+        return self.create_header() + self.create_tabs() + self.create_trailer()
+
+    def create_html_file(self, filename: str):
+        with open(filename, "w") as f:
+            f.write(self.create_html())
+
+    def create_html_file_with_script(self, filename: str):
+        with open(filename, "w") as f:
+            f.write(self.create_html())
+            f.write(self.create_tab_script())
+            f.write(self.create_tab_toggle_script())
+            f.write(self.create_default_open())
+            f.write(self.create_cdn())
+
     def get_metadata(self) -> str:
         lines = results.tui_sections.test_session_starts.content.split("\n")
-        return lines[3]
+        md = [line for line in lines if line.startswith("metadata: {")][0]
+        m = json.loads(md.replace("'", '"').lstrip("metadata: "))
+        m.pop("JAVA_HOME")
+        table_attributes = {
+            "id": "metadata",
+            "font-family": "Helvetica, Arial, sans-serif",
+            "border": "1",
+            "style": "width:auto%; table-layout: auto;",
+            "border-collapse": "collapse",
+            "class": "data-table",
+            "class": "sortable",
+            "text-align": "left",
+            "tr": "nth-child(even) {background-color: #f2f2f2;}",
+        }
+        return json2table.convert(m, table_attributes=table_attributes)
+
+    def get_terminal_output(self) -> str:
+        converter = Ansi2HTMLConverter()
+        with open(TERMINAL_OUTPUT_FILE, "r") as f:
+            tout = f.read()
+        return converter.convert(tout, full=False)
 
 
 def main():
-    conv = Ansi2HTMLConverter()
     page = HtmlPage()
     html_header = page.create_header()
     html_tabs = page.create_tabs()
