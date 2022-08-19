@@ -3,24 +3,36 @@ import warnings
 
 
 def test_pass_1():
+    print("Test Pass 2!")
     assert True
 
 
 def test_pass_2():
+    print("Test Pass 2!")
+    assert True
+
+
+def test_pass_3():
+    print("Test Pass 3!")
     assert True
 
 
 def test_fail_1():
+    print("Test Fail 1!")
     assert False
 
 
 def test_fail_2():
+    print("Test Fail 2!")
+    assert False
+
+
+def test_fail_3():
+    print("Test Fail 3!")
     assert False
 
 
 pytest.mark.skip(reason="Skipping this test with decorator.")
-
-
 def test_skip():
     assert True
 

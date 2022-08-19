@@ -101,29 +101,26 @@ class HtmlPage:
             result for result in tests_by_outcome_and_time if result.outcome == "FAILED"
         ]
 
+
+# <div class="content"> <p>Test Pass 2!\n</p> </div>
         tab_result_content = [
-            f"""<div id="{result}" class="tabcontent"> <h3>{result}</h3> <pre><p>{self.get_collapsible_results(result.lower())}</p></pre> </div>"""
+            f"""<div id="{result}" class="tabcontent"> {self.get_collapsible_results(result.lower())} </div>"""
             for result in TABS_RESULTS
         ]
         tab_results = "".join(tab_result_content)
 
-        def _results_area(self):
-            section_or_result_button_start = (
-                """<button type="button" class="collapsible">"""
-            )
-            section_or_result_button_end = """</button> <div class="content"> <p>"""
-            section_or_result_end = """</p> </div>"""
-
         # Sections tabs
         tab_section_content = [
-            f"""<div id="{section}" class="tabcontent"> <h3>{section}</h3> <pre><p>{self.tab_content[section]}</p></pre> </div>"""
+            f"""<div id="{section}" class="tabcontent"> <pre><p>{self.tab_content[section]}</p></pre> </div>"""
             for section in TABS_SECTIONS
         ]
         tab_sections = "".join(tab_section_content)
 
         # Metadata tab
         tab_metadata = f"""<div id="{TAB_METADATA[0]}" class="tabcontent"> <p>{self.get_metadata()}</p> </div>"""
-        tab_fullout = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <h3>{TAB_FULL_OUTPUT[0]}</h3> <pre><p>{self.get_terminal_output()}</p></pre> </div>"""
+
+        # "Full Output" (terminal/console) tab
+        tab_fullout = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <pre><p>{self.get_terminal_output()}</p></pre> </div>"""
         return (
             tab_links_section + tab_metadata + tab_results + tab_sections + tab_fullout
         )
@@ -141,7 +138,8 @@ class HtmlPage:
             )
             if not content:
                 content = "No output"
-            collapsible_results += f"""<button type="button" class="collapsible" style="border: none; outline: none; background: none;">{result.fqtn}</button> <div class="content"> <p>{content}</p> </div>"""
+            collapsible_results += f"""<button type="button" class="collapsible" style="border: none; outline: none;">{result.fqtn}</button> <div class="content"> <pre><p>{content}</p></pre> </div>"""
+            pass
         return collapsible_results
 
     def create_tab_script(self) -> str:
@@ -157,7 +155,7 @@ class HtmlPage:
         return """<script> document.getElementById("defaultOpen").click(); </script>"""
 
     def create_cdn(self) -> str:
-        return """"""
+        return """<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"> <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>"""
 
     def create_html(self) -> str:
         return self.create_header() + self.create_tabs() + self.create_trailer()
@@ -214,7 +212,7 @@ def main():
     html_scripts = html_tab_script + html_default_open + html_collapsible_result_script
     html_out = html_header + html_tabs + html_scripts + html_trailer
 
-    with open("html2.html", "w+") as f:
+    with open("pytest-tui.html", "w+") as f:
         f.write(html_out)
 
 

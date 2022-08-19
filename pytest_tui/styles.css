@@ -42,26 +42,29 @@
     to {opacity: 1.5;}
 }
 
+td:nth-child(odd) button {
+    background-image:url('darkSquare.jpg')
+}
+td:nth-child(even) button {
+    background-image:url('lightSquare.jpg')
+}
 
-
-  .collapsible {
-	font-weight: normal;
-	color: #{page.config_parser[ "HTML_COLOR_THEME"
-	  ].get("COLLAPSIBLE_FOREGROUND_COLOR")};
-	background-color: inherit;
-
-	cursor: pointer;
-	width: 100%;
-	border: none;
-	text-align: left;
-	outline: none;
-	font-size: 14px;
+.collapsible {
+  font-weight: normal;
+  background-color: #f1f1f1;
+  cursor: pointer;
+  width: 90%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 14px;
+  white-space: normal;
   }
 
   .active,
   .collapsible:hover {
-	background-color: #ddd;
-  }
+	background-color: #f1f1f1;
+}
   .content {
 	display: none;
 	overflow: hidden;
@@ -95,30 +98,6 @@
 	display: none;
 	overflow: hidden;
   } */
-
-  .ansi2html-content {
-	display: inline;
-	white-space: pre-wrap;
-	word-wrap: break-word;
-  }
-
-  .body_foreground {
-	color: #000000;
-  }
-
-  .body_background {
-	background-color: #eeeeee;
-  }
-
-  .inv_foreground {
-	color: #eeeeee;
-  }
-
-  .inv_background {
-	background-color: #000000;
-  }
-
-
 
 
 .ansi2html-content {
@@ -617,8 +596,6 @@
 .ansi48-230 { background: #d2d2a8; }
 .ansi38-231 { color: #d2d2d2; }
 .ansi48-231 { background: #d2d2d2; }
-
-
 .ansi38-232 { color: #080808; }
 .ansi48-232 { background: #080808; }
 .ansi38-233 { color: #121212; }
