@@ -28,7 +28,7 @@ TABS_SECTIONS = [
     "failures_section",
     "reruns_section",
 ]
-TABS_RESULTS = ["Failures", "Passes", "Skipped", "Xfails", "Xpasses", "Reruns"]
+TABS_RESULTS = ["Failures", "Passes", "Skipped", "Xfails", "Xpasses"]
 TAB_METADATA = ["About"]
 TAB_FULL_OUTPUT = ["Full Output"]
 
@@ -82,44 +82,46 @@ class HtmlPage:
         self.converter = Ansi2HTMLConverter()
 
     def create_header(self) -> str:
-        return """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> <title>pytest-tui html report</title> <link rel="stylesheet" href="pytest_tui/styles.css"> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif';   font-size: normal;" >"""
+        return """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Pytest-Tui Test Report</title> <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css"> <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">      <link rel="stylesheet" href="pytest_tui/styles.css">    <style> html,body,h1,h2,h3,h4,h5,h6 {font-family: "Roboto", sans-serif;} .w3-sidebar { z-index: 3; width: 250px; top: 43px; bottom: 0; height: inherit; } </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" >"""
+
+    def create_testrun_results(self) -> str:
+        return """<pre><b>""" + self.converter.convert(results.tui_sections.lastline.content.replace("=", ""), full=False) + """</b></pre>"""
 
     def create_trailer(self) -> str:
-        return """</body> </html>"""
+        return """</script> </body> </html>"""
 
     def create_tabs(self) -> str:
-        # Create tabs for sections, results, full-out, metadata
+        # Create tabs for 'About', sections, results, full-out, metadata
         tabs_links = [
             f"""<button class="tablinks" onclick="openTab(event, '{section}')" >{section}</button>"""
             for section in TAB_METADATA + TABS_RESULTS + TABS_SECTIONS + TAB_FULL_OUTPUT
         ]
+
         tab_links_section = """<div class="tab">""" + "".join(tabs_links) + """</div>"""
 
-        # Results tabs
+        # Results content
         tests_by_outcome_and_time = results.tui_test_results.all_by_outcome_then_time()
         results_failures = [
             result for result in tests_by_outcome_and_time if result.outcome == "FAILED"
         ]
 
-
-# <div class="content"> <p>Test Pass 2!\n</p> </div>
         tab_result_content = [
             f"""<div id="{result}" class="tabcontent"> {self.get_collapsible_results(result.lower())} </div>"""
             for result in TABS_RESULTS
         ]
         tab_results = "".join(tab_result_content)
 
-        # Sections tabs
+        # Sections content
         tab_section_content = [
             f"""<div id="{section}" class="tabcontent"> <pre><p>{self.tab_content[section]}</p></pre> </div>"""
             for section in TABS_SECTIONS
         ]
         tab_sections = "".join(tab_section_content)
 
-        # Metadata tab
+        # Metadata content
         tab_metadata = f"""<div id="{TAB_METADATA[0]}" class="tabcontent"> <p>{self.get_metadata()}</p> </div>"""
 
-        # "Full Output" (terminal/console) tab
+        # "Full Output" (terminal/console) content
         tab_fullout = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <pre><p>{self.get_terminal_output()}</p></pre> </div>"""
         return (
             tab_links_section + tab_metadata + tab_results + tab_sections + tab_fullout
@@ -155,7 +157,10 @@ class HtmlPage:
         return """<script> document.getElementById("defaultOpen").click(); </script>"""
 
     def create_cdn(self) -> str:
-        return """<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"> <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>"""
+        return ""
+        # return """<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"> <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>"""
+        # return """<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>"""
+
 
     def create_html(self) -> str:
         return self.create_header() + self.create_tabs() + self.create_trailer()
@@ -189,20 +194,20 @@ class HtmlPage:
             "tr": "nth-child(even) {background-color: #f2f2f2;}",
         }
         return (
-            f"""<h4> Report generated on {datetime.now(timezone.utc).replace(microsecond=0).strftime('%Y-%m-%d %H:%M:%S')} UTC by pytest-tui version {__version__}</h4><hr>"""
-            + json2table.convert(m, table_attributes=table_attributes)
+            self.create_testrun_results() + f"""<h5
+            ><b>Report generated on {datetime.now(timezone.utc).replace(microsecond=0 ).strftime('%Y-%m-%d %H:%M:%S')} UTC by pytest-tui version {__version__}</b></h5><br>""" + """<h5><b>Meta Data / Environment:</b></h5>""" + json2table.convert(m, table_attributes=table_attributes)
         )
 
     def get_terminal_output(self) -> str:
-        converter = Ansi2HTMLConverter()
         with open(TERMINAL_OUTPUT_FILE, "r") as f:
             tout = f.read()
-        return converter.convert(tout, full=False)
+        return self.converter.convert(tout, full=False)
 
 
 def main():
     page = HtmlPage()
     html_header = page.create_header()
+    html_results = page.create_testrun_results()
     html_tabs = page.create_tabs()
     html_tab_script = page.create_tab_script()
     html_default_open = page.create_default_open()
@@ -210,7 +215,7 @@ def main():
     html_cdn = page.create_cdn()
     html_collapsible_result_script = page.create_collapsible_script()
     html_scripts = html_tab_script + html_default_open + html_collapsible_result_script
-    html_out = html_header + html_tabs + html_scripts + html_trailer
+    html_out = html_header + html_tabs + html_scripts +html_cdn + html_trailer
 
     with open("pytest-tui.html", "w+") as f:
         f.write(html_out)
