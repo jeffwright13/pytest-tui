@@ -1,10 +1,8 @@
 import configparser
 import itertools
-import json
 import pickle
 import re
 from concurrent.futures.thread import ThreadPoolExecutor
-from dataclasses import dataclass
 from datetime import datetime
 from io import StringIO
 from types import SimpleNamespace
@@ -18,7 +16,7 @@ from strip_ansi import strip_ansi
 
 from pytest_tui.__main__ import Cli, tui_launch
 from pytest_tui.html import main as tuihtml
-from pytest_tui.utils import (CONFIGFILE, MARKERS, TERMINAL_OUTPUT_FILE,
+from pytest_tui.utils import (CONFIGFILE, TERMINAL_OUTPUT_FILE,
                               TUI_RESULT_OBJECTS_FILE, TUI_SECTIONS_FILE,
                               TuiSections, TuiTestResult, TuiTestResults,
                               errors_section_matcher, failures_section_matcher,
@@ -134,25 +132,18 @@ def pytest_configure(config: Config) -> None:
         def tee_write(s, **kwargs):
             if re.search(test_session_starts_matcher, s):
                 config._tui_current_section = "test_session_starts"
-                # _tui_sections.test_session_starts.content += s + "\n"
             if re.search(errors_section_matcher, s):
                 config._tui_current_section = "errors"
-                # _tui_sections.errors.content += s + "\n"
             if re.search(failures_section_matcher, s):
                 config._tui_current_section = "failures"
-                # _tui_sections.failures.content += s + "\n"
             if re.search(warnings_summary_matcher, s):
                 config._tui_current_section = "warnings_summary"
-                # _tui_sections.warnings_summary.content += s + "\n"
             if re.search(passes_section_matcher, s):
                 config._tui_current_section = "passes"
-                # _tui_sections.passes.content += s + "\n"
             if re.search(rerun_summary_matcher, s):
                 config._tui_current_section = "rerun_summary"
-                # _tui_sections.rerun_summary.content += s + "\n"
             if re.search(short_test_summary_matcher, s):
                 config._tui_current_section = "short_test_summary"
-                # _tui_sections.short_test_summary.content += s + "\n"
             if re.search(lastline_matcher, s):
                 config._tui_current_section = "lastline"
                 _tui_sections.lastline.content += s + "\n"
