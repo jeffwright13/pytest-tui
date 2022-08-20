@@ -225,19 +225,20 @@ class Results:
             with open(TUI_RESULT_OBJECTS_FILE, "rb") as rfile:
                 return pickle.load(rfile)
         except FileNotFoundError as e:
-            raise FileNotFoundError(
-                f"Cannot find {TUI_RESULT_OBJECTS_FILE}. Have you run pytest with the '--tui' option yet?"
-            ) from e
-
+            # raise FileNotFoundError(
+            #     f"Cannot find {TUI_RESULT_OBJECTS_FILE}. Have you run pytest with the '--tui' option yet?"
+            # ) from e
+            pass
     def _unpickle_tui_sections(self):
         """Unpack pickled TuiSections from file"""
         try:
             with open(TUI_SECTIONS_FILE, "rb") as rfile:
                 return pickle.load(rfile)
         except FileNotFoundError as e:
-            raise FileNotFoundError(
-                f"Cannot find {TUI_SECTIONS_FILE}. Have you run pytest with the '--tui' option yet?"
-            ) from e
+            # raise FileNotFoundError(
+            #     f"Cannot find {TUI_SECTIONS_FILE}. Have you run pytest with the '--tui' option yet?"
+            # ) from e
+            pass
 
     def _get_terminal_output(self, file_path: Path = TERMINAL_OUTPUT_FILE) -> list:
         """Get full Pytest terminal output"""
@@ -245,6 +246,7 @@ class Results:
             with open(file_path, "r") as file:
                 return file.read()
         except FileNotFoundError as e:
-            raise FileNotFoundError(
-                f"Cannot find {file_path}. Have you run pytest with the '--tui' option yet?"
-            ) from e
+            # raise FileNotFoundError(
+            #     f"Cannot find {file_path}. Have you run pytest with the '--tui' option yet?"
+            # ) from e
+            pass
