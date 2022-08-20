@@ -2,20 +2,20 @@ import configparser
 import itertools
 import pickle
 import re
+import tempfile
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime
 from io import StringIO
 from types import SimpleNamespace
 
 import pytest
-import tempfile
 from _pytest._io.terminalwriter import TerminalWriter
 from _pytest.config import Config, create_terminal_writer
 from _pytest.reports import TestReport
 from strip_ansi import strip_ansi
 
 from pytest_tui.__main__ import Cli, tui_launch
-from pytest_tui.html import main as tuihtml
+from pytest_tui.html1 import main as tuihtml
 from pytest_tui.utils import (CONFIGFILE, TERMINAL_OUTPUT_FILE,
                               TUI_RESULT_OBJECTS_FILE, TUI_SECTIONS_FILE,
                               TuiSections, TuiTestResult, TuiTestResults,
@@ -182,16 +182,7 @@ def pytest_configure(config: Config) -> None:
             # Then markup the line's text by passing it to an instance of TerminalWriter's
             # 'markup' method. (Do not pass "flush" to the method, or it will throw an error
             oldwrite(s, **kwargs)
-            s1 = s
             kwargs.pop("flush") if "flush" in kwargs else None
-            s1 = TerminalWriter().markup(s, **kwargs)
-
-            # Encode the marked up line so it can be written to the config object.
-            # The Pytest config object can be used by plugins for conveying staeful
-            # info across an entire test run session.
-            # if isinstance(s1, str):
-            #     marked_up = s1.encode("utf-8")
-            # config._tui_marked += str(marked_up)
 
             s_orig = s
             kwargs.pop("flush") if "flush" in kwargs else None
@@ -201,8 +192,7 @@ def pytest_configure(config: Config) -> None:
             global _tui_terminal_out
             _tui_terminal_out.write(unmarked_up)
 
-        # Write to both terminal/console and tempfiles:
-        # _pytui_config._tui_marked, _pytui_config._tui_terminal_out
+        # Write to both terminal/console and tempfiles
         tr._tw.write = tee_write
 
 

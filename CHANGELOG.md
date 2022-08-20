@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2022-08-19
+
+- Working/revamped HTML file output, with more modern look/feel.
+- Fixed tui1 (Textual) so that it works with new internal implementation.
+- Retiring tui2 (PyTermTk) for now.
+
 ## [1.1.3] - 2022-08-13
 
 - Fixed bug where if config file existed but was empty, an exception would occur on launching HTML file.

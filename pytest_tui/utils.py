@@ -183,6 +183,13 @@ class TuiTestResults:
             if test_result.outcome == "RERUN"
         ]
 
+    def all_errors(self):
+        return [
+            test_result
+            for test_result in self.test_results
+            if test_result.outcome == "ERROR"
+        ]
+
 
 @dataclass
 class TuiSection:

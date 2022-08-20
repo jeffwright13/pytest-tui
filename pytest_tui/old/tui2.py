@@ -8,13 +8,12 @@ from pytest_tui.utils import OUTCOMES, Results
 class TkTui:
     def __init__(self) -> None:
         # Instantiate pytest-tui's Results object, and populate w/ data
-        self.test_results = Results()
-        if not self.test_results.tests_all:
-            exit()
-        self.summary_results = (
-            self.test_results.Sections["LAST_LINE"]
-            .content.replace("=", "")
-            .replace("\n", "")
+        self.results = Results()
+        if len(self.results.tui_test_results.test_results) == 0:
+            print("No test results found.")
+            exit(1)
+        self.summary_results = self.results.tui_sections.lastline.content.replace(
+            "=", ""
         )
 
         # Create root TTk object
@@ -72,14 +71,14 @@ class TkTui:
                 ttk.TTkLog.info(f"Clicked test: {test_name}")
                 rview.clear()
                 for label in rlist.selectedLabels():
-                    rview.append(self.test_results.tests_all[label])
+                    rview.append(self.results.tui_test_results.all_by_time())
 
             min_width = 30
             max_width = 60
-            for result in eval(f"self.test_results.tests_{outcome.lower()}"):
-                results_list.addItem(result)
+            for result in eval(f"self.results.tui_test_results.all_{outcome.lower()}()"):
+                results_list.addItem(result.fqtn)
                 results_list.textClicked.connect(callback)
-                width = max(min_width, min(max_width, len(result)))
+                width = max(min_width, min(max_width, len(result.fqtn)))
 
             results_splitter = ttk.TTkSplitter()
             results_splitter.addWidget(results_list, width)
@@ -91,31 +90,30 @@ class TkTui:
     def create_section_tabs(self) -> None:
         # Create tabs with results from individual terminal output sections
         text = (
-            self.test_results.Sections["TEST_SESSION_STARTS"].content
-            + self.test_results.Sections["SHORT_TEST_SUMMARY"].content
+            self.results.tui_sections.test_session_starts.content
+            + self.results.tui_sections.short_test_summary.content
         )
         tab_label = "Summary"
         text_area = ttk.TTkTextEdit(parent=self.tab_widget)
-        # text_area.lineWrapMode == TTkK.WidgetWidth
         text_area.setText(text)
         text_areas = {tab_label: text_area}
         self.tab_widget.addTab(text_area, f"  {tab_label}  ")
 
-        text = self.test_results.unmarked_output
+        text = self.results.terminal_output
         tab_label = "Full Output"
         text_area = ttk.TTkTextEdit(parent=self.tab_widget)
         text_areas[tab_label] = text_area
         text_area.setText(text)
         self.tab_widget.addTab(text_area, f"  {tab_label}  ")
 
-        text = self.test_results.Sections["ERRORS_SECTION"].content
+        text = self.results.tui_sections.errors.content
         tab_label = "Errors"
         text_area = ttk.TTkTextEdit(parent=self.tab_widget)
         text_area.setText(text)
         text_areas[tab_label] = text_area
         self.tab_widget.addTab(text_area, f"  {tab_label}  ")
 
-        text = self.test_results.Sections["WARNINGS_SUMMARY"].content
+        text = self.results.tui_sections.warnings_summary.content
         tab_label = "Warnings"
         text_area = ttk.TTkTextEdit(parent=self.tab_widget)
         text_area.setText(text)

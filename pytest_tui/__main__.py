@@ -8,7 +8,6 @@ from bullet import Bullet, Input, YesNo, colors
 from rich import print
 
 from pytest_tui.tui1 import main as tui1
-from pytest_tui.tui2 import main as tui2
 from pytest_tui.utils import CONFIGFILE
 
 
@@ -259,7 +258,7 @@ class Cli:
 def tui_launch():
     tuicli = Cli()
     tuicli.read_config_file()
-    tui1() if tuicli.config_parser.get("TUI", "tui") == "tui1" else tui2()
+    tui1()
 
 
 def tui_config():

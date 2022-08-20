@@ -26,6 +26,7 @@ CATEGORIES = {
     "SKIPPED": "bold cyan underline",
     "XFAILS": "bold indian_red underline",
     "XPASSES": "bold chartreuse1 underline",
+    "RERUNS": "bold yellow underline",
 }
 
 
@@ -56,21 +57,22 @@ class Tabs(Widget):
             quit()
 
         body = self.parent.parent.body
-        test_results = self.parent.parent.test_results
+        results = self.parent.parent.results
         section_content = {
-            "Summary": test_results.Sections["LAST_LINE"].content
-            + test_results.Sections["TEST_SESSION_STARTS"].content
-            + test_results.Sections["SHORT_TEST_SUMMARY"].content,
-            "Warnings": test_results.Sections["WARNINGS_SUMMARY"].content,
-            "Errors": test_results.Sections["ERRORS_SECTION"].content,
-            "Full Output": test_results.unmarked_output,
+            "Summary": results.tui_sections.lastline.content
+            + results.tui_sections.test_session_starts.content
+            + results.tui_sections.short_test_summary.content,
+            "Warnings": results.tui_sections.warnings_summary.content,
+            "Errors": results.tui_sections.errors.content,
+            "Reruns": results.tui_sections.rerun_summary.content,
+            "Full Output": results.terminal_output,
         }
         tree_names = {
-            "Passes": "pass_tree",
-            "Failures": "fail_tree",
-            "Skipped": "skip_tree",
-            "Xfails": "xfail_tree",
-            "Xpasses": "xpass_tree",
+            "Passes": "passes_tree",
+            "Failures": "failures_tree",
+            "Skipped": "skipped_tree",
+            "Xfails": "xfails_tree",
+            "Xpasses": "xpasses_tree",
         }
 
         # Render the clicked tab with bold underline
@@ -107,10 +109,10 @@ class Tabs(Widget):
 class TuiApp(App):
     async def on_load(self, event: events.Load) -> None:
         # Get test result sections
-        self.test_results = Results()
-        if not self.test_results.tests_all:
+        self.results = Results()
+        if not self.results.tui_sections and self.results.tui_test_results:
             exit()
-        self.summary_results = self.test_results.Sections["LAST_LINE"].content.replace(
+        self.summary_results = self.results.tui_sections.lastline.content.replace(
             "=", ""
         )
         await self.bind("q", "quit", "Quit")
@@ -134,78 +136,76 @@ class TuiApp(App):
         # Body (to display result sections or result trees)
         self.body = ScrollView(
             Text.from_ansi(
-                self.test_results.Sections["LAST_LINE"].content
-                + self.test_results.Sections["TEST_SESSION_STARTS"].content
-                + self.test_results.Sections["SHORT_TEST_SUMMARY"].content
+                self.results.tui_sections.lastline.content
+                + self.results.tui_sections.test_session_starts.content
+                + self.results.tui_sections.short_test_summary.content
             ),
             auto_width=True,
         )
         await self.view.dock(self.body)
 
         # Define the results trees
-        self.fail_tree = TreeControl(
-            Text("Failures:", style="bold red underline"),
-            {"results": self.test_results.Sections["FAILURES_SECTION"].content},
-            name="fail_tree",
+        self.failures_tree = TreeControl(
+            Text("Failures:", style="bold red underline"), {}, name="failures_tree",
         )
-        self.pass_tree = TreeControl(
-            Text("Passes:", style="bold green underline"), {}, name="pass_tree"
+        self.passes_tree = TreeControl(
+            Text("Passes:", style="bold green underline"), {}, name="passes_tree"
         )
-        self.error_tree = TreeControl(
-            Text("Errors:", style="bold magenta underline"), {}, name="error_tree"
+        self.errors_tree = TreeControl(
+            Text("Errors:", style="bold magenta underline"), {}, name="errors_tree"
         )
-        self.skip_tree = TreeControl(
-            Text("Skipped:", style="bold yellow underline"), {}, name="skip_tree"
+        self.skipped_tree = TreeControl(
+            Text("Skipped:", style="bold yellow underline"), {}, name="skipped_tree"
         )
-        self.xpass_tree = TreeControl(
-            Text("Xpasses:", style="bold yellow underline"), {}, name="xpass_tree"
+        self.xpasses_tree = TreeControl(
+            Text("Xpasses:", style="bold yellow underline"), {}, name="xpasses_tree"
         )
-        self.xfail_tree = TreeControl(
-            Text("Xfails:", style="bold yellow underline"), {}, name="xfail_tree"
+        self.xfails_tree = TreeControl(
+            Text("Xfails:", style="bold yellow underline"), {}, name="xfails_tree"
         )
-        for failed in self.test_results.tests_failures:
-            await self.fail_tree.add(
-                self.fail_tree.root.id,
-                Text(failed),
-                {"results": self.test_results.tests_failures},
+        for failed in self.results.tui_test_results.all_failures():
+            await self.failures_tree.add(
+                self.failures_tree.root.id,
+                Text(failed.fqtn),
+                {"results": f"{failed.caplog}{failed.capstderr}{failed.capstdout}"},
             )
-        for passed in self.test_results.tests_passes:
-            await self.pass_tree.add(
-                self.pass_tree.root.id,
-                Text(passed),
-                {"results": self.test_results.tests_passes},
+        for passed in self.results.tui_test_results.all_passes():
+            await self.passes_tree.add(
+                self.passes_tree.root.id,
+                Text(passed.fqtn),
+                {"results": f"{passed.caplog}{passed.capstderr}{passed.capstdout}"},
             )
-        for errored in self.test_results.tests_errors:
-            await self.error_tree.add(
-                self.error_tree.root.id,
-                Text(errored),
-                {"results": self.test_results.tests_errors},
+        for errored in self.results.tui_test_results.all_errors():
+            await self.errors_tree.add(
+                self.errors_tree.root.id,
+                Text(errored.fqtn),
+                {"results": f"{errored.caplog}{errored.capstderr}{errored.capstdout}"},
             )
-        for skipped in self.test_results.tests_skipped:
-            await self.skip_tree.add(
-                self.skip_tree.root.id,
-                Text(skipped),
-                {"results": self.test_results.tests_skipped},
+        for skipped in self.results.tui_test_results.all_skipped():
+            await self.skipped_tree.add(
+                self.skipped_tree.root.id,
+                Text(skipped.fqtn),
+                {"results": f"{skipped.caplog}{skipped.capstderr}{skipped.capstdout}"},
             )
-        for xpassed in self.test_results.tests_xpasses:
-            await self.xpass_tree.add(
-                self.xpass_tree.root.id,
-                Text(xpassed),
-                {"results": self.test_results.tests_xpasses},
+        for xpassed in self.results.tui_test_results.all_xpasses():
+            await self.xpasses_tree.add(
+                self.xpasses_tree.root.id,
+                Text(xpassed.fqtn),
+                {"results": f"{xpassed.caplog}{xpassed.capstderr}{xpassed.capstdout}"},
             )
-        for xfailed in self.test_results.tests_xfails:
-            await self.xfail_tree.add(
-                self.xfail_tree.root.id,
-                Text(xfailed),
-                {"results": self.test_results.tests_xfails},
+        for xfailed in self.results.tui_test_results.all_xfails():
+            await self.xfails_tree.add(
+                self.xfails_tree.root.id,
+                Text(xfailed.fqtn),
+                {"results": f"{xfailed.caplog}{xfailed.capstderr}{xfailed.capstdout}"},
             )
 
-        await self.fail_tree.root.expand()
-        await self.pass_tree.root.expand()
-        await self.error_tree.root.expand()
-        await self.skip_tree.root.expand()
-        await self.xpass_tree.root.expand()
-        await self.xfail_tree.root.expand()
+        await self.failures_tree.root.expand()
+        await self.passes_tree.root.expand()
+        await self.errors_tree.root.expand()
+        await self.skipped_tree.root.expand()
+        await self.xpasses_tree.root.expand()
+        await self.xfails_tree.root.expand()
 
     async def handle_tree_click(self, message: TreeClick[dict]) -> None:
         # Display results in body when category header is clicked;
@@ -213,18 +213,18 @@ class TuiApp(App):
         label = message.node.label
         if label.plain.upper().rstrip(":") in CATEGORIES:
             return
-        for category in CATEGORIES:
-            try:
-                test_category = f"tests_{category.lower()}"
-                self.text = eval(
-                    f"self.test_results.{test_category}[message.node.label.plain]"
+        category = message.sender.name.rstrip("_tree")
+        all_tests_in_category = eval(
+            f"self.results.tui_test_results.all_{category.lower()}()"
+        )
+        for test in all_tests_in_category:
+            if test.fqtn == label.plain:
+                self.text = Text.from_ansi(
+                    f"{test.caplog}{test.capstderr}{test.capstdout}"
                 )
-            except Exception:
-                pass
+                break
 
-        text: RenderableType
-        text = Text.from_ansi(self.text)
-        await self.body.update(text)
+        await self.body.update(self.text.markup)
 
 
 def main():

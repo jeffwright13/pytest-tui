@@ -14,7 +14,7 @@ def read(fname):
 
 setup(
     name="pytest-tui",
-    version="1.1.3",
+    version="1.2.0",
     author="Jeff Wright",
     author_email="jeff.washcloth@gmail.com",
     license="MIT",
@@ -57,7 +57,7 @@ setup(
         "console_scripts": [
             "tuiconf = pytest_tui.__main__:tui_config",
             "tui = pytest_tui.__main__:tui_launch",
-            "tuih = pytest_tui.html:main",
+            "tuih = pytest_tui.html1:main",
         ],
     },
 )

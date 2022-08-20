@@ -1,3 +1,4 @@
+import ast
 import json
 import webbrowser
 from datetime import datetime, timezone
@@ -6,7 +7,7 @@ import json2table
 from ansi2html import Ansi2HTMLConverter
 
 from pytest_tui import __version__
-from pytest_tui.utils import TERMINAL_OUTPUT_FILE, Results
+from pytest_tui.utils import TERMINAL_OUTPUT_FILE, HTML_OUTPUT_FILE, Results
 
 TABS = [
     "Summary",
@@ -147,7 +148,6 @@ class HtmlPage:
             if not content:
                 content = "No output"
             collapsible_results += f"""<button type="button" class="collapsible" style="border: none; outline: none;">{result.fqtn}</button> <div class="content"> <pre><p>{content}</p></pre> </div>"""
-            pass
         return collapsible_results
 
     def create_tab_script(self) -> str:
@@ -226,6 +226,10 @@ def main():
 
     with open("pytest-tui.html", "w+") as f:
         f.write(html_out)
+
+    # Open in browser
+    if page.config_parser["HTML"].get("autolaunch_html") == "True":
+        webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
 
 
 if __name__ == "__main__":
