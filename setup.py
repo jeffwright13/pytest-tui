@@ -35,7 +35,6 @@ setup(
         "json2table>=1.1.5",
         "pytest-metadata>=2.0.2",
         "pytest>=6.2.5",
-        "pyTermTk>=0.10.8a0",
         "single-source>=0.3.0",
         "strip-ansi>=0.1.1",
         "textual>=0.1.18",

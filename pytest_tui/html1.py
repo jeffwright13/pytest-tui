@@ -1,4 +1,4 @@
-import ast
+import configparser
 import json
 import webbrowser
 from datetime import datetime, timezone
@@ -7,6 +7,8 @@ import json2table
 from ansi2html import Ansi2HTMLConverter
 
 from pytest_tui import __version__
+from pytest_tui.__main__ import Cli
+from pytest_tui.utils import CONFIGFILE
 from pytest_tui.utils import TERMINAL_OUTPUT_FILE, HTML_OUTPUT_FILE, Results
 
 TABS = [
@@ -79,6 +81,14 @@ class HtmlPage:
     def __init__(
         self,
     ):
+        # Read existing config from file, or apply default if not existing
+        self.config_parser = configparser.ConfigParser()
+        try:
+            self.config_parser.read(CONFIGFILE)
+        except Exception:
+            Cli().apply_default_config()
+            self.config_parser.read(CONFIGFILE)
+
         self.tab_content = TabContent().fetch_html()
         self.converter = Ansi2HTMLConverter()
 
@@ -223,8 +233,9 @@ def main():
     html_collapsible_result_script = page.create_collapsible_script()
     html_scripts = html_tab_script + html_default_open + html_collapsible_result_script
     html_out = html_header + html_tabs + html_scripts + html_cdn + html_trailer
+    pass
 
-    with open("pytest-tui.html", "w+") as f:
+    with open(HTML_OUTPUT_FILE, "w+") as f:
         f.write(html_out)
 
     # Open in browser

@@ -36,6 +36,7 @@ class DefaultConfig:
     def __init__(self):
         self.tui = "tui1"
         self.autolaunch_tui = False
+        self.html_layout = "html1"
         self.colortheme = "light"
         self.colortheme_colors = self.HTML_LIGHT_THEME
         self.autolaunch_html = True
@@ -71,8 +72,9 @@ class Cli:
         return {
             "Apply default config settings": self.apply_default_config_plus_enter,
             "Display current config settings": self.display_current_config,
-            "Select TUI": self.select_tui,
+            # "Select TUI": self.select_tui,
             "Set TUI autolaunch option": self.set_tui_autolaunch,
+            "Select HTML layout": self.select_html_layout,
             "Select HTML light or dark theme": self.select_html_light_dark,
             "Set HTML autolaunch option": self.set_html_autolaunch,
             "Define custom HTML color theme": self.define_custom_html_theme,
@@ -106,6 +108,7 @@ class Cli:
         )
         if not self.config_parser.has_section("HTML"):
             self.config_parser.add_section("HTML")
+        self.config_parser.set("HTML", "layout", self.default_config.html_layout)
         self.config_parser.set("HTML", "colortheme", self.default_config.colortheme)
         self.config_parser.set(
             "HTML", "autolaunch_html", str(self.default_config.autolaunch_html)
@@ -157,30 +160,58 @@ class Cli:
         self.write_current_config_to_file()
         self._enter_to_continue()
 
-    def select_html_light_dark(self) -> None:
+    def select_html_layout(self) -> None:
+        def _set_html_layout_1():
+            self.config_parser.set("HTML", "layout", "html1")
+            self.write_current_config_to_file()
+            self._enter_to_continue()
+        def _set_html_layout_2():
+            self.config_parser.set("HTML", "layout", "html2")
+            self.write_current_config_to_file()
+            self._enter_to_continue()
+
+        menu_items = {"HTML1": _set_html_layout_1, "HTML2": _set_html_layout_2}
         self._clear_terminal()
-        colortheme = Input(
-            "Enter the HTML theme you would like to use ['light' | 'dark']: ",
-            strip=True,
+        selection = Bullet(
+            choices=list(menu_items.keys()),
+            bullet="==> ",
+            word_color=colors.bright(colors.foreground["white"]),
+            word_on_switch=colors.bright(colors.foreground["black"]),
+            background_color=colors.bright(colors.background["black"]),
+            background_on_switch=colors.bright(colors.background["white"]),
         ).launch()
-        if colortheme not in ["light", "dark"]:
-            self.select_html_light_dark()
-            return
-        if not self.config_parser.has_section("HTML"):
-            self.config_parser.add_section("HTML")
-        self.config_parser.set("HTML", "colortheme", colortheme)
+        self._clear_terminal()
+        menu_items[selection]()
 
-        self.colortheme_colors = (
-            self.default_config.HTML_LIGHT_THEME
-            if colortheme == "light"
-            else self.default_config.HTML_DARK_THEME
-        )
 
-        for key in self.colortheme_colors:
-            self.config_parser.set("HTML_COLOR_THEME", key, self.colortheme_colors[key])
+    def select_html_light_dark(self) -> None:
+        def _set_html_theme_light():
+            self.config_parser.set("HTML", "colortheme", "light")
+            self.colortheme_colors = self.default_config.HTML_LIGHT_THEME
+            for key in self.colortheme_colors:
+                self.config_parser.set("HTML_COLOR_THEME", key, self.colortheme_colors[key])
+            self.write_current_config_to_file()
+            self._enter_to_continue()
+        def _set_html_theme_dark():
+            self.config_parser.set("HTML", "colortheme", "dark")
+            self.colortheme_colors = self.default_config.HTML_DARK_THEME
+            for key in self.colortheme_colors:
+                self.config_parser.set("HTML_COLOR_THEME", key, self.colortheme_colors[key])
+            self.write_current_config_to_file()
+            self._enter_to_continue()
 
-        self.write_current_config_to_file()
-        self._enter_to_continue()
+        menu_items = {"Light": _set_html_theme_light, "Dark": _set_html_theme_dark}
+        self._clear_terminal()
+        selection = Bullet(
+            choices=list(menu_items.keys()),
+            bullet="==> ",
+            word_color=colors.bright(colors.foreground["white"]),
+            word_on_switch=colors.bright(colors.foreground["black"]),
+            background_color=colors.bright(colors.background["black"]),
+            background_on_switch=colors.bright(colors.background["white"]),
+        ).launch()
+        self._clear_terminal()
+        menu_items[selection]()
 
     def define_custom_html_theme(self) -> None:
         self._clear_terminal()
@@ -239,7 +270,7 @@ class Cli:
 
     def run(self) -> None:
         self._clear_terminal()
-        cli = Bullet(
+        self.cli = Bullet(
             # prompt = self._prompt(),
             choices=list(self.menu_items().keys()),
             bullet="==> ",
@@ -248,11 +279,11 @@ class Cli:
             background_color=colors.bright(colors.background["black"]),
             background_on_switch=colors.bright(colors.background["white"]),
         )
-        menu_item = cli.launch()
+        self.menu_item = self.cli.launch()
         while True:
             self._clear_terminal()
-            self.menu_items()[menu_item]()
-            menu_item = cli.launch()
+            self.menu_items()[self.menu_item]()
+            self.menu_item = self.cli.launch()
 
 
 def tui_launch():

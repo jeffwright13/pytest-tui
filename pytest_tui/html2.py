@@ -1,10 +1,8 @@
 import configparser
-import html
 import json
 import re
 import webbrowser
 from datetime import datetime, timezone
-from itertools import count
 
 import json2table
 from ansi2html import Ansi2HTMLConverter

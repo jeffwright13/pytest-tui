@@ -41,7 +41,6 @@ pyfiglet==0.8.post1
 pyflakes==2.5.0
 Pygments==2.12.0
 pyparsing==3.0.9
-pyTermTk==0.10.8a0
 pytest==7.0.1
 pytest-html==3.1.1
 pytest-metadata==2.0.2
