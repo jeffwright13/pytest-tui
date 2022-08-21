@@ -70,14 +70,14 @@ class Cli:
 
     def menu_items(self) -> dict:
         return {
-            "Apply default config settings": self.apply_default_config_plus_enter,
             "Display current config settings": self.display_current_config,
+            "Apply default config settings": self.apply_default_config_plus_enter,
             # "Select TUI": self.select_tui,
             "Set TUI autolaunch option": self.set_tui_autolaunch,
-            "Select HTML layout": self.select_html_layout,
-            "Select HTML light or dark theme": self.select_html_light_dark,
             "Set HTML autolaunch option": self.set_html_autolaunch,
-            "Define custom HTML color theme": self.define_custom_html_theme,
+            "Select HTML layout": self.select_html_layout,
+            # "Select HTML light or dark theme": self.select_html_light_dark,
+            # "Define custom HTML color theme": self.define_custom_html_theme,
             "Quit": self.quit,
         }
 

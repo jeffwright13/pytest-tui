@@ -18,12 +18,13 @@
 }
 
 .tablinks {
-	font-family: "Roboto", sans-serif;
+	font-family: "Arial", sans-serif;
 }
 
 .tabcontent {
+	background-color: #ddd;
 	display: none;
-	padding: 6px 12px;
+	/* padding: 6px 12px; */
 	border: 1px solid #ccc;
 	border-top: none;
 	-webkit-animation: fadeEffect 1s;
@@ -48,35 +49,40 @@
     to {opacity: 1.5;}
 }
 
-td:nth-child(odd) button {
-    background-image:url('darkSquare.jpg')
-}
-td:nth-child(even) button {
-    background-image:url('lightSquare.jpg')
-}
-
 .collapsible {
   font-weight: normal;
-  font-family: "Roboto", sans-serif;
+  font-family: "Arial", sans-serif;
   background-color: #f1f1f1;
   cursor: pointer;
-  width: 90%;
+  width: 100%;
   border: none;
+  padding: 1px 1px;
   text-align: left;
   outline: none;
   font-size: 14px;
   white-space: normal;
+  /* box-shadow: 0px 0px 1px 1px #ccc; */
   }
 
   .active,
   .collapsible:hover {
-	background-color: #f1f1f1;
-}
-  .content {
+	background-color: #ccc;
+	transition: 0.35s;
+  }
+
+.content {
 	display: none;
-	overflow: hidden;
+	overflow: auto;
 	-webkit-animation: fadeEffect 1s;
-    animation: fadeEffect .25s;
+	animation: fadeEffect .25s;
+}
+
+  h1, h2, h3, h4, h5, h6 {
+	font-family: "Arial", sans-serif;
+  }
+
+  table, th, td {
+	font-family: "Arial", sans-serif;
   }
 
 .ansi2html-content {
@@ -126,8 +132,6 @@ td:nth-child(even) button {
 .ansi47 { background-color: #F5F1DE; }
 
 /* Define the explicit color codes (obnoxious) */
-
-
 .ansi38-16 { color: #000000; }
 .ansi48-16 { background: #000000; }
 .ansi38-17 { color: #00002a; }

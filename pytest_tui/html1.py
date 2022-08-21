@@ -13,8 +13,8 @@ from pytest_tui.utils import TERMINAL_OUTPUT_FILE, HTML_OUTPUT_FILE, Results
 
 TABS = [
     "Summary",
-    "Failures",
     "Passes",
+    "Failures",
     "Skipped",
     "Xfails",
     "Xpasses",
@@ -31,7 +31,7 @@ TABS_SECTIONS = [
     "failures_section",
     "reruns_section",
 ]
-TABS_RESULTS = ["Failures", "Passes", "Skipped", "Xfails", "Xpasses"]
+TABS_RESULTS = ["Passes", "Failures", "Skipped", "Xfails", "Xpasses"]
 TAB_METADATA = ["About"]
 TAB_FULL_OUTPUT = ["Full Output"]
 
@@ -87,7 +87,7 @@ class HtmlPage:
         self.converter = Ansi2HTMLConverter()
 
     def create_header(self) -> str:
-        return """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Pytest-Tui Test Report</title> <link rel="stylesheet" href="/Users/jwr003/coding/pytest-tui/pytest_tui/styles.css" type="text/css"> <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css"> <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" >"""
+        return """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Pytest-Tui Test Report</title> <link rel="stylesheet" href="/Users/jwr003/coding/pytest-tui/pytest_tui/styles.css" type="text/css"> <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css"> <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Arial"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" >"""
 
     def create_testrun_results(self) -> str:
         return ("""<pre><b>""" + self.converter.convert( results.tui_sections.lastline.content.replace("=", ""), full=False ) + """</b></pre>""" )
@@ -187,8 +187,8 @@ class HtmlPage:
         m.pop("JAVA_HOME")
         table_attributes = {
             "id": "metadata",
-            "font-family ": "Helvetica, Arial, sans-serif",
-            "border": "1",
+            "font-family": "Helvetica, Arial, sans-serif",
+            "border": "ridge",
             "style": "width:auto%; table-layout: auto;",
             "border-collapse": "collapse",
             "class": "data-table",
@@ -196,7 +196,7 @@ class HtmlPage:
             "text-align": "left",
             "tr": "nth-child(even) {background-color: #f2f2f2;}",
         }
-        return ( self.create_testrun_results() + f"""<h6><b>Report generated on {datetime.now(timezone.utc).replace(microsecond=0 ).strftime('%Y-%m-%d %H:%M:%S')} UTC by pytest-tui version {__version__}</b></h6><br>""" + """<h6><b>Meta Data / Environment:</b></h6>""" + json2table.convert(m, table_attributes=table_attributes) )
+        return ( self.create_testrun_results() + f"""<h6><b>Report generated on {datetime.now(timezone.utc).replace(microsecond=0 ).strftime('%Y-%m-%d %H:%M:%S')} UTC by pytest-tui version {__version__}</b></h6><br>""" + """<h6><b>Meta Data / Environment:</b></h6>""" + json2table.convert(m, build_direction="LEFT_TO_RIGHT", table_attributes=table_attributes) )
 
     def get_terminal_output(self) -> str:
         with open(TERMINAL_OUTPUT_FILE, "r") as f:
