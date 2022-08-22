@@ -254,3 +254,9 @@ def pytui_launch(config: Config) -> None:
         tui_launch()
 
         capmanager.resume_global_capture()
+
+# In case pytest is run without the --tui option
+try:
+    _tui_terminal_out.close()
+except Exception:
+    pass
