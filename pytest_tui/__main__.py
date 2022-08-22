@@ -75,7 +75,7 @@ class Cli:
             # "Select TUI": self.select_tui,
             "Set TUI autolaunch option": self.set_tui_autolaunch,
             "Set HTML autolaunch option": self.set_html_autolaunch,
-            "Select HTML layout": self.select_html_layout,
+            # "Select HTML layout": self.select_html_layout,
             # "Select HTML light or dark theme": self.select_html_light_dark,
             # "Define custom HTML color theme": self.define_custom_html_theme,
             "Quit": self.quit,
@@ -89,7 +89,7 @@ class Cli:
         if not (
             self.config_parser.has_section("TUI")
             and self.config_parser.has_section("HTML")
-            and self.config_parser.has_section("HTML_COLOR_THEME")
+            # and self.config_parser.has_section("HTML_COLOR_THEME")
         ):
             self.apply_default_config()
 
@@ -102,23 +102,23 @@ class Cli:
         """Generate default config, store in local config_parser instance, and write it to file."""
         if not self.config_parser.has_section("TUI"):
             self.config_parser.add_section("TUI")
-        self.config_parser.set("TUI", "tui", self.default_config.tui)
+        # self.config_parser.set("TUI", "tui", self.default_config.tui)
         self.config_parser.set(
             "TUI", "autolaunch_tui", str(self.default_config.autolaunch_tui)
         )
         if not self.config_parser.has_section("HTML"):
             self.config_parser.add_section("HTML")
-        self.config_parser.set("HTML", "layout", self.default_config.html_layout)
-        self.config_parser.set("HTML", "colortheme", self.default_config.colortheme)
+        # self.config_parser.set("HTML", "layout", self.default_config.html_layout)
+        # self.config_parser.set("HTML", "colortheme", self.default_config.colortheme)
         self.config_parser.set(
             "HTML", "autolaunch_html", str(self.default_config.autolaunch_html)
         )
-        if not self.config_parser.has_section("HTML_COLOR_THEME"):
-            self.config_parser.add_section("HTML_COLOR_THEME")
-        for key in self.default_config.colortheme_colors:
-            self.config_parser.set(
-                "HTML_COLOR_THEME", key, self.default_config.colortheme_colors[key]
-            )
+        # if not self.config_parser.has_section("HTML_COLOR_THEME"):
+        #     self.config_parser.add_section("HTML_COLOR_THEME")
+        # for key in self.default_config.colortheme_colors:
+        #     self.config_parser.set(
+        #         "HTML_COLOR_THEME", key, self.default_config.colortheme_colors[key]
+        #     )
         self.write_current_config_to_file()
 
     def display_current_config(self) -> None:
@@ -135,19 +135,19 @@ class Cli:
         with open(CONFIGFILE, "w+") as configfile:
             self.config_parser.write(configfile)
 
-    def select_tui(self) -> None:
-        self._clear_terminal()
-        tui = Input(
-            "Enter the TUI you would like to use ['tui1' | 'tui2']: ", strip=True
-        ).launch()
-        if tui not in ["tui1", "tui2"]:
-            self.select_tui()
-            return
-        if not self.config_parser.has_section("TUI"):
-            self.config_parser.add_section("TUI")
-        self.config_parser.set("TUI", "tui", tui)
-        self.write_current_config_to_file()
-        self._enter_to_continue()
+    # def select_tui(self) -> None:
+    #     self._clear_terminal()
+    #     tui = Input(
+    #         "Enter the TUI you would like to use ['tui1' | 'tui2']: ", strip=True
+    #     ).launch()
+    #     if tui not in ["tui1", "tui2"]:
+    #         self.select_tui()
+    #         return
+    #     if not self.config_parser.has_section("TUI"):
+    #         self.config_parser.add_section("TUI")
+    #     self.config_parser.set("TUI", "tui", tui)
+    #     self.write_current_config_to_file()
+    #     self._enter_to_continue()
 
     def set_tui_autolaunch(self) -> None:
         self._clear_terminal()
@@ -160,99 +160,99 @@ class Cli:
         self.write_current_config_to_file()
         self._enter_to_continue()
 
-    def select_html_layout(self) -> None:
-        def _set_html_layout_1():
-            self.config_parser.set("HTML", "layout", "html1")
-            self.write_current_config_to_file()
-            self._enter_to_continue()
-        def _set_html_layout_2():
-            self.config_parser.set("HTML", "layout", "html2")
-            self.write_current_config_to_file()
-            self._enter_to_continue()
+    # def select_html_layout(self) -> None:
+    #     def _set_html_layout_1():
+    #         self.config_parser.set("HTML", "layout", "html1")
+    #         self.write_current_config_to_file()
+    #         self._enter_to_continue()
+    #     def _set_html_layout_2():
+    #         self.config_parser.set("HTML", "layout", "html2")
+    #         self.write_current_config_to_file()
+    #         self._enter_to_continue()
 
-        menu_items = {"HTML1": _set_html_layout_1, "HTML2": _set_html_layout_2}
-        self._clear_terminal()
-        selection = Bullet(
-            choices=list(menu_items.keys()),
-            bullet="==> ",
-            word_color=colors.bright(colors.foreground["white"]),
-            word_on_switch=colors.bright(colors.foreground["black"]),
-            background_color=colors.bright(colors.background["black"]),
-            background_on_switch=colors.bright(colors.background["white"]),
-        ).launch()
-        self._clear_terminal()
-        menu_items[selection]()
+    #     menu_items = {"HTML1": _set_html_layout_1, "HTML2": _set_html_layout_2}
+    #     self._clear_terminal()
+    #     selection = Bullet(
+    #         choices=list(menu_items.keys()),
+    #         bullet="==> ",
+    #         word_color=colors.bright(colors.foreground["white"]),
+    #         word_on_switch=colors.bright(colors.foreground["black"]),
+    #         background_color=colors.bright(colors.background["black"]),
+    #         background_on_switch=colors.bright(colors.background["white"]),
+    #     ).launch()
+    #     self._clear_terminal()
+    #     menu_items[selection]()
 
 
-    def select_html_light_dark(self) -> None:
-        def _set_html_theme_light():
-            self.config_parser.set("HTML", "colortheme", "light")
-            self.colortheme_colors = self.default_config.HTML_LIGHT_THEME
-            for key in self.colortheme_colors:
-                self.config_parser.set("HTML_COLOR_THEME", key, self.colortheme_colors[key])
-            self.write_current_config_to_file()
-            self._enter_to_continue()
-        def _set_html_theme_dark():
-            self.config_parser.set("HTML", "colortheme", "dark")
-            self.colortheme_colors = self.default_config.HTML_DARK_THEME
-            for key in self.colortheme_colors:
-                self.config_parser.set("HTML_COLOR_THEME", key, self.colortheme_colors[key])
-            self.write_current_config_to_file()
-            self._enter_to_continue()
+    # def select_html_light_dark(self) -> None:
+    #     def _set_html_theme_light():
+    #         self.config_parser.set("HTML", "colortheme", "light")
+    #         self.colortheme_colors = self.default_config.HTML_LIGHT_THEME
+    #         for key in self.colortheme_colors:
+    #             self.config_parser.set("HTML_COLOR_THEME", key, self.colortheme_colors[key])
+    #         self.write_current_config_to_file()
+    #         self._enter_to_continue()
+    #     def _set_html_theme_dark():
+    #         self.config_parser.set("HTML", "colortheme", "dark")
+    #         self.colortheme_colors = self.default_config.HTML_DARK_THEME
+    #         for key in self.colortheme_colors:
+    #             self.config_parser.set("HTML_COLOR_THEME", key, self.colortheme_colors[key])
+    #         self.write_current_config_to_file()
+    #         self._enter_to_continue()
 
-        menu_items = {"Light": _set_html_theme_light, "Dark": _set_html_theme_dark}
-        self._clear_terminal()
-        selection = Bullet(
-            choices=list(menu_items.keys()),
-            bullet="==> ",
-            word_color=colors.bright(colors.foreground["white"]),
-            word_on_switch=colors.bright(colors.foreground["black"]),
-            background_color=colors.bright(colors.background["black"]),
-            background_on_switch=colors.bright(colors.background["white"]),
-        ).launch()
-        self._clear_terminal()
-        menu_items[selection]()
+    #     menu_items = {"Light": _set_html_theme_light, "Dark": _set_html_theme_dark}
+    #     self._clear_terminal()
+    #     selection = Bullet(
+    #         choices=list(menu_items.keys()),
+    #         bullet="==> ",
+    #         word_color=colors.bright(colors.foreground["white"]),
+    #         word_on_switch=colors.bright(colors.foreground["black"]),
+    #         background_color=colors.bright(colors.background["black"]),
+    #         background_on_switch=colors.bright(colors.background["white"]),
+    #     ).launch()
+    #     self._clear_terminal()
+    #     menu_items[selection]()
 
-    def define_custom_html_theme(self) -> None:
-        self._clear_terminal()
-        if not self.config_parser.has_section("HTML_COLOR_THEME"):
-            self.config_parser.add_section("HTML_COLOR_THEME")
+    # def define_custom_html_theme(self) -> None:
+    #     self._clear_terminal()
+    #     if not self.config_parser.has_section("HTML_COLOR_THEME"):
+    #         self.config_parser.add_section("HTML_COLOR_THEME")
 
-        val = Input(
-            "Enter BODY_FOREGROUND_COLOR value in hex (#xxxxx): ", strip=True
-        ).launch()
-        self.config_parser.set("HTML_COLOR_THEME", "BODY_FOREGROUND_COLOR", val)
-        val = Input(
-            "Enter BODY_BACKGROUND_COLOR value in hex (#xxxxx): ", strip=True
-        ).launch()
-        self.config_parser.set("HTML_COLOR_THEME", "BODY_BACKGROUND_COLOR", val)
-        val = Input(
-            "Enter INV_FOREGROUND_COLOR value in hex (#xxxxx): ", strip=True
-        ).launch()
-        self.config_parser.set("HTML_COLOR_THEME", "INV_FOREGROUND_COLOR", val)
-        val = Input(
-            "Enter INV_BACKGROUND_COLOR value in hex (#xxxxx): ", strip=True
-        ).launch()
-        self.config_parser.set("HTML_COLOR_THEME", "INV_BACKGROUND_COLOR", val)
-        val = Input(
-            "Enter COLLAPSIBLE_FOREGROUND_COLOR value in hex (#xxxxx): ", strip=True
-        ).launch()
-        self.config_parser.set("HTML_COLOR_THEME", "COLLAPSIBLE_FOREGROUND_COLOR", val)
-        val = Input(
-            "Enter COLLAPSIBLE_BACKGROUND_COLOR value in hex (#xxxxx): ", strip=True
-        ).launch()
-        self.config_parser.set("HTML_COLOR_THEME", "COLLAPSIBLE_BACKGROUND_COLOR", val)
-        val = Input(
-            "Enter HOVER_FOREGROUND_COLOR value in hex (#xxxxx): ", strip=True
-        ).launch()
-        self.config_parser.set("HTML_COLOR_THEME", "HOVER_FOREGROUND_COLOR", val)
-        val = Input(
-            "Enter HOVER_BACKGROUND_COLOR value in hex (#xxxxx): ", strip=True
-        ).launch()
-        self.config_parser.set("HTML_COLOR_THEME", "HOVER_BACKGROUND_COLOR", val)
+    #     val = Input(
+    #         "Enter BODY_FOREGROUND_COLOR value in hex (#xxxxx): ", strip=True
+    #     ).launch()
+    #     self.config_parser.set("HTML_COLOR_THEME", "BODY_FOREGROUND_COLOR", val)
+    #     val = Input(
+    #         "Enter BODY_BACKGROUND_COLOR value in hex (#xxxxx): ", strip=True
+    #     ).launch()
+    #     self.config_parser.set("HTML_COLOR_THEME", "BODY_BACKGROUND_COLOR", val)
+    #     val = Input(
+    #         "Enter INV_FOREGROUND_COLOR value in hex (#xxxxx): ", strip=True
+    #     ).launch()
+    #     self.config_parser.set("HTML_COLOR_THEME", "INV_FOREGROUND_COLOR", val)
+    #     val = Input(
+    #         "Enter INV_BACKGROUND_COLOR value in hex (#xxxxx): ", strip=True
+    #     ).launch()
+    #     self.config_parser.set("HTML_COLOR_THEME", "INV_BACKGROUND_COLOR", val)
+    #     val = Input(
+    #         "Enter COLLAPSIBLE_FOREGROUND_COLOR value in hex (#xxxxx): ", strip=True
+    #     ).launch()
+    #     self.config_parser.set("HTML_COLOR_THEME", "COLLAPSIBLE_FOREGROUND_COLOR", val)
+    #     val = Input(
+    #         "Enter COLLAPSIBLE_BACKGROUND_COLOR value in hex (#xxxxx): ", strip=True
+    #     ).launch()
+    #     self.config_parser.set("HTML_COLOR_THEME", "COLLAPSIBLE_BACKGROUND_COLOR", val)
+    #     val = Input(
+    #         "Enter HOVER_FOREGROUND_COLOR value in hex (#xxxxx): ", strip=True
+    #     ).launch()
+    #     self.config_parser.set("HTML_COLOR_THEME", "HOVER_FOREGROUND_COLOR", val)
+    #     val = Input(
+    #         "Enter HOVER_BACKGROUND_COLOR value in hex (#xxxxx): ", strip=True
+    #     ).launch()
+    #     self.config_parser.set("HTML_COLOR_THEME", "HOVER_BACKGROUND_COLOR", val)
 
-        self.write_current_config_to_file()
-        self._enter_to_continue()
+    #     self.write_current_config_to_file()
+    #     self._enter_to_continue()
 
     def set_html_autolaunch(self) -> None:
         self._clear_terminal()
@@ -285,6 +285,9 @@ class Cli:
             self.menu_items()[self.menu_item]()
             self.menu_item = self.cli.launch()
 
+
+def tui_run():
+    tui1()
 
 def tui_launch():
     tuicli = Cli()
