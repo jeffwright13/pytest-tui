@@ -12,26 +12,26 @@ from pytest_tui.utils import CONFIGFILE
 
 
 class DefaultConfig:
-#     HTML_LIGHT_THEME = {
-#         "BODY_FOREGROUND_COLOR": "000000",
-#         "BODY_BACKGROUND_COLOR": "EEEEEE",
-#         "INV_FOREGROUND_COLOR": "000000",
-#         "INV_BACKGROUND_COLOR": "AAAAAA",
-#         "COLLAPSIBLE_FOREGROUND_COLOR": "000000",
-#         "COLLAPSIBLE_BACKGROUND_COLOR": "EEEEEE",
-#         "HOVER_FOREGROUND_COLOR": "EEEEEE",
-#         "HOVER_BACKGROUND_COLOR": "000000",
-#     }
-#     HTML_DARK_THEME = {
-#         "BODY_FOREGROUND_COLOR": "AAAAAA",
-#         "BODY_BACKGROUND_COLOR": "000000",
-#         "INV_FOREGROUND_COLOR": "000000",
-#         "INV_BACKGROUND_COLOR": "AAAAAA",
-#         "COLLAPSIBLE_FOREGROUND_COLOR": "AAAAAA",
-#         "COLLAPSIBLE_BACKGROUND_COLOR": "000000",
-#         "HOVER_FOREGROUND_COLOR": "111111",
-#         "HOVER_BACKGROUND_COLOR": "999999",
-#     }
+    #     HTML_LIGHT_THEME = {
+    #         "BODY_FOREGROUND_COLOR": "000000",
+    #         "BODY_BACKGROUND_COLOR": "EEEEEE",
+    #         "INV_FOREGROUND_COLOR": "000000",
+    #         "INV_BACKGROUND_COLOR": "AAAAAA",
+    #         "COLLAPSIBLE_FOREGROUND_COLOR": "000000",
+    #         "COLLAPSIBLE_BACKGROUND_COLOR": "EEEEEE",
+    #         "HOVER_FOREGROUND_COLOR": "EEEEEE",
+    #         "HOVER_BACKGROUND_COLOR": "000000",
+    #     }
+    #     HTML_DARK_THEME = {
+    #         "BODY_FOREGROUND_COLOR": "AAAAAA",
+    #         "BODY_BACKGROUND_COLOR": "000000",
+    #         "INV_FOREGROUND_COLOR": "000000",
+    #         "INV_BACKGROUND_COLOR": "AAAAAA",
+    #         "COLLAPSIBLE_FOREGROUND_COLOR": "AAAAAA",
+    #         "COLLAPSIBLE_BACKGROUND_COLOR": "000000",
+    #         "HOVER_FOREGROUND_COLOR": "111111",
+    #         "HOVER_BACKGROUND_COLOR": "999999",
+    #     }
 
     def __init__(self):
         # self.tui = "tui1"
@@ -183,7 +183,6 @@ class Cli:
     #     self._clear_terminal()
     #     menu_items[selection]()
 
-
     # def select_html_light_dark(self) -> None:
     #     def _set_html_theme_light():
     #         self.config_parser.set("HTML", "colortheme", "light")
@@ -288,6 +287,7 @@ class Cli:
 
 def tui_run():
     tui1()
+
 
 def tui_launch():
     tuicli = Cli()

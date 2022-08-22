@@ -146,7 +146,9 @@ class TuiApp(App):
 
         # Define the results trees
         self.failures_tree = TreeControl(
-            Text("Failures:", style="bold red underline"), {}, name="failures_tree",
+            Text("Failures:", style="bold red underline"),
+            {},
+            name="failures_tree",
         )
         self.passes_tree = TreeControl(
             Text("Passes:", style="bold green underline"), {}, name="passes_tree"

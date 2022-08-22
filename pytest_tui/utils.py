@@ -229,6 +229,7 @@ class Results:
             #     f"Cannot find {TUI_RESULT_OBJECTS_FILE}. Have you run pytest with the '--tui' option yet?"
             # ) from e
             pass
+
     def _unpickle_tui_sections(self):
         """Unpack pickled TuiSections from file"""
         try:
