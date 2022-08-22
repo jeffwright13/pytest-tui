@@ -145,7 +145,7 @@ def pytest_configure(config: Config) -> None:
                 config._tui_current_section = "short_test_summary"
             if re.search(lastline_matcher, s):
                 config._tui_current_section = "lastline"
-                _tui_sections.lastline.content += s + "\n"
+                _tui_sections.lastline.content += s
             else:
                 exec(f"_tui_sections.{config._tui_current_section}.content += s")
 
@@ -238,7 +238,6 @@ def pytest_unconfigure(config: Config):
 def pytui_launch(config: Config) -> None:
     """
     Final code invocation after Pytest run has completed.
-    Will call either or both of TUI / HTML code is specified on cmd line.
     """
     try:
         # disable capturing while TUI runs to avoid error `redirected stdin is pseudofile, has
@@ -247,6 +246,7 @@ def pytui_launch(config: Config) -> None:
         capmanager.suspend_global_capture(in_=True)
     finally:
         # individually launch TUIand/or HTML report (if configured in config.ini to do so)
+        # config.ini is configured through use of `pyconf` console scripts
         with ThreadPoolExecutor() as executor:
             executor.submit(tuihtml)
         tui_launch()

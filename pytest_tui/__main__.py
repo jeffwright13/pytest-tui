@@ -12,33 +12,33 @@ from pytest_tui.utils import CONFIGFILE
 
 
 class DefaultConfig:
-    HTML_LIGHT_THEME = {
-        "BODY_FOREGROUND_COLOR": "000000",
-        "BODY_BACKGROUND_COLOR": "EEEEEE",
-        "INV_FOREGROUND_COLOR": "000000",
-        "INV_BACKGROUND_COLOR": "AAAAAA",
-        "COLLAPSIBLE_FOREGROUND_COLOR": "000000",
-        "COLLAPSIBLE_BACKGROUND_COLOR": "EEEEEE",
-        "HOVER_FOREGROUND_COLOR": "EEEEEE",
-        "HOVER_BACKGROUND_COLOR": "000000",
-    }
-    HTML_DARK_THEME = {
-        "BODY_FOREGROUND_COLOR": "AAAAAA",
-        "BODY_BACKGROUND_COLOR": "000000",
-        "INV_FOREGROUND_COLOR": "000000",
-        "INV_BACKGROUND_COLOR": "AAAAAA",
-        "COLLAPSIBLE_FOREGROUND_COLOR": "AAAAAA",
-        "COLLAPSIBLE_BACKGROUND_COLOR": "000000",
-        "HOVER_FOREGROUND_COLOR": "111111",
-        "HOVER_BACKGROUND_COLOR": "999999",
-    }
+#     HTML_LIGHT_THEME = {
+#         "BODY_FOREGROUND_COLOR": "000000",
+#         "BODY_BACKGROUND_COLOR": "EEEEEE",
+#         "INV_FOREGROUND_COLOR": "000000",
+#         "INV_BACKGROUND_COLOR": "AAAAAA",
+#         "COLLAPSIBLE_FOREGROUND_COLOR": "000000",
+#         "COLLAPSIBLE_BACKGROUND_COLOR": "EEEEEE",
+#         "HOVER_FOREGROUND_COLOR": "EEEEEE",
+#         "HOVER_BACKGROUND_COLOR": "000000",
+#     }
+#     HTML_DARK_THEME = {
+#         "BODY_FOREGROUND_COLOR": "AAAAAA",
+#         "BODY_BACKGROUND_COLOR": "000000",
+#         "INV_FOREGROUND_COLOR": "000000",
+#         "INV_BACKGROUND_COLOR": "AAAAAA",
+#         "COLLAPSIBLE_FOREGROUND_COLOR": "AAAAAA",
+#         "COLLAPSIBLE_BACKGROUND_COLOR": "000000",
+#         "HOVER_FOREGROUND_COLOR": "111111",
+#         "HOVER_BACKGROUND_COLOR": "999999",
+#     }
 
     def __init__(self):
-        self.tui = "tui1"
+        # self.tui = "tui1"
         self.autolaunch_tui = False
-        self.html_layout = "html1"
-        self.colortheme = "light"
-        self.colortheme_colors = self.HTML_LIGHT_THEME
+        # self.html_layout = "html1"
+        # self.colortheme = "light"
+        # self.colortheme_colors = self.HTML_LIGHT_THEME
         self.autolaunch_html = True
 
 

@@ -77,13 +77,17 @@
 	animation: fadeEffect .25s;
 }
 
-  h1, h2, h3, h4, h5, h6 {
-	font-family: "Arial", sans-serif;
-  }
+p {
+  font-size: 14px;
+}
 
-  table, th, td {
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Arial", sans-serif;
+}
+
+table, th, td {
 	font-family: "Arial", sans-serif;
-  }
+}
 
 .ansi2html-content {
 	display: inline;

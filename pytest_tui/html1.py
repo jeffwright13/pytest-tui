@@ -2,6 +2,7 @@ import configparser
 import json
 import webbrowser
 from datetime import datetime, timezone
+from pathlib import Path
 
 import json2table
 from ansi2html import Ansi2HTMLConverter
@@ -91,7 +92,7 @@ class HtmlPage:
         return """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Pytest-Tui Test Report</title> <link rel="stylesheet" href="/Users/jwr003/coding/pytest-tui/pytest_tui/styles.css" type="text/css"> <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css"> <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Arial"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" >"""
 
     def create_testrun_results(self) -> str:
-        return ("""<pre><b>""" + self.converter.convert(self.results.tui_sections.lastline.content.replace("=", ""), full=False ) + """</b></pre>""")
+        return ("""<br><pre><b>""" + self.converter.convert(self.results.tui_sections.lastline.content.replace("=", ""), full=False ) + """</b></pre>""")
 
     def create_trailer(self) -> str:
         return """</script> </body> </html>"""
@@ -191,7 +192,9 @@ class HtmlPage:
             "text-align": "left",
             "tr": "nth-child(even) {background-color: #f2f2f2;}",
         }
-        return ( self.create_testrun_results() + f"""<h6><b>Report generated on {datetime.now(timezone.utc).replace(microsecond=0 ).strftime('%Y-%m-%d %H:%M:%S')} UTC by pytest-tui version {__version__}</b></h6><br>""" + """<h6><b>Meta Data / Environment:</b></h6>""" + json2table.convert(m, build_direction="LEFT_TO_RIGHT", table_attributes=table_attributes) )
+        now = datetime.now(timezone.utc).replace(microsecond=0 ).strftime('%Y-%m-%d %H:%M:%S')
+        results_modification_time = datetime.utcfromtimestamp(Path(TERMINAL_OUTPUT_FILE).stat().st_mtime).replace(microsecond=0).strftime('%Y-%m-%d %H:%M:%S')
+        return ( self.create_testrun_results() + "<hr>" + f"""<h6><b>Test results generated {results_modification_time}</b></h6>""" + f"""<h6><b>This report generated {now}</b></h6>""" + f"""<h6><b>pytest-tui version {__version__}</b></h6><hr>""" + """<h6><b>Meta Data / Environment:</b></h6>""" + json2table.convert(m, build_direction="LEFT_TO_RIGHT", table_attributes=table_attributes) )
 
     def get_terminal_output(self) -> str:
         with open(TERMINAL_OUTPUT_FILE, "r") as f:

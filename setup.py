@@ -55,7 +55,7 @@ setup(
         "pytest11": ["pytest_tui = pytest_tui.plugin"],
         "console_scripts": [
             "tuiconf = pytest_tui.__main__:tui_config",
-            "tui = pytest_tui.__main__:tui_launch",
+            "tui = pytest_tui.__main__:tui_run",
             "tuih = pytest_tui.html1:main",
         ],
     },
