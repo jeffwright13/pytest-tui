@@ -147,6 +147,8 @@ def pytest_configure(config: Config) -> None:
                 config._tui_current_section = "lastline"
                 _tui_sections.lastline.content += s
             else:
+                if not hasattr(config, "_tui_current_section"):
+                    config._tui_current_section = "other"
                 exec(f"_tui_sections.{config._tui_current_section}.content += s")
 
             # If this is an actual test outcome line in the initial `=== test session starts ==='

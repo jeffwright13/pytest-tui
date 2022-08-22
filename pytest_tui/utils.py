@@ -207,6 +207,7 @@ class TuiSections:
     rerun_summary: TuiSection = TuiSection(name="rerun_summary", content="")
     short_test_summary: TuiSection = TuiSection(name="short_test_summary", content="")
     lastline: TuiSection = TuiSection(name="lastline", content="")
+    other: TuiSection = TuiSection(name="other", content="") # for anything else that isn't a known pytest section
 
 
 class Results:
