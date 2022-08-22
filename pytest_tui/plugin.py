@@ -1,4 +1,3 @@
-import configparser
 import itertools
 import pickle
 import re
@@ -233,34 +232,23 @@ def pytest_unconfigure(config: Config):
         pickle.dump(_tui_sections, file)
 
     if hasattr(config.option, "tui") and config.option.tui:
-        pytui_tui(config)
+        pytui_launch(config)
 
 
-def pytui_tui(config: Config) -> None:
+def pytui_launch(config: Config) -> None:
     """
     Final code invocation after Pytest run has completed.
     Will call either or both of TUI / HTML code is specified on cmd line.
     """
-    config_parser = configparser.ConfigParser()
-
-    # Make sure the config file exists and has section content
-    try:
-        config_parser.read(CONFIGFILE)
-        assert len(config_parser.sections()) > 0
-    except Exception:
-        Cli().apply_default_config()
-    finally:
-        config_parser.read(CONFIGFILE)
-
     try:
         # disable capturing while TUI runs to avoid error `redirected stdin is pseudofile, has
         # no fileno()`; adapted from https://githubmemory.com/repo/jsbueno/terminedia/issues/25
         capmanager = config.pluginmanager.getplugin("capturemanager")
         capmanager.suspend_global_capture(in_=True)
     finally:
+        # individually launch TUIand/or HTML report (if configured in config.ini to do so)
         with ThreadPoolExecutor() as executor:
             executor.submit(tuihtml)
-        if config_parser["TUI"].get("autolaunch_tui") == "True":
-            tui_launch()
+        tui_launch()
 
         capmanager.resume_global_capture()

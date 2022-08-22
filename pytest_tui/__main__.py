@@ -289,7 +289,8 @@ class Cli:
 def tui_launch():
     tuicli = Cli()
     tuicli.read_config_file()
-    tui1()
+    if tuicli.config_parser["TUI"].get("autolaunch_tui") == "True":
+        tui1()
 
 
 def tui_config():

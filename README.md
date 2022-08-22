@@ -87,7 +87,7 @@ On Linux terminals, you can typically press and hold the SHIFT key on your keybo
 On Windows, use the ALT key while click-dragging the mouse. Mac users can get the same effect with the Option key.
 
 ## HTML File
-The HTML output file is located at `<cwd>/pytest_tui_files/output_html.html`. By default, the HTML file is automatically launched via browser, just as with the TUI, using the system default browser upon completion of the test run. HTML autolaunch can be suppressed through the configuration console script `tuiconf`.
+The HTML output file is located at `<cwd>/ptt_files/html_report.html`. By default, the HTML file is automatically launched via browser, just as with the TUI, using the system default browser upon completion of the test run. HTML autolaunch can be suppressed through the configuration console script `tuiconf`.
 
 ## Known Limitations / Issues
 - User interfaces need work:

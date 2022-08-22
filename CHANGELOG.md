@@ -10,6 +10,8 @@ and this project tries to adhere to [Semantic Versioning](https://semver.org/spe
 - Working/revamped HTML file output, with more modern look/feel.
 - Fixed tui1 (Textual) so that it works with new internal implementation.
 - Retiring tui2 (PyTermTk) for now.
+- Reordered/removed some menu items in tuiconf to fit new content/choices.
+- Changed output files folder to ./ptt_files.
 
 ## [1.1.3] - 2022-08-13
 
