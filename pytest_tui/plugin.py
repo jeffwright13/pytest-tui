@@ -111,11 +111,6 @@ def pytest_runtest_logstart(nodeid, location):
 
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config: Config) -> None:
-    if not hasattr(config.option, "tui"):
-        return
-    if not config.option.tui:
-        return
-
     config.option.verbose = 1  # easier parsing of final test results
     config.option.reportchars = "A"  # "display all" mode so all results are shown
 
@@ -254,9 +249,3 @@ def pytui_launch(config: Config) -> None:
         tui_launch()
 
         capmanager.resume_global_capture()
-
-# In case pytest is run without the --tui option
-try:
-    _tui_terminal_out.close()
-except Exception:
-    pass
