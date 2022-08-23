@@ -25,19 +25,18 @@ TABS = [
     "Full Output",
 ]
 TABS_SECTIONS = [
+    # "livelog_section",
     "summary_section",
     "warnings_section",
     "errors_section",
     "passes_section",
     "failures_section",
     "reruns_section",
+    "other_section",
 ]
 TABS_RESULTS = ["Passes", "Failures", "Skipped", "Xfails", "Xpasses"]
 TAB_METADATA = ["About"]
 TAB_FULL_OUTPUT = ["Full Output"]
-
-# results = Results()
-
 
 class TabContent:
     def __init__(self, results: Results):
@@ -59,11 +58,13 @@ class TabContent:
             # + self.results.tui_sections.test_session_starts.content
             # + self.results.tui_sections.short_test_summary.content,
         )
+        # self.add("livelog_section", self.results.tui_sections.live_log_sessionstart.content)
         self.add("warnings_section", self.results.tui_sections.warnings_summary.content)
         self.add("errors_section", self.results.tui_sections.errors.content)
         self.add("passes_section", self.results.tui_sections.passes.content)
         self.add("failures_section", self.results.tui_sections.failures.content)
         self.add("reruns_section", self.results.tui_sections.rerun_summary.content)
+        self.add("other_section", self.results.tui_sections.other.content)
         return self.get_all_items()
 
     def fetch_html(self):
@@ -134,7 +135,7 @@ class HtmlPage:
 
         # Sections content
         tab_section_content = [
-            f"""<div id="{section}" class="tabcontent"> <pre><p>{self.tab_content.tabs[section]}</p></pre> </div>"""
+            f"""<div id="{section}" class="tabcontent"> <pre><p>{self.tab_content.tabs[section] or ""}</p></pre> </div>"""
             for section in TABS_SECTIONS
         ]
         tab_sections = "".join(tab_section_content)

@@ -20,7 +20,7 @@ from pytest_tui.utils import (CONFIGFILE, TERMINAL_OUTPUT_FILE,
                               TuiSections, TuiTestResult, TuiTestResults,
                               errors_section_matcher, failures_section_matcher,
                               lastline_matcher, passes_section_matcher,
-                              rerun_summary_matcher,
+                              rerun_summary_matcher, #live_log_sessionstart_matcher,
                               short_test_summary_matcher,
                               short_test_summary_test_matcher,
                               test_session_starts_matcher,
@@ -111,6 +111,9 @@ def pytest_runtest_logstart(nodeid, location):
 
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config: Config) -> None:
+    if not (hasattr(config.option, "tui") and config.option.tui):
+        return
+
     config.option.verbose = 1  # easier parsing of final test results
     config.option.reportchars = "A"  # "display all" mode so all results are shown
 
@@ -124,6 +127,8 @@ def pytest_configure(config: Config) -> None:
 
         # identify and mark each results section
         def tee_write(s, **kwargs):
+            # if re.search(live_log_sessionstart_matcher, s):
+            #     config._tui_current_section = "live_log_sessionstart"
             if re.search(test_session_starts_matcher, s):
                 config._tui_current_section = "test_session_starts"
             if re.search(errors_section_matcher, s):
@@ -194,6 +199,9 @@ def pytest_configure(config: Config) -> None:
 
 def pytest_unconfigure(config: Config):
     # Populate test result objects with total durations, from each test's TestReport object.
+    if not (hasattr(config.option, "tui") and config.option.tui):
+        return
+
     for tui_test_result, test_report in itertools.product(
         _tui_test_results.test_results, _tui_reports
     ):
@@ -228,7 +236,6 @@ def pytest_unconfigure(config: Config):
     with open(TUI_SECTIONS_FILE, "wb") as file:
         pickle.dump(_tui_sections, file)
 
-    if hasattr(config.option, "tui") and config.option.tui:
         pytui_launch(config)
 
 

@@ -17,6 +17,7 @@ TUI_SECTIONS_FILE = PYTEST_TUI_FILES_DIR / "tui_sections.pickle"
 TERMINAL_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "terminal_output.ansi"
 
 # regex matching patterns for Pytest sections
+# live_log_sessionstart_matcher = re.compile(r"^==.*\s live log sessionstart\s==+")
 test_session_starts_matcher = re.compile(r"^==.*\stest session starts\s==+")
 test_session_starts_test_matcher = re.compile(r"^(.*\::\S+)\s")
 errors_section_matcher = re.compile(r"^==.*\sERRORS\s==+")
@@ -34,12 +35,13 @@ section_name_matcher = re.compile(r"~~>PYTEST_TUI_(\w+)")
 standard_test_matcher = re.compile(
     r"(.*\::\S+)\s(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)"
 )
-live_log_testname_matcher = re.compile(r"(.*::\S+)", re.MULTILINE)
-live_log_outcome_matcher = re.compile(
-    r"^(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)\W.+(\[\W?.*?\])", re.MULTILINE
-)
+# live_log_testname_matcher = re.compile(r"(.*::\S+)", re.MULTILINE)
+# live_log_outcome_matcher = re.compile(
+#     r"^(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)\W.+(\[\W?.*?\])", re.MULTILINE
+# )
 
 MARKERS = {
+    # "pytest_tui_live_log_sessionstarts": "~~>PYTEST_TUI_LIVE_LOG_SESSIONSTARTS<~~",
     "pytest_tui_test_session_starts": "~~>PYTEST_TUI_TEST_SESSION_STARTS<~~",
     "pytest_tui_errors_section": "~~>PYTEST_TUI_ERRORS_SECTION<~~",
     "pytest_tui_failures_section": "~~>PYTEST_TUI_FAILURES_SECTION<~~",
@@ -199,6 +201,7 @@ class TuiSection:
 
 @dataclass
 class TuiSections:
+    # live_log_sessionstart: TuiSection = TuiSection(name="live_log_sessionstart", content="")
     test_session_starts: TuiSection = TuiSection(name="test_session_starts", content="")
     errors: TuiSection = TuiSection(name="errors", content="")
     failures: TuiSection = TuiSection(name="failures", content="")

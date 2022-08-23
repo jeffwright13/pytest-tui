@@ -8,6 +8,7 @@
 }
 
 .tab button {
+	border-radius: 3px;
 	background-color: inherit;
 	float: left;
 	border: none;
@@ -15,10 +16,12 @@
 	cursor: pointer;
 	padding: 14px 16px;
 	transition: 0.3s;
+	/* border: 1px solid #d3d3d3; */
 }
 
 .tablinks {
 	font-family: "Arial", sans-serif;
+	/* border: 1px solid gray; */
 }
 
 .tabcontent {
