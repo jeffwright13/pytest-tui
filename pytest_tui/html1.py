@@ -53,10 +53,9 @@ class TabContent:
     def fetch_raw(self):
         self.add(
             "summary_section",
-            self.results.tui_sections.short_test_summary.content,
-            # self.results.tui_sections.lastline.content
-            # + self.results.tui_sections.test_session_starts.content
-            # + self.results.tui_sections.short_test_summary.content,
+            self.converter.convert(self.results.tui_sections.test_session_starts.content, full=False)
+            + self.converter.convert(self.results.tui_sections.short_test_summary.content, full=False)
+            + self.converter.convert(self.results.tui_sections.lastline.content, full=False)
         )
         # self.add("livelog_section", self.results.tui_sections.live_log_sessionstart.content)
         self.add("warnings_section", self.results.tui_sections.warnings_summary.content)
@@ -86,7 +85,7 @@ class HtmlPage:
 
         self.results = results
         self.tab_content = TabContent(results)
-        self.tab_content.fetch_html()
+        self.fetched_html = self.tab_content.fetch_html()
         self.converter = Ansi2HTMLConverter()
 
     def create_header(self) -> str:

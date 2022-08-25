@@ -1,5 +1,13 @@
 @charset "UTF-8";
 
+.pre {
+	display: block;
+	font-family: monospace;
+	white-space: pre;
+	margin: 1em 0;
+	word-wrap: break-word;
+}
+
 .tab {
 	overflow: hidden;
 	border: 1px solid #ccc;

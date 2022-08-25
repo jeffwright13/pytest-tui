@@ -1,5 +1,13 @@
 RELEASE_INSTRUCTIONS
 --------------------
+
+# TESTING
+- `pytest --version` completes without error and shows correct version
+- `pytest` runs without any tests to execute (should show 'no tests ran')
+- `pytest` runs on new venv with only pytest-tui installed, and some tests, and w/o a ptt_files folder in place
+- 'pytest --tui' runs on new venv with only pytest-tui installed, and some tests, and w/o a ptt_files folder in place
+
+# RELEASE
 - Verify package installs and runs correctly locally (from toplevel):
   cd <dev-direcory>
   pip install -e .

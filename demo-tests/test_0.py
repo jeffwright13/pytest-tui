@@ -1,49 +1,56 @@
-import pytest
+import logging
+import random
 import warnings
 
+import pytest
 
-def test_pass_1():
-    print("Test Pass 2!")
+logger = logging.getLogger()
+
+
+def test0_pass_1():
+    print("Test Pass 1!")
     assert True
 
 
-def test_pass_2():
+def test0_pass_2_logs():
     print("Test Pass 2!")
+    logger.critical("CRITICAL")
+    logger.error("ERROR")
+    logger.warning("WARNING")
+    logger.info("INFO")
+    logger.debug("DEBUG")
     assert True
 
 
-def test_pass_3():
+@pytest.fixture
+def error_fixt():
+    raise Exception("Error in fixture")
+
+
+def test0_pass_3_error_in_fixture(error_fixt):
     print("Test Pass 3!")
     assert True
 
 
-def test_fail_1():
+def test0_fail_1():
     print("Test Fail 1!")
-    assert False
-
-
-def test_fail_2():
-    print("Test Fail 2!")
-    assert False
-
-
-def test_fail_3():
-    print("Test Fail 3!")
-    assert False
+    assert 1 == 2
 
 
 pytest.mark.skip(reason="Skipping this test with decorator.")
-def test_skip():
+
+
+def test0_skip():
     assert True
 
 
 @pytest.mark.xfail()
-def test_xfail():
+def test0_xfail():
     assert False
 
 
 @pytest.mark.xfail()
-def test_xpass():
+def test0_xpass():
     assert True
 
 
@@ -53,5 +60,10 @@ def api_v1():
     return 1
 
 
-def test_warning():
+def test0_warning():
     assert api_v1() == 1
+
+
+@pytest.mark.flaky(reruns=5)
+def test_flaky_3():
+    assert random.choice([True, False])

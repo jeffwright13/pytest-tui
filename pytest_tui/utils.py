@@ -40,17 +40,17 @@ standard_test_matcher = re.compile(
 #     r"^(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)\W.+(\[\W?.*?\])", re.MULTILINE
 # )
 
-MARKERS = {
-    # "pytest_tui_live_log_sessionstarts": "~~>PYTEST_TUI_LIVE_LOG_SESSIONSTARTS<~~",
-    "pytest_tui_test_session_starts": "~~>PYTEST_TUI_TEST_SESSION_STARTS<~~",
-    "pytest_tui_errors_section": "~~>PYTEST_TUI_ERRORS_SECTION<~~",
-    "pytest_tui_failures_section": "~~>PYTEST_TUI_FAILURES_SECTION<~~",
-    "pytest_tui_warnings_summary": "~~>PYTEST_TUI_WARNINGS_SUMMARY<~~",
-    "pytest_tui_passes_section": "~~>PYTEST_TUI_PASSES_SECTION<~~",
-    "pytest_tui_rerun_summary": "~~>PYTEST_TUI_RERUN_SUMMARY<~~",
-    "pytest_tui_short_test_summary": "~~>PYTEST_TUI_SHORT_TEST_SUMMARY<~~",
-    "pytest_tui_last_line": "~~>PYTEST_TUI_LAST_LINE<~~",
-}
+# MARKERS = {
+#     # "pytest_tui_live_log_sessionstarts": "~~>PYTEST_TUI_LIVE_LOG_SESSIONSTARTS<~~",
+#     "pytest_tui_test_session_starts": "~~>PYTEST_TUI_TEST_SESSION_STARTS<~~",
+#     "pytest_tui_errors_section": "~~>PYTEST_TUI_ERRORS_SECTION<~~",
+#     "pytest_tui_failures_section": "~~>PYTEST_TUI_FAILURES_SECTION<~~",
+#     "pytest_tui_warnings_summary": "~~>PYTEST_TUI_WARNINGS_SUMMARY<~~",
+#     "pytest_tui_passes_section": "~~>PYTEST_TUI_PASSES_SECTION<~~",
+#     "pytest_tui_rerun_summary": "~~>PYTEST_TUI_RERUN_SUMMARY<~~",
+#     "pytest_tui_short_test_summary": "~~>PYTEST_TUI_SHORT_TEST_SUMMARY<~~",
+#     "pytest_tui_last_line": "~~>PYTEST_TUI_LAST_LINE<~~",
+# }
 
 
 OUTCOMES = (
@@ -201,7 +201,7 @@ class TuiSection:
 
 @dataclass
 class TuiSections:
-    # live_log_sessionstart: TuiSection = TuiSection(name="live_log_sessionstart", content="")
+    live_log_sessionstart: TuiSection = TuiSection(name="pre_test", content="")
     test_session_starts: TuiSection = TuiSection(name="test_session_starts", content="")
     errors: TuiSection = TuiSection(name="errors", content="")
     failures: TuiSection = TuiSection(name="failures", content="")
@@ -210,7 +210,9 @@ class TuiSections:
     rerun_summary: TuiSection = TuiSection(name="rerun_summary", content="")
     short_test_summary: TuiSection = TuiSection(name="short_test_summary", content="")
     lastline: TuiSection = TuiSection(name="lastline", content="")
-    other: TuiSection = TuiSection(name="other", content="") # for anything else that isn't a known pytest section
+    other: TuiSection = TuiSection(
+        name="other", content=""
+    )  # for anything else that isn't a known pytest section
 
 
 class Results:
@@ -229,10 +231,10 @@ class Results:
             with open(TUI_RESULT_OBJECTS_FILE, "rb") as rfile:
                 return pickle.load(rfile)
         except FileNotFoundError as e:
-            # raise FileNotFoundError(
-            #     f"Cannot find {TUI_RESULT_OBJECTS_FILE}. Have you run pytest with the '--tui' option yet?"
-            # ) from e
-            pass
+            raise FileNotFoundError(
+                f"Cannot find {TUI_RESULT_OBJECTS_FILE}. Have you run pytest with the '--tui' option yet?"
+            ) from e
+            # pass
 
     def _unpickle_tui_sections(self):
         """Unpack pickled TuiSections from file"""
@@ -240,10 +242,10 @@ class Results:
             with open(TUI_SECTIONS_FILE, "rb") as rfile:
                 return pickle.load(rfile)
         except FileNotFoundError as e:
-            # raise FileNotFoundError(
-            #     f"Cannot find {TUI_SECTIONS_FILE}. Have you run pytest with the '--tui' option yet?"
-            # ) from e
-            pass
+            raise FileNotFoundError(
+                f"Cannot find {TUI_SECTIONS_FILE}. Have you run pytest with the '--tui' option yet?"
+            ) from e
+            # pass
 
     def _get_terminal_output(self, file_path: Path = TERMINAL_OUTPUT_FILE) -> list:
         """Get full Pytest terminal output"""
@@ -251,7 +253,7 @@ class Results:
             with open(file_path, "r") as file:
                 return file.read()
         except FileNotFoundError as e:
-            # raise FileNotFoundError(
-            #     f"Cannot find {file_path}. Have you run pytest with the '--tui' option yet?"
-            # ) from e
+            raise FileNotFoundError(
+                f"Cannot find {file_path}. Have you run pytest with the '--tui' option yet?"
+            ) from e
             pass

@@ -17,7 +17,7 @@ logging.getLogger("faker").setLevel(logging.DEBUG)
 # across different files
 
 
-def fake_data(min: int = 300, max: int = 600) -> str:
+def fake_data(min: int = 30, max: int = 60) -> str:
     return faker.Faker().text(random.randint(min, max))
 
 

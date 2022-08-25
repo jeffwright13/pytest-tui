@@ -8,24 +8,32 @@ from io import StringIO
 from types import SimpleNamespace
 
 import pytest
+from pytest import Session
 from _pytest._io.terminalwriter import TerminalWriter
 from _pytest.config import Config, create_terminal_writer
 from _pytest.reports import TestReport
 from strip_ansi import strip_ansi
 
-from pytest_tui.__main__ import Cli, tui_launch
+from pytest_tui.__main__ import tui_launch
 from pytest_tui.html1 import main as tuihtml
-from pytest_tui.utils import (CONFIGFILE, TERMINAL_OUTPUT_FILE,
-                              TUI_RESULT_OBJECTS_FILE, TUI_SECTIONS_FILE,
-                              TuiSections, TuiTestResult, TuiTestResults,
-                              errors_section_matcher, failures_section_matcher,
-                              lastline_matcher, passes_section_matcher,
-                              rerun_summary_matcher, #live_log_sessionstart_matcher,
-                              short_test_summary_matcher,
-                              short_test_summary_test_matcher,
-                              test_session_starts_matcher,
-                              test_session_starts_test_matcher,
-                              warnings_summary_matcher)
+from pytest_tui.utils import (
+    TERMINAL_OUTPUT_FILE,
+    TUI_RESULT_OBJECTS_FILE,
+    TUI_SECTIONS_FILE,
+    TuiSections,
+    TuiTestResult,
+    TuiTestResults,
+    errors_section_matcher,
+    failures_section_matcher,
+    lastline_matcher,
+    passes_section_matcher,
+    rerun_summary_matcher,  # live_log_sessionstart_matcher,
+    short_test_summary_matcher,
+    short_test_summary_test_matcher,
+    test_session_starts_matcher,
+    test_session_starts_test_matcher,
+    warnings_summary_matcher,
+)
 
 # Don't collect tests from any of these files
 collect_ignore = [
@@ -41,7 +49,7 @@ _tui_sections = TuiSections()
 _tui_terminal_out = tempfile.TemporaryFile("wb+")
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser) -> None:
     group = parser.getgroup("tui")
     group.addoption(
         "--tui",
@@ -50,7 +58,7 @@ def pytest_addoption(parser):
     )
 
 
-def add_ansi_to_report(config: Config, report: TestReport):
+def add_ansi_to_report(config: Config, report: TestReport) -> None:
     """
     If the report has longreprtext (traceback info), mark it up with ANSI codes
     From https://stackoverflow.com/questions/71846269/algorithm-for-extracting-first-and-last-lines-from-sectionalized-output-file
@@ -74,7 +82,19 @@ def add_ansi_to_report(config: Config, report: TestReport):
     reporter._tw = original_writer
 
 
-def pytest_report_teststatus(report: TestReport, config: Config):
+def pytest_cmdline_main(config: Config) -> None:
+    config.option.verbose = 1  # easier parsing of final test results
+    config.option.reportchars = "A"  # "display all" mode so all results are shown
+
+
+def pytest_sessionstart(session: Session) -> None:
+    session.config._tui_sessionstart = (
+        True  # used by tui plugin to indicate first lines of console output
+    )
+    session.config._tui_current_section = "pre_test"  # "" ""
+
+
+def pytest_report_teststatus(report: TestReport, config: Config) -> None:
     """Construct list(s) of individual TestReport instances"""
 
     if hasattr(report, "caplog") and report.caplog:
@@ -102,7 +122,7 @@ def pytest_report_teststatus(report: TestReport, config: Config):
 
 
 @pytest.hookimpl()
-def pytest_runtest_logstart(nodeid, location):
+def pytest_runtest_logstart(nodeid, location) -> None:
     for tui_test_result in _tui_test_results.test_results:
         if tui_test_result.fqtn == nodeid:
             tui_test_result.start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
@@ -114,8 +134,8 @@ def pytest_configure(config: Config) -> None:
     if not (hasattr(config.option, "tui") and config.option.tui):
         return
 
-    config.option.verbose = 1  # easier parsing of final test results
-    config.option.reportchars = "A"  # "display all" mode so all results are shown
+    # config.option.verbose = 1  # easier parsing of final test results
+    # config.option.reportchars = "rA"  # "display all" mode so all results are shown
 
     # Examine Pytest terminal output to mark different sections of the output.
     # This code is based on the code in pytest's `pastebin.py`.
@@ -127,8 +147,8 @@ def pytest_configure(config: Config) -> None:
 
         # identify and mark each results section
         def tee_write(s, **kwargs):
-            # if re.search(live_log_sessionstart_matcher, s):
-            #     config._tui_current_section = "live_log_sessionstart"
+
+            # Check to see if current line is a section start marker
             if re.search(test_session_starts_matcher, s):
                 config._tui_current_section = "test_session_starts"
             if re.search(errors_section_matcher, s):
@@ -147,9 +167,13 @@ def pytest_configure(config: Config) -> None:
                 config._tui_current_section = "lastline"
                 _tui_sections.lastline.content += s
             else:
-                if not hasattr(config, "_tui_current_section"):
-                    config._tui_current_section = "other"
-                exec(f"_tui_sections.{config._tui_current_section}.content += s")
+                # This line is not a section start marker
+                if config._tui_sessionstart:
+                    config._tui_current_section = "test_session_starts"
+                    config._tui_sessionstart = False
+
+            # Write current line to current section
+            exec(f"_tui_sections.{config._tui_current_section}.content += s")
 
             # If this is an actual test outcome line in the initial `=== test session starts ==='
             # section, populate the TuiTestResult's fully qualified test name field. Do not add
@@ -197,7 +221,7 @@ def pytest_configure(config: Config) -> None:
         tr._tw.write = tee_write
 
 
-def pytest_unconfigure(config: Config):
+def pytest_unconfigure(config: Config) -> None:
     # Populate test result objects with total durations, from each test's TestReport object.
     if not (hasattr(config.option, "tui") and config.option.tui):
         return

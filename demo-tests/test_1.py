@@ -15,7 +15,7 @@ logger.addHandler(stdout_handler)
 logging.getLogger("faker").setLevel(logging.DEBUG)
 
 
-def fake_data(min: int = 120, max: int = 480) -> str:
+def fake_data(min: int = 12, max: int = 48) -> str:
     return faker.Faker().text(random.randint(min, max))
 
 
