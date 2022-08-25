@@ -7,7 +7,9 @@ and this project tries to adhere to [Semantic Versioning](https://semver.org/spe
 
 ## [1.2.1] - 2022-08-22
 
-- Add support for `live log sessionstarts` section, if it exists.
+- Revamp console-line categorization algorithm to accomodate variations in user environment more easily
+- Add support for `live log` sections
+- Fix multiple bugs (although several remain)
 
 ## [1.2.0] - 2022-08-19
 
