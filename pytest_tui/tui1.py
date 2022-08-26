@@ -26,7 +26,7 @@ CATEGORIES = {
     "SKIPPED": "bold cyan underline",
     "XFAILS": "bold indian_red underline",
     "XPASSES": "bold chartreuse1 underline",
-    "RERUNS": "bold yellow underline",
+    # "RERUNS": "bold yellow underline",
 }
 
 
@@ -64,7 +64,7 @@ class Tabs(Widget):
             + results.tui_sections.short_test_summary.content,
             "Warnings": results.tui_sections.warnings_summary.content,
             "Errors": results.tui_sections.errors.content,
-            "Reruns": results.tui_sections.rerun_summary.content,
+            # "Reruns": results.tui_sections.rerun_summary.content,
             "Full Output": results.terminal_output,
         }
         tree_names = {

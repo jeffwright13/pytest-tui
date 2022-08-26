@@ -27,7 +27,7 @@ from pytest_tui.utils import (
     failures_section_matcher,
     lastline_matcher,
     passes_section_matcher,
-    rerun_summary_matcher,  # live_log_sessionstart_matcher,
+    # rerun_summary_matcher,
     short_test_summary_matcher,
     short_test_summary_test_matcher,
     test_session_starts_matcher,
@@ -41,8 +41,8 @@ collect_ignore = [
     "plugin.py",
 ]
 
-# Globals to hold Pytest TestReport instances; and individual test result and
-# section objects
+# Globals to hold Pytest TestReport instances; individual test result objects;
+#  and section objects
 _tui_reports = []
 _tui_test_results = TuiTestResults()
 _tui_sections = TuiSections()
@@ -83,8 +83,12 @@ def add_ansi_to_report(config: Config, report: TestReport) -> None:
 
 
 def pytest_cmdline_main(config: Config) -> None:
-    config.option.verbose = 1  # easier parsing of final test results
-    config.option.reportchars = "A"  # "display all" mode so all results are shown
+    if hasattr(config.option, "tui"):
+        if config.option.tui:
+            config.option.verbose = 1  # easier parsing of final test results
+            config.option.reportchars = "A"  # "display all" mode so all results are shown
+        if hasattr(config.option, "reruns"):
+            config.option.reportchars = "AR" # special handling for pytest-rerunfailures
 
 
 def pytest_sessionstart(session: Session) -> None:
@@ -159,8 +163,8 @@ def pytest_configure(config: Config) -> None:
                 config._tui_current_section = "warnings_summary"
             if re.search(passes_section_matcher, s):
                 config._tui_current_section = "passes"
-            if re.search(rerun_summary_matcher, s):
-                config._tui_current_section = "rerun_summary"
+            # if re.search(rerun_summary_matcher, s):
+            #     config._tui_current_section = "rerun_summary"
             if re.search(short_test_summary_matcher, s):
                 config._tui_current_section = "short_test_summary"
             if re.search(lastline_matcher, s):

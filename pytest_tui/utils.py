@@ -24,7 +24,7 @@ errors_section_matcher = re.compile(r"^==.*\sERRORS\s==+")
 failures_section_matcher = re.compile(r"^==.*\sFAILURES\s==+")
 warnings_summary_matcher = re.compile(r"^==.*\swarnings summary\s.*==+")
 passes_section_matcher = re.compile(r"^==.*\sPASSES\s==+")
-rerun_summary_matcher = re.compile(r"^==.*\srerun test summary info\s==+")
+# rerun_summary_matcher = re.compile(r"^==.*\srerun test summary info\s==+")
 short_test_summary_matcher = re.compile(r"^==.*\sshort test summary info\s.*==+")
 short_test_summary_test_matcher = re.compile(
     r"^(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)\s+(?:\[\d+\]\s)?(\S+)(?:.*)?$"
@@ -35,22 +35,6 @@ section_name_matcher = re.compile(r"~~>PYTEST_TUI_(\w+)")
 standard_test_matcher = re.compile(
     r"(.*\::\S+)\s(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)"
 )
-# live_log_testname_matcher = re.compile(r"(.*::\S+)", re.MULTILINE)
-# live_log_outcome_matcher = re.compile(
-#     r"^(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)\W.+(\[\W?.*?\])", re.MULTILINE
-# )
-
-# MARKERS = {
-#     # "pytest_tui_live_log_sessionstarts": "~~>PYTEST_TUI_LIVE_LOG_SESSIONSTARTS<~~",
-#     "pytest_tui_test_session_starts": "~~>PYTEST_TUI_TEST_SESSION_STARTS<~~",
-#     "pytest_tui_errors_section": "~~>PYTEST_TUI_ERRORS_SECTION<~~",
-#     "pytest_tui_failures_section": "~~>PYTEST_TUI_FAILURES_SECTION<~~",
-#     "pytest_tui_warnings_summary": "~~>PYTEST_TUI_WARNINGS_SUMMARY<~~",
-#     "pytest_tui_passes_section": "~~>PYTEST_TUI_PASSES_SECTION<~~",
-#     "pytest_tui_rerun_summary": "~~>PYTEST_TUI_RERUN_SUMMARY<~~",
-#     "pytest_tui_short_test_summary": "~~>PYTEST_TUI_SHORT_TEST_SUMMARY<~~",
-#     "pytest_tui_last_line": "~~>PYTEST_TUI_LAST_LINE<~~",
-# }
 
 
 OUTCOMES = (
@@ -178,12 +162,12 @@ class TuiTestResults:
             if test_result.outcome == "XPASS"
         ]
 
-    def all_reruns(self):
-        return [
-            test_result
-            for test_result in self.test_results
-            if test_result.outcome == "RERUN"
-        ]
+    # def all_reruns(self):
+    #     return [
+    #         test_result
+    #         for test_result in self.test_results
+    #         if test_result.outcome == "RERUN"
+    #     ]
 
     def all_errors(self):
         return [
@@ -207,7 +191,7 @@ class TuiSections:
     failures: TuiSection = TuiSection(name="failures", content="")
     passes: TuiSection = TuiSection(name="passes", content="")
     warnings_summary: TuiSection = TuiSection(name="warnings_summary", content="")
-    rerun_summary: TuiSection = TuiSection(name="rerun_summary", content="")
+    # rerun_summary: TuiSection = TuiSection(name="rerun_summary", content="")
     short_test_summary: TuiSection = TuiSection(name="short_test_summary", content="")
     lastline: TuiSection = TuiSection(name="lastline", content="")
     other: TuiSection = TuiSection(

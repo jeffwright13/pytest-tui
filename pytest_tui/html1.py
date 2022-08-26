@@ -19,19 +19,18 @@ TABS = [
     "Skipped",
     "Xfails",
     "Xpasses",
-    "Reruns",
+    # "Reruns",
     "Warnings",
     "Errors",
     "Full Output",
 ]
 TABS_SECTIONS = [
-    # "livelog_section",
     "summary_section",
     "warnings_section",
     "errors_section",
     "passes_section",
     "failures_section",
-    "reruns_section",
+    # "reruns_section",
     "other_section",
 ]
 TABS_RESULTS = ["Passes", "Failures", "Skipped", "Xfails", "Xpasses"]
@@ -57,12 +56,11 @@ class TabContent:
             + self.converter.convert(self.results.tui_sections.short_test_summary.content, full=False)
             + self.converter.convert(self.results.tui_sections.lastline.content, full=False)
         )
-        # self.add("livelog_section", self.results.tui_sections.live_log_sessionstart.content)
         self.add("warnings_section", self.results.tui_sections.warnings_summary.content)
         self.add("errors_section", self.results.tui_sections.errors.content)
         self.add("passes_section", self.results.tui_sections.passes.content)
         self.add("failures_section", self.results.tui_sections.failures.content)
-        self.add("reruns_section", self.results.tui_sections.rerun_summary.content)
+        # self.add("reruns_section", self.results.tui_sections.rerun_summary.content)
         self.add("other_section", self.results.tui_sections.other.content)
         return self.get_all_items()
 
@@ -75,7 +73,7 @@ class TabContent:
 
 class HtmlPage:
     def __init__(self, results: Results):
-        # Read existing config from file, or apply default if not existing
+        # Read existing config from file, or apply default if not exist
         self.config_parser = configparser.ConfigParser()
         try:
             self.config_parser.read(CONFIGFILE)
