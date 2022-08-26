@@ -12,6 +12,8 @@ from pytest_tui.__main__ import Cli
 from pytest_tui.utils import (CONFIGFILE, HTML_OUTPUT_FILE,
                               TERMINAL_OUTPUT_FILE, Results)
 
+CSS_FILE = Path(__file__).parent / "styles.css"
+
 TABS = [
     "Summary",
     "Passes",
@@ -34,6 +36,7 @@ TABS_RESULTS = ["Passes", "Failures", "Skipped", "Xfails", "Xpasses"]
 TAB_METADATA = ["About"]
 TAB_FULL_OUTPUT = ["Full Output"]
 
+
 class TabContent:
     def __init__(self, results: Results):
         self.converter = Ansi2HTMLConverter()
@@ -47,12 +50,8 @@ class TabContent:
         return self.tabs
 
     def fetch_raw(self):
-        self.add(
-            "summary_section",
-            self.converter.convert(self.results.tui_sections.test_session_starts.content, full=False)
-            + self.converter.convert(self.results.tui_sections.short_test_summary.content, full=False)
-            + self.converter.convert(self.results.tui_sections.lastline.content, full=False)
-        )
+        summary_section = self.results.tui_sections.test_session_starts.content + self.results.tui_sections.short_test_summary.content + "\n" +  self.results.tui_sections.lastline.content.replace("=", "")
+        self.add("summary_section", summary_section)
         self.add("warnings_section", self.results.tui_sections.warnings_summary.content)
         self.add("errors_section", self.results.tui_sections.errors.content)
         self.add("passes_section", self.results.tui_sections.passes.content)
@@ -83,7 +82,13 @@ class HtmlPage:
         self.converter = Ansi2HTMLConverter()
 
     def create_header(self) -> str:
-        return """<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Pytest-Tui Test Report</title> <link rel="stylesheet" href="/Users/jwr003/coding/pytest-tui/pytest_tui/styles.css" type="text/css"> <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css"> <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Arial"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" >"""
+        if self.config_parser["HTML"].get("html_autolaunch") == "True":
+            with open(CSS_FILE) as file:
+                css = file.read()
+            return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" >"""
+
+        else:
+            return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Pytest-Tui Test Report</title> <link rel="stylesheet" href={CSS_FILE} type="text/css"> <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css"> <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Arial"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" >"""
 
     def create_testrun_results(self) -> str:
         return (
@@ -216,8 +221,8 @@ class HtmlPage:
         )
 
     def get_terminal_output(self) -> str:
-        with open(TERMINAL_OUTPUT_FILE, "r") as f:
-            tout = f.read()
+        with open(TERMINAL_OUTPUT_FILE, "rb") as f:
+            tout = str(f.read(), "utf-8")
         return self.converter.convert(tout, full=False)
 
 
@@ -237,7 +242,7 @@ def main():
         f.write(html_out)
 
     # Open in browser
-    if page.config_parser["HTML"].get("autolaunch_html") == "True":
+    if page.config_parser["HTML"].get("html_autolaunch") == "True":
         webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
 
 

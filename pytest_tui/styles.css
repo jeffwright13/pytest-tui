@@ -137,6 +137,23 @@ table, th, td {
 .ansi36 { color: #00aaaa; }
 .ansi37 { color: #F5F1DE; }
 
+.ansi90 { color: #7f7f7f; }
+.inv90 { background-color: #7f7f7f; }
+.ansi91 { color: #ff0000; }
+.inv91 { background-color: #ff0000; }
+.ansi92 { color: #00ff00; }
+.inv92 { background-color: #00ff00; }
+.ansi93 { color: #ffff00; }
+.inv93 { background-color: #ffff00; }
+.ansi94 { color: #5c5cff; }
+.inv94 { background-color: #5c5cff; }
+.ansi95 { color: #ff00ff; }
+.inv95 { background-color: #ff00ff; }
+.ansi96 { color: #00ffff; }
+.inv96 { background-color: #00ffff; }
+.ansi97 { color: #ffffff; }
+.inv97 { background-color: #ffffff; }
+
 .ansi40 { background-color: #000316; }
 .ansi41 { background-color: #aa0000; }
 .ansi42 { background-color: #00aa00; }
