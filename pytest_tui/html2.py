@@ -208,7 +208,7 @@ def main():  # sourcery skip: low-code-quality, use-fstring-for-concatenation
         f.write(html_out)
 
     # Open in browser
-    if page.config_parser["HTML"].get("autolaunch_html") == "True":
+    if page.config_parser["HTML"].get("html_autolaunch") == "True":
         webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
 
 
