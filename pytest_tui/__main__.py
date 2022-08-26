@@ -35,11 +35,12 @@ class DefaultConfig:
 
     def __init__(self):
         # self.tui = "tui1"
-        self.autolaunch_tui = False
+        self.tui_autolaunch = False
         # self.html_layout = "html1"
         # self.colortheme = "light"
         # self.colortheme_colors = self.HTML_LIGHT_THEME
-        self.autolaunch_html = True
+        self.html_autolaunch = True
+        self.html_outputformat = "linked"  # 'linked' | 'selfcontained'
 
 
 class Cli:
@@ -75,6 +76,7 @@ class Cli:
             # "Select TUI": self.select_tui,
             "Set TUI autolaunch option": self.set_tui_autolaunch,
             "Set HTML autolaunch option": self.set_html_autolaunch,
+            "Set HTML output file format": self.set_html_output_format,
             # "Select HTML layout": self.select_html_layout,
             # "Select HTML light or dark theme": self.select_html_light_dark,
             # "Define custom HTML color theme": self.define_custom_html_theme,
@@ -104,14 +106,17 @@ class Cli:
             self.config_parser.add_section("TUI")
         # self.config_parser.set("TUI", "tui", self.default_config.tui)
         self.config_parser.set(
-            "TUI", "autolaunch_tui", str(self.default_config.autolaunch_tui)
+            "TUI", "tui_autolaunch", str(self.default_config.tui_autolaunch)
         )
         if not self.config_parser.has_section("HTML"):
             self.config_parser.add_section("HTML")
         # self.config_parser.set("HTML", "layout", self.default_config.html_layout)
         # self.config_parser.set("HTML", "colortheme", self.default_config.colortheme)
         self.config_parser.set(
-            "HTML", "autolaunch_html", str(self.default_config.autolaunch_html)
+            "HTML", "html_autolaunch", str(self.default_config.html_autolaunch)
+        )
+        self.config_parser.set(
+            "HTML", "html_outputformat", str(self.default_config.html_outputformat)
         )
         # if not self.config_parser.has_section("HTML_COLOR_THEME"):
         #     self.config_parser.add_section("HTML_COLOR_THEME")
@@ -151,12 +156,12 @@ class Cli:
 
     def set_tui_autolaunch(self) -> None:
         self._clear_terminal()
-        autolaunch_tui = YesNo(
+        tui_autolaunch = YesNo(
             "Autolaunch TUI when test session is complete: "
         ).launch()
         if not self.config_parser.has_section("TUI"):
             self.config_parser.add_section("TUI")
-        self.config_parser.set("TUI", "autolaunch_tui", str(autolaunch_tui))
+        self.config_parser.set("TUI", "tui_autolaunch", str(tui_autolaunch))
         self.write_current_config_to_file()
         self._enter_to_continue()
 
@@ -255,12 +260,31 @@ class Cli:
 
     def set_html_autolaunch(self) -> None:
         self._clear_terminal()
-        autolaunch_html = YesNo("Auto-launch HTML when generated: ").launch()
+        html_autolaunch = YesNo("Auto-launch HTML when generated: ").launch()
         if not self.config_parser.has_section("HTML"):
             self.config_parser.add_section("HTML")
-        self.config_parser.set("HTML", "autolaunch_html", str(autolaunch_html))
+        self.config_parser.set("HTML", "html_autolaunch", str(html_autolaunch))
         self.write_current_config_to_file()
         self._enter_to_continue()
+
+    def set_html_output_format(self) -> None:
+        menu_items = {"Standard (linked) HTML output file": "linked", "Self-contained HTML output file": "selfcontained"}
+        self._clear_terminal()
+        selection = Bullet(
+            choices=list(menu_items.keys()),
+            bullet="==> ",
+            word_color=colors.bright(colors.foreground["white"]),
+            word_on_switch=colors.bright(colors.foreground["black"]),
+            background_color=colors.bright(colors.background["black"]),
+            background_on_switch=colors.bright(colors.background["white"]),
+        ).launch()
+        self._clear_terminal()
+
+        self.config_parser.set("HTML", "outputformat", menu_items[selection])
+        self.html_outputformat = menu_items[selection]
+        self.write_current_config_to_file()
+        self._enter_to_continue()
+
 
     def quit(self) -> None:
         self._clear_terminal()
@@ -292,7 +316,7 @@ def tui_run():
 def tui_launch():
     tuicli = Cli()
     tuicli.read_config_file()
-    if tuicli.config_parser["TUI"].get("autolaunch_tui") == "True":
+    if tuicli.config_parser["TUI"].get("tui_autolaunch") == "True":
         tui1()
 
 
