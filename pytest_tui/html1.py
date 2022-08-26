@@ -19,7 +19,6 @@ TABS = [
     "Skipped",
     "Xfails",
     "Xpasses",
-    # "Reruns",
     "Warnings",
     "Errors",
     "Full Output",
@@ -30,8 +29,6 @@ TABS_SECTIONS = [
     "errors_section",
     "passes_section",
     "failures_section",
-    # "reruns_section",
-    "other_section",
 ]
 TABS_RESULTS = ["Passes", "Failures", "Skipped", "Xfails", "Xpasses"]
 TAB_METADATA = ["About"]
@@ -60,7 +57,6 @@ class TabContent:
         self.add("errors_section", self.results.tui_sections.errors.content)
         self.add("passes_section", self.results.tui_sections.passes.content)
         self.add("failures_section", self.results.tui_sections.failures.content)
-        # self.add("reruns_section", self.results.tui_sections.rerun_summary.content)
         self.add("other_section", self.results.tui_sections.other.content)
         return self.get_all_items()
 
@@ -87,7 +83,7 @@ class HtmlPage:
         self.converter = Ansi2HTMLConverter()
 
     def create_header(self) -> str:
-        return """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Pytest-Tui Test Report</title> <link rel="stylesheet" href="/Users/jwr003/coding/pytest-tui/pytest_tui/styles.css" type="text/css"> <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css"> <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Arial"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" >"""
+        return """<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Pytest-Tui Test Report</title> <link rel="stylesheet" href="/Users/jwr003/coding/pytest-tui/pytest_tui/styles.css" type="text/css"> <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css"> <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Arial"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" >"""
 
     def create_testrun_results(self) -> str:
         return (
@@ -117,13 +113,6 @@ class HtmlPage:
         tab_links_section = """<div class="tab">""" + "".join(tabs_links) + """</div>"""
 
         # Results content
-        tests_by_outcome_and_time = (
-            self.results.tui_test_results.all_by_outcome_then_time()
-        )
-        results_failures = [
-            result for result in tests_by_outcome_and_time if result.outcome == "FAILED"
-        ]
-
         tab_result_content = [
             f"""<div id="{result}" class="tabcontent"> {self.get_collapsible_results(result.lower())} </div>"""
             for result in TABS_RESULTS
@@ -132,7 +121,7 @@ class HtmlPage:
 
         # Sections content
         tab_section_content = [
-            f"""<div id="{section}" class="tabcontent"> <pre><p>{self.tab_content.tabs[section] or ""}</p></pre> </div>"""
+            f"""<div id="{section}" class="tabcontent"> <pre><p>{self.converter.convert(self.tab_content.tabs[section], full=False) or ""}</p></pre> </div>"""
             for section in TABS_SECTIONS
         ]
         tab_sections = "".join(tab_section_content)
@@ -236,7 +225,6 @@ def main():
     results = Results()
     page = HtmlPage(results)
     html_header = page.create_header()
-    html_results = page.create_testrun_results()
     html_tabs = page.create_tabs()
     html_tab_script = page.create_tab_script()
     html_default_open = page.create_default_open()

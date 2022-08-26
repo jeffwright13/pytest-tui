@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2022-08-22
+
+- Remove unused "Reruns" section. Reruns are still supported, just not broken out individually. This is more in line with how ytest treats the Reruns section anyway. Reruns are categorized P/F/Sk just as normal tests are.
+- Remove duplicate 'lastline' in About section.
+
 ## [1.2.1] - 2022-08-22
 
 - Revamp console-line categorization algorithm to accomodate variations in user environment more easily

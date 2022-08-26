@@ -27,7 +27,6 @@ from pytest_tui.utils import (
     failures_section_matcher,
     lastline_matcher,
     passes_section_matcher,
-    # rerun_summary_matcher,
     short_test_summary_matcher,
     short_test_summary_test_matcher,
     test_session_starts_matcher,
@@ -138,9 +137,6 @@ def pytest_configure(config: Config) -> None:
     if not (hasattr(config.option, "tui") and config.option.tui):
         return
 
-    # config.option.verbose = 1  # easier parsing of final test results
-    # config.option.reportchars = "rA"  # "display all" mode so all results are shown
-
     # Examine Pytest terminal output to mark different sections of the output.
     # This code is based on the code in pytest's `pastebin.py`.
     tr = config.pluginmanager.getplugin("terminalreporter")
@@ -163,13 +159,10 @@ def pytest_configure(config: Config) -> None:
                 config._tui_current_section = "warnings_summary"
             if re.search(passes_section_matcher, s):
                 config._tui_current_section = "passes"
-            # if re.search(rerun_summary_matcher, s):
-            #     config._tui_current_section = "rerun_summary"
             if re.search(short_test_summary_matcher, s):
                 config._tui_current_section = "short_test_summary"
             if re.search(lastline_matcher, s):
                 config._tui_current_section = "lastline"
-                _tui_sections.lastline.content += s
             else:
                 # This line is not a section start marker
                 if config._tui_sessionstart:
