@@ -9,21 +9,11 @@ from ansi2html import Ansi2HTMLConverter
 
 from pytest_tui import __version__
 from pytest_tui.__main__ import Cli
-from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
+from pytest_tui.utils import (CONFIGFILE, HTML_OUTPUT_FILE,
+                              TERMINAL_OUTPUT_FILE, Results)
 
 CSS_FILE = Path(__file__).parent / "styles.css"
 
-TABS = [
-    "Summary",
-    "Passes",
-    "Failures",
-    "Skipped",
-    "Xfails",
-    "Xpasses",
-    "Warnings",
-    "Errors",
-    "Full Output",
-]
 TABS_SECTIONS = [
     "summary_section",
     "warnings_section",
@@ -39,7 +29,7 @@ TAB_FULL_OUTPUT = ["Full Output"]
 class TabContent:
     def __init__(self, results: Results):
         self.converter = Ansi2HTMLConverter()
-        self.tabs = {tab: "" for tab in TABS}
+        self.tabs = {tab: "" for tab in TABS_SECTIONS}
         self.results = results
 
     def add(self, tab, content):
@@ -49,19 +39,13 @@ class TabContent:
         return self.tabs
 
     def fetch_raw(self):
-        summary_section = (
-            "\n"
-            + self.results.tui_sections.lastline.content.replace("=", "")
-            + "\n"
-            + self.results.tui_sections.test_session_starts.content
-            + self.results.tui_sections.short_test_summary.content
-        )
+        summary_section = "\n" + self.results.tui_sections.lastline.content.replace("=", "") + "\n" + self.results.tui_sections.test_session_starts.content + self.results.tui_sections.short_test_summary.content
         self.add("summary_section", summary_section)
         self.add("warnings_section", self.results.tui_sections.warnings_summary.content)
         self.add("errors_section", self.results.tui_sections.errors.content)
         self.add("passes_section", self.results.tui_sections.passes.content)
         self.add("failures_section", self.results.tui_sections.failures.content)
-        # self.add("other_section", self.results.tui_sections.other.content)
+
         return self.get_all_items()
 
     def fetch_html(self):
@@ -86,10 +70,27 @@ class HtmlPage:
         self.fetched_html = self.tab_content.fetch_html()
         self.converter = Ansi2HTMLConverter()
 
+    def remove_tabs_without_content(self):
+        # Remove tabs for sections that do not contain any section or result data.
+        # This way, the HTML file will only not show blank tabs.
+        for tab in TABS_SECTIONS:
+            if not self.fetched_html[tab]:
+                TABS_SECTIONS.remove(tab)
+        if not self.results.tui_test_results.all_xpasses():
+            TABS_RESULTS.remove("Xpasses")
+        if not self.results.tui_test_results.all_xfails():
+            TABS_RESULTS.remove("Xfails")
+        if not self.results.tui_test_results.all_passes():
+            TABS_RESULTS.remove("Passes")
+        if not self.results.tui_test_results.all_failures():
+            TABS_RESULTS.remove("Failures")
+        if not self.results.tui_test_results.all_skipped():
+            TABS_RESULTS.remove("Skipped")
+
     def create_header(self) -> str:
-        with open(CSS_FILE) as file:
-            css = file.read()
+        css = Path(CSS_FILE).read_text()
         return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" >"""
+
 
     def create_testrun_results(self) -> str:
         return (
@@ -191,6 +192,7 @@ class HtmlPage:
         table_attributes = {
             "id": "metadata",
             "font-family": "Helvetica, Arial, sans-serif",
+            "font-size": "12px",
             "border": "ridge",
             "style": "width:auto%; table-layout: auto;",
             "border-collapse": "collapse",
@@ -230,6 +232,7 @@ class HtmlPage:
 def main():
     results = Results()
     page = HtmlPage(results)
+    page.remove_tabs_without_content()
     html_header = page.create_header()
     html_tabs = page.create_tabs()
     html_tab_script = page.create_tab_script()

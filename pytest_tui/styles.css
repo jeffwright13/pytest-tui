@@ -13,6 +13,7 @@
 	border: 1px solid #ccc;
 	background-color: #f1f1f1;
   	margin-right: 4px;
+	/* font-size: 15px */
 }
 
 .tab button {
@@ -24,11 +25,13 @@
 	cursor: pointer;
 	padding: 14px 16px;
 	transition: 0.3s;
+	font-size: 15px
 	/* border: 1px solid #d3d3d3; */
 }
 
 .tablinks {
 	font-family: "Arial", sans-serif;
+	font-size: 15px
 	/* border: 1px solid gray; */
 }
 
@@ -88,7 +91,7 @@
 	animation: fadeEffect .25s;
 }
 
-p {
+.p {
   font-size: 14px;
 }
 
@@ -98,6 +101,7 @@ h1, h2, h3, h4, h5, h6 {
 
 table, th, td {
 	font-family: "Arial", sans-serif;
+	font-size: 14px
 }
 
 .ansi2html-content {
