@@ -24,7 +24,6 @@ errors_section_matcher = re.compile(r"^==.*\sERRORS\s==+")
 failures_section_matcher = re.compile(r"^==.*\sFAILURES\s==+")
 warnings_summary_matcher = re.compile(r"^==.*\swarnings summary\s.*==+")
 passes_section_matcher = re.compile(r"^==.*\sPASSES\s==+")
-# rerun_summary_matcher = re.compile(r"^==.*\srerun test summary info\s==+")
 short_test_summary_matcher = re.compile(r"^==.*\sshort test summary info\s.*==+")
 short_test_summary_test_matcher = re.compile(
     r"^(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)\s+(?:\[\d+\]\s)?(\S+)(?:.*)?$"
@@ -162,13 +161,6 @@ class TuiTestResults:
             if test_result.outcome == "XPASS"
         ]
 
-    # def all_reruns(self):
-    #     return [
-    #         test_result
-    #         for test_result in self.test_results
-    #         if test_result.outcome == "RERUN"
-    #     ]
-
     def all_errors(self):
         return [
             test_result
@@ -191,11 +183,10 @@ class TuiSections:
     failures: TuiSection = TuiSection(name="failures", content="")
     passes: TuiSection = TuiSection(name="passes", content="")
     warnings_summary: TuiSection = TuiSection(name="warnings_summary", content="")
-    # rerun_summary: TuiSection = TuiSection(name="rerun_summary", content="")
     short_test_summary: TuiSection = TuiSection(name="short_test_summary", content="")
     lastline: TuiSection = TuiSection(name="lastline", content="")
-    other: TuiSection = TuiSection(
-        name="other", content=""
+    # other: TuiSection = TuiSection(
+    #     name="other", content=""
     )  # for anything else that isn't a known pytest section
 
 

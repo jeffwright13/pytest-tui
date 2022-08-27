@@ -50,13 +50,13 @@ class TabContent:
         return self.tabs
 
     def fetch_raw(self):
-        summary_section = self.results.tui_sections.test_session_starts.content + self.results.tui_sections.short_test_summary.content + "\n" +  self.results.tui_sections.lastline.content.replace("=", "")
-        self.add("summary_section", summary_section)
-        self.add("warnings_section", self.results.tui_sections.warnings_summary.content)
-        self.add("errors_section", self.results.tui_sections.errors.content)
-        self.add("passes_section", self.results.tui_sections.passes.content)
-        self.add("failures_section", self.results.tui_sections.failures.content)
-        self.add("other_section", self.results.tui_sections.other.content)
+        summary_section = "\n" + self.results.tui_sections.lastline.content.replace("=", "") + "\n" + self.results.tui_sections.test_session_starts.content + self.results.tui_sections.short_test_summary.content
+        self.add("summary", summary_section)
+        self.add("warnings", self.results.tui_sections.warnings_summary.content)
+        self.add("errors", self.results.tui_sections.errors.content)
+        self.add("passes", self.results.tui_sections.passes.content)
+        self.add("failures", self.results.tui_sections.failures.content)
+        # self.add("other_section", self.results.tui_sections.other.content)
         return self.get_all_items()
 
     def fetch_html(self):

@@ -32,7 +32,6 @@ class HtmlPage:
             "short test summary info": self.results.tui_sections.lastline.content
             + self.results.tui_sections.short_test_summary.content,
             "warnings summary": self.results.tui_sections.warnings_summary.content,
-            # "rerun test summary info": self.results.tui_sections.rerun_summary.content,
             "errors": self.results.tui_sections.errors.content,
             "full output": self.results.terminal_output,
         }
