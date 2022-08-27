@@ -8,31 +8,24 @@ from io import StringIO
 from types import SimpleNamespace
 
 import pytest
-from pytest import Session
 from _pytest._io.terminalwriter import TerminalWriter
 from _pytest.config import Config, create_terminal_writer
 from _pytest.reports import TestReport
+from pytest import Session
 from strip_ansi import strip_ansi
 
 from pytest_tui.__main__ import tui_launch
 from pytest_tui.html1 import main as tuihtml
-from pytest_tui.utils import (
-    TERMINAL_OUTPUT_FILE,
-    TUI_RESULT_OBJECTS_FILE,
-    TUI_SECTIONS_FILE,
-    TuiSections,
-    TuiTestResult,
-    TuiTestResults,
-    errors_section_matcher,
-    failures_section_matcher,
-    lastline_matcher,
-    passes_section_matcher,
-    short_test_summary_matcher,
-    short_test_summary_test_matcher,
-    test_session_starts_matcher,
-    test_session_starts_test_matcher,
-    warnings_summary_matcher,
-)
+from pytest_tui.utils import (TERMINAL_OUTPUT_FILE, TUI_RESULT_OBJECTS_FILE,
+                              TUI_SECTIONS_FILE, TuiSections, TuiTestResult,
+                              TuiTestResults, errors_section_matcher,
+                              failures_section_matcher, lastline_matcher,
+                              passes_section_matcher,
+                              short_test_summary_matcher,
+                              short_test_summary_test_matcher,
+                              test_session_starts_matcher,
+                              test_session_starts_test_matcher,
+                              warnings_summary_matcher)
 
 # Don't collect tests from any of these files
 collect_ignore = [
@@ -85,9 +78,13 @@ def pytest_cmdline_main(config: Config) -> None:
     if hasattr(config.option, "tui"):
         if config.option.tui:
             config.option.verbose = 1  # easier parsing of final test results
-            config.option.reportchars = "A"  # "display all" mode so all results are shown
+            config.option.reportchars = (
+                "A"  # "display all" mode so all results are shown
+            )
         if hasattr(config.option, "reruns"):
-            config.option.reportchars = "AR" # special handling for pytest-rerunfailures
+            config.option.reportchars = (
+                "AR"  # special handling for pytest-rerunfailures
+            )
 
 
 def pytest_sessionstart(session: Session) -> None:
@@ -169,9 +166,6 @@ def pytest_configure(config: Config) -> None:
                     config._tui_current_section = "test_session_starts"
                     config._tui_sessionstart = False
 
-            # Write current line to current section
-            exec(f"_tui_sections.{config._tui_current_section}.content += s")
-
             # If this is an actual test outcome line in the initial `=== test session starts ==='
             # section, populate the TuiTestResult's fully qualified test name field. Do not add
             # duplicates (as may be encountered with plugins such as pytest-rerunfailures).
@@ -201,14 +195,16 @@ def pytest_configure(config: Config) -> None:
                         break
 
             # Write this line's original pytest output text (plus markup) to console.
-            # Then markup the line's text by passing it to an instance of TerminalWriter's
-            # 'markup' method. (Do not pass "flush" to the method, or it will throw an error
+            # Also write marked up content to this TUISection's 'content' field.
+            # Markup is done w/ TerminalWriter's 'markup' method.
+            # (do not pass "flush" to the method, or it will throw an error)
             oldwrite(s, **kwargs)
             kwargs.pop("flush") if "flush" in kwargs else None
 
             s_orig = s
             kwargs.pop("flush") if "flush" in kwargs else None
             s_orig = TerminalWriter().markup(s, **kwargs)
+            exec(f"_tui_sections.{config._tui_current_section}.content += s_orig")
             if isinstance(s_orig, str):
                 unmarked_up = s_orig.encode("utf-8")
             global _tui_terminal_out
