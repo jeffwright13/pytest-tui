@@ -5,12 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2022-08-26
+## [1.3.0] - 2022-08-27
 
 - Changed to output HTML as one file, with all included CSS and JS content. This makes it portable when sharing results files.
 - Removed unuse "Reruns" section. Reruns are still supported, just not broken out individually. This is more in line with how pytest treats the Reruns section anyway. Reruns are categorized P/F/S/XP/XF just as normal tests are.
 - Remove duplicate 'lastline' in About section.
 - Implemented dynamic inclusion/removal of section and results tabs, depending on if they have content or not.
+- Added 'sticky' CSS styling to top-bar buttons. The top bar now shows up even when scrolling down long pages.
 - Fixed a few persistent ANSI issues: no blue markup (was misssing CSS for \x1b94m, 'bright blue'); and non-marked-up section content.
 
 ## [1.2.1] - 2022-08-22
