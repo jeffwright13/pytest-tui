@@ -187,7 +187,7 @@ class TuiSections:
     lastline: TuiSection = TuiSection(name="lastline", content="")
     # other: TuiSection = TuiSection(
     #     name="other", content=""
-    )  # for anything else that isn't a known pytest section
+    # )  # for anything else that isn't a known pytest section
 
 
 class Results:
