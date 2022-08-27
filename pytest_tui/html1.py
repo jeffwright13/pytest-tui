@@ -9,8 +9,7 @@ from ansi2html import Ansi2HTMLConverter
 
 from pytest_tui import __version__
 from pytest_tui.__main__ import Cli
-from pytest_tui.utils import (CONFIGFILE, HTML_OUTPUT_FILE,
-                              TERMINAL_OUTPUT_FILE, Results)
+from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
 
 CSS_FILE = Path(__file__).parent / "styles.css"
 
@@ -50,7 +49,13 @@ class TabContent:
         return self.tabs
 
     def fetch_raw(self):
-        summary_section = "\n" + self.results.tui_sections.lastline.content.replace("=", "") + "\n" + self.results.tui_sections.test_session_starts.content + self.results.tui_sections.short_test_summary.content
+        summary_section = (
+            "\n"
+            + self.results.tui_sections.lastline.content.replace("=", "")
+            + "\n"
+            + self.results.tui_sections.test_session_starts.content
+            + self.results.tui_sections.short_test_summary.content
+        )
         self.add("summary_section", summary_section)
         self.add("warnings_section", self.results.tui_sections.warnings_summary.content)
         self.add("errors_section", self.results.tui_sections.errors.content)
@@ -85,7 +90,6 @@ class HtmlPage:
         with open(CSS_FILE) as file:
             css = file.read()
         return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" >"""
-
 
     def create_testrun_results(self) -> str:
         return (

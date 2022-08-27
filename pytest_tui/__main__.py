@@ -49,7 +49,6 @@ class Cli:
             "Apply default config settings": self.apply_default_config_plus_enter,
             "Set TUI autolaunch option": self.set_tui_autolaunch,
             "Set HTML autolaunch option": self.set_html_autolaunch,
-            "Set HTML output file format": self.set_html_output_format,
             "Quit": self.quit,
         }
 
@@ -97,7 +96,6 @@ class Cli:
         with open(CONFIGFILE, "w+") as configfile:
             self.config_parser.write(configfile)
 
-
     def set_tui_autolaunch(self) -> None:
         self._clear_terminal()
         tui_autolaunch = YesNo(
@@ -109,7 +107,6 @@ class Cli:
         self.write_current_config_to_file()
         self._enter_to_continue()
 
-
     def set_html_autolaunch(self) -> None:
         self._clear_terminal()
         html_autolaunch = YesNo("Auto-launch HTML when generated: ").launch()
@@ -118,25 +115,6 @@ class Cli:
         self.config_parser.set("HTML", "html_autolaunch", str(html_autolaunch))
         self.write_current_config_to_file()
         self._enter_to_continue()
-
-    # def set_html_output_format(self) -> None:
-    #     menu_items = {"Standard (linked) HTML output file": "linked", "Self-contained HTML output file": "selfcontained"}
-    #     self._clear_terminal()
-    #     selection = Bullet(
-    #         choices=list(menu_items.keys()),
-    #         bullet="==> ",
-    #         word_color=colors.bright(colors.foreground["white"]),
-    #         word_on_switch=colors.bright(colors.foreground["black"]),
-    #         background_color=colors.bright(colors.background["black"]),
-    #         background_on_switch=colors.bright(colors.background["white"]),
-    #     ).launch()
-    #     self._clear_terminal()
-
-    #     self.config_parser.set("HTML", "outputformat", menu_items[selection])
-    #     self.html_outputformat = menu_items[selection]
-    #     self.write_current_config_to_file()
-    #     self._enter_to_continue()
-
 
     def quit(self) -> None:
         self._clear_terminal()

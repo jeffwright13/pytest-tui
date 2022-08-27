@@ -28,6 +28,7 @@ CATEGORIES = {
     "XPASSES": "bold chartreuse1 underline",
 }
 
+
 class Tab(Widget):
     def __init__(
         self,

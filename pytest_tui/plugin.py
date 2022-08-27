@@ -16,16 +16,23 @@ from strip_ansi import strip_ansi
 
 from pytest_tui.__main__ import tui_launch
 from pytest_tui.html1 import main as tuihtml
-from pytest_tui.utils import (TERMINAL_OUTPUT_FILE, TUI_RESULT_OBJECTS_FILE,
-                              TUI_SECTIONS_FILE, TuiSections, TuiTestResult,
-                              TuiTestResults, errors_section_matcher,
-                              failures_section_matcher, lastline_matcher,
-                              passes_section_matcher,
-                              short_test_summary_matcher,
-                              short_test_summary_test_matcher,
-                              test_session_starts_matcher,
-                              test_session_starts_test_matcher,
-                              warnings_summary_matcher)
+from pytest_tui.utils import (
+    TERMINAL_OUTPUT_FILE,
+    TUI_RESULT_OBJECTS_FILE,
+    TUI_SECTIONS_FILE,
+    TuiSections,
+    TuiTestResult,
+    TuiTestResults,
+    errors_section_matcher,
+    failures_section_matcher,
+    lastline_matcher,
+    passes_section_matcher,
+    short_test_summary_matcher,
+    short_test_summary_test_matcher,
+    test_session_starts_matcher,
+    test_session_starts_test_matcher,
+    warnings_summary_matcher,
+)
 
 # Don't collect tests from any of these files
 collect_ignore = [
