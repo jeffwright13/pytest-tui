@@ -39,6 +39,8 @@ setup(
         "strip-ansi>=0.1.1",
         "textual>=0.1.18",
     ],
+    setup_requires=['setuptools_scm'],
+    include_package_data=True,
     classifiers=[
         "Framework :: Pytest",
         "Development Status :: 4 - Beta",
