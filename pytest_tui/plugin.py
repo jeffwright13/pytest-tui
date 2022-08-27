@@ -235,7 +235,6 @@ def pytest_unconfigure(config: Config) -> None:
     for tui_test_result in _tui_test_results.test_results:
         if tui_test_result.outcome == "":
             tui_test_result.outcome = "SKIPPED"
-            # tui_test_result.duration = 0
 
     config.pluginmanager.getplugin("terminalreporter")  # <= ???
 

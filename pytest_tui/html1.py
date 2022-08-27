@@ -82,13 +82,10 @@ class HtmlPage:
         self.converter = Ansi2HTMLConverter()
 
     def create_header(self) -> str:
-        if self.config_parser["HTML"].get("html_autolaunch") == "True":
-            with open(CSS_FILE) as file:
-                css = file.read()
-            return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" >"""
+        with open(CSS_FILE) as file:
+            css = file.read()
+        return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" >"""
 
-        else:
-            return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Pytest-Tui Test Report</title> <link rel="stylesheet" href={CSS_FILE} type="text/css"> <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css"> <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Arial"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" >"""
 
     def create_testrun_results(self) -> str:
         return (
@@ -211,10 +208,10 @@ class HtmlPage:
         return (
             self.create_testrun_results()
             + "<hr>"
-            + f"""<h6><b>Test results generated {results_modification_time}</b></h6>"""
-            + f"""<h6><b>This report generated {now}</b></h6>"""
-            + f"""<h6><b>pytest-tui version {__version__}</b></h6><hr>"""
-            + """<h6><b>Meta Data / Environment:</b></h6>"""
+            + f"""<h5><b>Test results generated {results_modification_time}</b></h5>"""
+            + f"""<h5><b>This report generated {now}</b></h5>"""
+            + f"""<h5><b>pytest-tui version {__version__}</b></h5><hr>"""
+            + """<h5><b>Meta Data / Environment:</b></h5>"""
             + json2table.convert(
                 m, build_direction="LEFT_TO_RIGHT", table_attributes=table_attributes
             )
