@@ -5,10 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.2.2] - 2022-08-22
+## [1.3.0] - 2022-08-26
 
-- Remove unused "Reruns" section. Reruns are still supported, just not broken out individually. This is more in line with how ytest treats the Reruns section anyway. Reruns are categorized P/F/Sk just as normal tests are.
+- Added new config option to output HTML as one file, with all included CSS and JS content. This makes it more portable when sharing results files.
+- Remove unuse "Reruns" section. Reruns are still supported, just not broken out individually. This is more in line with how pytest treats the Reruns section anyway. Reruns are categorized P/F/S/XP/XF just as normal tests are.
 - Remove duplicate 'lastline' in About section.
+- Fixed a few persistent ANSI issues: no blue markup (was misssing CSS for \x1b94m, 'bright blue'); and non-marked-up section content.
 
 ## [1.2.1] - 2022-08-22
 
