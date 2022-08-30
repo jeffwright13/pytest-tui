@@ -9,21 +9,36 @@ from ansi2html import Ansi2HTMLConverter
 
 from pytest_tui import __version__
 from pytest_tui.__main__ import Cli
-from pytest_tui.utils import (CONFIGFILE, HTML_OUTPUT_FILE,
-                              TERMINAL_OUTPUT_FILE, Results)
+from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
 
 CSS_FILE = Path(__file__).parent / "styles.css"
 
+TAB_METADATA = ["About"]
+TAB_METADATA_COLOR = {"About": "rgba(0, 0, 255, 0.33)"}
+TABS_RESULTS = ["Failures", "Passes", "Skipped", "Xfails", "Xpasses"]
+TABS_RESULTS_COLORS = {
+    "Failures": ("rgba(255, 10, 10, 0.75)", "rgba(255,0,0,0.5)"),
+    "Passes": ("rgba(66, 228, 47, 1)", "rgba(0,0,0,0.5)"),
+    "Skipped": ("rgba(111, 104, 105, 0.34)", "rgba(128,128,0,0.5)"),
+    "Xfails": ("rgba(255, 176, 176, 0.90)", "rgba(0,0,0,0.5)"),
+    "Xpasses": ("rgba(0, 255, 0, 0.43)", "rgba(0,0,0,0.5)"),
+}
 TABS_SECTIONS = [
     "summary_section",
+    "failures_section",
+    "passes_section",
     "warnings_section",
     "errors_section",
-    "passes_section",
-    "failures_section",
 ]
-TABS_RESULTS = ["Passes", "Failures", "Skipped", "Xfails", "Xpasses"]
-TAB_METADATA = ["About"]
+TABS_SECTIONS_COLORS = {
+    "summary_section": "#daeaf6",
+    "failures_section": "rgba(255, 10, 10, 0.50)",
+    "passes_section": "rgba(66, 228, 47, .6)",
+    "warnings_section": "#ffee93",
+    "errors_section": "#ffc09f",
+}
 TAB_FULL_OUTPUT = ["Full Output"]
+TAB_FULL_OUTPUT_COLOR = {"Full Output": "rgba(0, 0, 255, 0.33)"}
 
 
 class TabContent:
@@ -39,7 +54,13 @@ class TabContent:
         return self.tabs
 
     def fetch_raw(self):
-        summary_section = "\n" + self.results.tui_sections.lastline.content.replace("=", "") + "\n" + self.results.tui_sections.test_session_starts.content + self.results.tui_sections.short_test_summary.content
+        summary_section = (
+            "\n"
+            + self.results.tui_sections.lastline.content
+            + "\n"
+            + self.results.tui_sections.test_session_starts.content
+            + self.results.tui_sections.short_test_summary.content
+        )
         self.add("summary_section", summary_section)
         self.add("warnings_section", self.results.tui_sections.warnings_summary.content)
         self.add("errors_section", self.results.tui_sections.errors.content)
@@ -91,10 +112,9 @@ class HtmlPage:
         css = Path(CSS_FILE).read_text()
         return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8" name="viewport" content="width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" > <div class="sticky">"""
 
-
     def create_testrun_results(self) -> str:
         return (
-            """<br><pre><b>"""
+            """<hr><h5>Final Results:</h5><pre><b>"""
             + self.converter.convert(
                 self.results.tui_sections.lastline.content.replace("=", ""), full=False
             )
@@ -107,18 +127,35 @@ class HtmlPage:
     def create_tabs(self) -> str:
         # Create tabs for 'About', sections, results, full-out, metadata
         tabs_links = [
-            f"""<button class="tablinks" id="defaultOpen" onclick="openTab(event, '{section}')" >{section}</button>"""
+            f"""<button class="tablinks" style="background-color: {TAB_METADATA_COLOR[section]}" id="defaultOpen" onclick="openTab(event, '{section}')" >{section}</button>"""
             for section in TAB_METADATA
         ]
         tabs_links.extend(
             [
-                f"""<button class="tablinks" onclick="openTab(event, '{section}')" >{section}</button>"""
-                for section in TABS_RESULTS + TABS_SECTIONS + TAB_FULL_OUTPUT
+                f"""<button class="tablinks" style="background-color: {TABS_RESULTS_COLORS[section][0]}" onclick="openTab(event, '{section}')" >{section}</button>"""
+                for section in TABS_RESULTS
+            ]
+        )
+
+        # tabs_links += """<div class="line"> </div>""" # visible space between results and sections tabs
+        # tabs_links += """<img src="blueline.gif" role="separator" alt="">
+
+        tabs_links.extend(
+            [
+                f"""<button class="tablinks" style="background-color: {TABS_SECTIONS_COLORS[section]}" onclick="openTab(event, '{section}')" >{section}</button>"""
+                for section in TABS_SECTIONS
+            ]
+        )
+
+        tabs_links.extend(
+            [
+                f"""<button class="tablinks" style="background-color: {TAB_FULL_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button>"""
+                for section in TAB_FULL_OUTPUT
             ]
         )
 
         tab_links_section = """<div class="tab">""" + "".join(tabs_links) + """</div>"""
-        tab_links_section += """</div>""" # terminate sticky div
+        tab_links_section += """</div>"""  # terminate sticky div
 
         # Results content
         tab_result_content = [
@@ -129,7 +166,7 @@ class HtmlPage:
 
         # Sections content
         tab_section_content = [
-            f"""<div id="{section}" class="tabcontent"> <pre><p>{self.converter.convert(self.tab_content.tabs[section], full=False) or ""}</p></pre> </div>"""
+            f"""<div id="{section}" class="tabcontent"> <pre>{self.converter.convert(self.tab_content.tabs[section], full=False) or ""}</pre> </div>"""
             for section in TABS_SECTIONS
         ]
         tab_sections = "".join(tab_section_content)
@@ -138,7 +175,7 @@ class HtmlPage:
         tab_metadata = f"""<div id="{TAB_METADATA[0]}" class="tabcontent"> <p>{self.get_metadata()}</p> </div>"""
 
         # "Full Output" (terminal/console) content
-        tab_fullout = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <pre><p>{self.get_terminal_output()}</p></pre> </div>"""
+        tab_fullout = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <pre>{self.get_terminal_output()}</pre> </div>"""
         return (
             tab_links_section + tab_metadata + tab_results + tab_sections + tab_fullout
         )
@@ -215,9 +252,9 @@ class HtmlPage:
         return (
             self.create_testrun_results()
             + "<hr>"
-            + f"""<h5><b>Test results generated {results_modification_time}</b></h5>"""
-            + f"""<h5><b>This report generated {now}</b></h5>"""
-            + f"""<h5><b>pytest-tui version {__version__}</b></h5><hr>"""
+            + f"""<h5>Test results generated:</h5> <p>{results_modification_time}</p>"""
+            + f"""<h5>This report generated:</h5> <p>{now}</p>"""
+            + f"""<h5>pytest-tui version:</h5> <p>{__version__}</p><hr>"""
             + """<h5><b>Meta Data / Environment:</b></h5>"""
             + json2table.convert(
                 m, build_direction="LEFT_TO_RIGHT", table_attributes=table_attributes

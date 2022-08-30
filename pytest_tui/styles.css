@@ -1,5 +1,9 @@
 @charset "UTF-8";
 
+/* *:not(p):not(.pre){
+	font-family: Arial;
+} */
+
 div.sticky {
 	position: -webkit-sticky;
 	position: sticky;
@@ -10,7 +14,7 @@ div.sticky {
 	display: block;
 	font-family: monospace;
 	white-space: pre;
-	margin: 1em 0;
+	margin: 4px 0;
 	word-wrap: break-word;
 }
 
@@ -26,7 +30,11 @@ div.sticky {
 	border-radius: 3px;
 	background-color: inherit;
 	float: left;
-	border: none;
+	/* border: none; */
+	border: 1px solid #ccc;
+	border-color: lightgrey;
+	border-style;
+	border-radius: 2px;
 	outline: none;
 	cursor: pointer;
 	padding: 14px 16px;
@@ -34,10 +42,20 @@ div.sticky {
 	font-size: 15px
 	/* border: 1px solid #d3d3d3; */
 }
+.separator {
+	content: '';
+	display: inline-block;
+	background: #888;
+	margin: 0px 4px;
+	height: 18px;
+	width: 1px;
+	vertical-align: top;
+  }
 
 .tablinks {
 	font-family: "Arial", sans-serif;
 	font-size: 15px
+	opacity: 0.4;
 	/* border: 1px solid gray; */
 }
 
@@ -51,13 +69,30 @@ div.sticky {
     animation: fadeEffect .25s;
 }
 
-.tab button:hover {
-	background-color: #ddd;
+.tabcontent button:nth-child(even) {
+    background-color: #ddd;
+}
+.tabcontent button:nth-child(odd) {
+    background-color: #f1f1f1;
 }
 
-.tab button.active {
-	background-color: #ccc;
+.tab button:hover {
+	background-color: #ddd;
+	opacity: 0.65;
+	transition: 0.3s;
 }
+
+.tab button.focus {
+	background-color: #ccc;
+	opacity: 1.0;
+	transition: 0.3s;
+}
+
+/* .tab button.active {
+	/* background-color: #ccc; */
+	opacity: 1.0;
+	transition: 0.3s;
+} */
 
 @-webkit-keyframes fadeEffect {
     from {opacity: 0;}
@@ -76,7 +111,7 @@ div.sticky {
   cursor: pointer;
   width: 100%;
   border: none;
-  padding: 1px 1px;
+  padding: 4px 4px;
   text-align: left;
   outline: none;
   font-size: 14px;
@@ -84,11 +119,11 @@ div.sticky {
   box-shadow: 0px 0px 1px 1px #bbb;
   }
 
-  .active,
-  .collapsible:hover {
+.active,
+.collapsible:hover {
 	background-color: #ccc;
 	transition: 0.35s;
-  }
+}
 
 .content {
 	display: none;
@@ -97,8 +132,20 @@ div.sticky {
 	animation: fadeEffect .25s;
 }
 
-.p {
-  font-size: 14px;
+.space {
+	width: 4px;
+	height: auto;
+	display: inline-block;
+}
+.line{
+	background-color:black;
+	height:auto;
+	width:5px;
+  }
+
+p {
+	font-size: 14px;
+	font-family: "Arial", sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
