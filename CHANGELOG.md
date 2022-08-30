@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.3.1] - 2022-08-27
+
+- Tweaked colors.
+- Cleaned up CSS a bit.
+
 ## [1.3.0] - 2022-08-27
 
 - Changed to output HTML as one file, with all included CSS and JS content. This makes it portable when sharing results files.
