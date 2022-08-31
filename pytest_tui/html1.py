@@ -9,7 +9,8 @@ from ansi2html import Ansi2HTMLConverter
 
 from pytest_tui import __version__
 from pytest_tui.__main__ import Cli
-from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
+from pytest_tui.utils import (CONFIGFILE, HTML_OUTPUT_FILE,
+                              TERMINAL_OUTPUT_FILE, Results)
 
 CSS_FILE = Path(__file__).parent / "styles.css"
 
@@ -33,7 +34,7 @@ TABS_SECTIONS = [
 TABS_SECTIONS_COLORS = {
     "summary_section": "#daeaf6",
     "failures_section": "rgba(255, 10, 10, 0.50)",
-    "passes_section": "rgba(66, 228, 47, .6)",
+    "passes_section": "rgba(66, 228, 47, 0.6)",
     "warnings_section": "#ffee93",
     "errors_section": "#ffc09f",
 }
@@ -92,11 +93,14 @@ class HtmlPage:
         self.converter = Ansi2HTMLConverter()
 
     def remove_tabs_without_content(self):
-        # Remove tabs for sections that do not contain any section or result data.
+        # Remove tabs for sections that do not contain any data.
         # This way, the HTML file will only not show blank tabs.
-        for tab in TABS_SECTIONS:
+        for tab in TABS_SECTIONS.copy():
             if not self.fetched_html[tab]:
                 TABS_SECTIONS.remove(tab)
+
+        # Remove tabs for outcomes that have no test results.
+        # This way, the HTML file will only not show blank tabs.
         if not self.results.tui_test_results.all_xpasses():
             TABS_RESULTS.remove("Xpasses")
         if not self.results.tui_test_results.all_xfails():
@@ -125,20 +129,17 @@ class HtmlPage:
         return """</script> </body> </html>"""
 
     def create_tabs(self) -> str:
-        # Create tabs for 'About', sections, results, full-out, metadata
         tabs_links = [
             f"""<button class="tablinks" style="background-color: {TAB_METADATA_COLOR[section]}" id="defaultOpen" onclick="openTab(event, '{section}')" >{section}</button>"""
             for section in TAB_METADATA
         ]
+
         tabs_links.extend(
             [
                 f"""<button class="tablinks" style="background-color: {TABS_RESULTS_COLORS[section][0]}" onclick="openTab(event, '{section}')" >{section}</button>"""
                 for section in TABS_RESULTS
             ]
         )
-
-        # tabs_links += """<div class="line"> </div>""" # visible space between results and sections tabs
-        # tabs_links += """<img src="blueline.gif" role="separator" alt="">
 
         tabs_links.extend(
             [
@@ -155,27 +156,25 @@ class HtmlPage:
         )
 
         tab_links_section = """<div class="tab">""" + "".join(tabs_links) + """</div>"""
-        tab_links_section += """</div>"""  # terminate sticky div
 
-        # Results content
+        tab_links_section += """</div>"""
         tab_result_content = [
             f"""<div id="{result}" class="tabcontent"> {self.get_collapsible_results(result.lower())} </div>"""
             for result in TABS_RESULTS
         ]
-        tab_results = "".join(tab_result_content)
 
-        # Sections content
+        tab_results = "".join(tab_result_content)
         tab_section_content = [
             f"""<div id="{section}" class="tabcontent"> <pre>{self.converter.convert(self.tab_content.tabs[section], full=False) or ""}</pre> </div>"""
             for section in TABS_SECTIONS
+            if self.tab_content.tabs[section]
         ]
-        tab_sections = "".join(tab_section_content)
 
-        # Metadata content
+        tab_sections = "".join(tab_section_content)
         tab_metadata = f"""<div id="{TAB_METADATA[0]}" class="tabcontent"> <p>{self.get_metadata()}</p> </div>"""
 
-        # "Full Output" (terminal/console) content
         tab_fullout = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <pre>{self.get_terminal_output()}</pre> </div>"""
+
         return (
             tab_links_section + tab_metadata + tab_results + tab_sections + tab_fullout
         )
@@ -193,7 +192,7 @@ class HtmlPage:
             )
             if not content:
                 content = "No output"
-            collapsible_results += f"""<button type="button" class="collapsible" style="border: none; outline: none;">{result.fqtn}</button> <div class="content"> <pre><p>{content}</p></pre> </div>"""
+            collapsible_results += f"""<button type="button" class="collapsible" style="border: none; outline: none;">{result.fqtn}</button> <div class="content"> <pre>{content}</pre> </div>"""
         return collapsible_results
 
     def create_tab_script(self) -> str:
