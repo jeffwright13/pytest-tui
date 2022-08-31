@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [1.3.2] - 2022-08-31
+
+- Fixed issue where 'passes_section' was being rendered even if no Passed testcases.
+
 ## [1.3.1] - 2022-08-27
 
 - Tweaked colors.
