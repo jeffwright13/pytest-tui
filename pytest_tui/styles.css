@@ -10,11 +10,13 @@ div.sticky {
 	top: 0;
   }
 
-.pre {
+pre, .pre {
 	display: block;
 	font-family: monospace;
 	white-space: pre;
 	margin: 4px 0;
+	overflow-wrap: break-word;
+	word-break: break-all;
 	word-wrap: break-word;
 }
 
