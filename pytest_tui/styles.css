@@ -1,73 +1,70 @@
 @charset "UTF-8";
 
-/* *:not(p):not(.pre){
-	font-family: Arial;
-} */
-
 div.sticky {
-	position: -webkit-sticky;
-	position: sticky;
-	top: 0;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
   }
 
 pre, .pre {
-	display: block;
-	font-family: monospace;
-	white-space: pre;
-	margin: 4px 0;
-	overflow-wrap: break-word;
-	word-break: break-all;
-	word-wrap: break-word;
+    display: block;
+    font-family: monospace;
+    white-space: pre;
+    margin: 4px 0;
+    overflow: auto
+    overflow-wrap: break-word;
+    word-break: break-all;
+    word-wrap: break-word;
 }
 
 .tab {
-	overflow: hidden;
-	border: 1px solid #ccc;
-	background-color: #f1f1f1;
-  	margin-right: 4px;
-	/* font-size: 15px */
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+      margin-right: 4px;
+    /* font-size: 15px */
 }
 
 .tab button {
-	border-radius: 3px;
-	background-color: inherit;
-	float: left;
-	/* border: none; */
-	border: 1px solid #ccc;
-	border-color: lightgrey;
-	border-style;
-	border-radius: 2px;
-	outline: none;
-	cursor: pointer;
-	padding: 14px 16px;
-	transition: 0.3s;
-	font-size: 15px
-	/* border: 1px solid #d3d3d3; */
+    border-radius: 3px;
+    background-color: inherit;
+    float: left;
+    /* border: none; */
+    border: 1px solid #ccc;
+    border-color: lightgrey;
+    border-style;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 15px
+    /* border: 1px solid #d3d3d3; */
 }
 .separator {
-	content: '';
-	display: inline-block;
-	background: #888;
-	margin: 0px 4px;
-	height: 18px;
-	width: 1px;
-	vertical-align: top;
+    content: '';
+    display: inline-block;
+    background: #888;
+    margin: 0px 4px;
+    height: 18px;
+    width: 1px;
+    vertical-align: top;
   }
 
 .tablinks {
-	font-family: "Arial", sans-serif;
-	font-size: 15px
-	opacity: 0.4;
-	/* border: 1px solid gray; */
+    font-family: "Arial", sans-serif;
+    font-size: 15px
+    opacity: 0.4;
+    /* border: 1px solid gray; */
 }
 
 .tabcontent {
-	background-color: #ddd;
-	display: none;
-	/* padding: 6px 12px; */
-	border: 1px solid #ccc;
-	border-top: none;
-	-webkit-animation: fadeEffect 1s;
+    background-color: #ddd;
+    display: none;
+    /* padding: 6px 12px; */
+    border: 1px solid #ccc;
+    border-top: none;
+    -webkit-animation: fadeEffect 1s;
     animation: fadeEffect .25s;
 }
 
@@ -79,21 +76,21 @@ pre, .pre {
 }
 
 .tab button:hover {
-	background-color: #ddd;
-	opacity: 0.65;
-	transition: 0.3s;
+    background-color: #ddd;
+    opacity: 0.65;
+    transition: 0.3s;
 }
 
 .tab button.focus {
-	background-color: #ccc;
-	opacity: 1.0;
-	transition: 0.3s;
+    background-color: #ccc;
+    opacity: 1.0;
+    transition: 0.3s;
 }
 
-/* .tab button.active {
-	/* background-color: #ccc; */
-	opacity: 1.0;
-	transition: 0.3s;
+.tab button.active {
+    /* background-color: #ccc; */
+    opacity: 1.0;
+    transition: 0.3s;
 } */
 
 @-webkit-keyframes fadeEffect {
@@ -123,31 +120,31 @@ pre, .pre {
 
 .active,
 .collapsible:hover {
-	background-color: #ccc;
-	transition: 0.35s;
+    background-color: #ccc;
+    transition: 0.35s;
 }
 
 .content {
-	display: none;
-	overflow: auto;
-	-webkit-animation: fadeEffect 1s;
-	animation: fadeEffect .25s;
+    display: none;
+    overflow: auto;
+    -webkit-animation: fadeEffect 1s;
+    animation: fadeEffect .25s;
 }
 
 .space {
-	width: 4px;
-	height: auto;
-	display: inline-block;
+    width: 4px;
+    height: auto;
+    display: inline-block;
 }
 .line{
-	background-color:black;
-	height:auto;
-	width:5px;
+    background-color:black;
+    height:auto;
+    width:5px;
   }
 
 p {
-	font-size: 14px;
-	font-family: "Arial", sans-serif;
+    font-size: 14px;
+    font-family: "Arial", sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -155,30 +152,30 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 table, th, td {
-	font-family: "Arial", sans-serif;
-	font-size: 14px
+    font-family: "Arial", sans-serif;
+    font-size: 14px
 }
 
 .ansi2html-content {
-	display: inline;
-	white-space: pre-wrap;
-	word-wrap: break-word;
+    display: inline;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 .body_foreground {
-	color: #000000;
+    color: #000000;
 }
 
 .body_background {
-	background-color: #EEEEEE;
+    background-color: #EEEEEE;
 }
 
 .inv_foreground {
-	color: #EEEEEE;
+    color: #EEEEEE;
 }
 
 .inv_background {
-	background-color: #000000;
+    background-color: #000000;
 }
 
 
