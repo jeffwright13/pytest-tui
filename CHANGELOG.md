@@ -7,7 +7,8 @@ and this project tries to adhere to [Semantic Versioning](https://semver.org/spe
 
 ## [1.4.0] - 2022-09-04
 
-- Open up real estate with dropdown containing console output sections (which are presumably lesser-used).
+- Open up HTML real estate with dropdown containing console output sections (which are presumably lesser-used).
+- Make autolaunch False by default for both TUI and HTML.
 
 ## [1.3.3] - 2022-09-04
 

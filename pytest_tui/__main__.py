@@ -14,7 +14,7 @@ from pytest_tui.utils import CONFIGFILE
 class DefaultConfig:
     def __init__(self):
         self.tui_autolaunch = False
-        self.html_autolaunch = True
+        self.html_autolaunch = False
 
 
 class Cli:
