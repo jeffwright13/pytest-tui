@@ -38,8 +38,8 @@ TABS_SECTIONS_COLORS = {
     "warnings_section": "#ffee93",
     "errors_section": "#ffc09f",
 }
-TAB_FULL_OUTPUT = ["Full Output"]
-TAB_FULL_OUTPUT_COLOR = {"Full Output": "rgba(0, 0, 255, 0.33)"}
+TAB_FULL_OUTPUT = ["Console Output"]
+TAB_FULL_OUTPUT_COLOR = {"Console Output": "rgba(0, 0, 255, 0.33)"}
 
 
 class TabContent:
