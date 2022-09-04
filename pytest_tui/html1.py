@@ -113,8 +113,8 @@ class HtmlPage:
             TABS_RESULTS.remove("Skipped")
 
     def create_header(self) -> str:
-        css = Path(CSS_FILE).read_text()
-        return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8, width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif'; font-size: normal;" > <div class="sticky">"""
+        css = Path(CSS_FILE).read_text().replace("\n", "")
+        return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8, width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif';" > <div class="sticky">"""
 
     def create_testrun_results(self) -> str:
         return (
@@ -143,8 +143,20 @@ class HtmlPage:
 
         tabs_links.extend(
             [
-                f"""<button class="tablinks" style="background-color: {TABS_SECTIONS_COLORS[section]}" onclick="openTab(event, '{section}')" >{section}</button>"""
+                f"""<div class="dropdown"> <button class="dropbtn" style="color: white; background-color: gray">Output Sections</button> <div id="myDropdown" class="dropdown-content">"""
+            ]
+        )
+
+        tabs_links.extend(
+            [
+                f"""<button class="dropdown-item tablinks" style="background-color: {TABS_SECTIONS_COLORS[section]}" onclick="openTab(event, '{section}')" >{section}</button>"""
                 for section in TABS_SECTIONS
+            ]
+        )
+
+        tabs_links.extend(
+            [
+                f"""</div> </div>"""
             ]
         )
 
