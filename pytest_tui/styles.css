@@ -1,6 +1,44 @@
 @charset "UTF-8";
 
-div.sticky {
+
+/* Dropdown Button */
+.dropbtn {
+    background-color: #04AA6D;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+  }
+
+  /* The container <div> - needed to position the dropdown content */
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  /* Dropdown Content (Hidden by Default) */
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    position: relative;
+}
+
+  /* Links inside the dropdown */
+  .dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+
+  /* Show the dropdown menu on hover */
+  .dropdown:hover .dropdown-content {display: block;}
+
+  div.sticky {
     position: -webkit-sticky;
     position: sticky;
     top: 0;
@@ -9,15 +47,13 @@ div.sticky {
 pre, .pre {
     display: block;
     font-family: monospace;
+    white-space: pre-wrap;
     margin: 4px 0;
     overflow: auto
     overflow-wrap: break-word;
     word-break: break-all;
-    white-space: pre-wrap;       /* Since CSS 2.1 */
-    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
-    white-space: -pre-wrap;      /* Opera 4-6 */
-    white-space: -o-pre-wrap;    /* Opera 7 */
-    word-wrap: break-word;       /* Internet Explorer 5.5+ */}
+    word-wrap: break-word;
+}
 
 .tab {
     overflow: hidden;
@@ -31,7 +67,6 @@ pre, .pre {
     border-radius: 3px;
     background-color: inherit;
     float: left;
-    /* border: none; */
     border: 1px solid #ccc;
     border-color: lightgrey;
     border-style;
@@ -41,40 +76,6 @@ pre, .pre {
     padding: 14px 16px;
     transition: 0.3s;
     font-size: 15px
-    /* border: 1px solid #d3d3d3; */
-}
-.separator {
-    content: '';
-    display: inline-block;
-    background: #888;
-    margin: 0px 4px;
-    height: 18px;
-    width: 1px;
-    vertical-align: top;
-  }
-
-.tablinks {
-    font-family: "Arial", sans-serif;
-    font-size: 15px
-    opacity: 0.4;
-    /* border: 1px solid gray; */
-}
-
-.tabcontent {
-    background-color: #ddd;
-    display: none;
-    /* padding: 6px 12px; */
-    border: 1px solid #ccc;
-    border-top: none;
-    -webkit-animation: fadeEffect 1s;
-    animation: fadeEffect .25s;
-}
-
-.tabcontent button:nth-child(even) {
-    background-color: #ddd;
-}
-.tabcontent button:nth-child(odd) {
-    background-color: #f1f1f1;
 }
 
 .tab button:hover {
@@ -90,10 +91,31 @@ pre, .pre {
 }
 
 .tab button.active {
-    /* background-color: #ccc; */
     opacity: 1.0;
     transition: 0.3s;
-} */
+}
+
+.tablinks {
+    font-family: "Arial", sans-serif;
+    font-size: 15px
+    opacity: 0.4;
+}
+
+.tabcontent {
+    background-color: #ddd;
+    display: none;
+    border: 1px solid #ccc;
+    border-top: none;
+    -webkit-animation: fadeEffect 1s;
+    animation: fadeEffect .25s;
+}
+
+.tabcontent button:nth-child(even) {
+    background-color: #ddd;
+}
+.tabcontent button:nth-child(odd) {
+    background-color: #f1f1f1;
+}
 
 @-webkit-keyframes fadeEffect {
     from {opacity: 0;}
