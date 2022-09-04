@@ -139,6 +139,10 @@ def pytest_runtest_logstart(nodeid, location) -> None:
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config: Config) -> None:
     if not (hasattr(config.option, "tui") and config.option.tui):
+        try:
+            _tui_terminal_out.close()
+        except Exception:
+            pass
         return
 
     # Examine Pytest terminal output to mark different sections of the output.
@@ -254,12 +258,14 @@ def pytest_unconfigure(config: Config) -> None:
         file.write(terminal_out)
 
     # Pickle the test reult and sections objects to files.
-    with open(TUI_RESULT_OBJECTS_FILE, "wb") as file:
-        pickle.dump(_tui_test_results, file)
-    with open(TUI_SECTIONS_FILE, "wb") as file:
-        pickle.dump(_tui_sections, file)
+    file = open(TUI_RESULT_OBJECTS_FILE, "wb")
+    pickle.dump(_tui_test_results, file)
+    file.close()
+    file = open(TUI_SECTIONS_FILE, "wb")
+    pickle.dump(_tui_sections, file)
+    file.close()
 
-        pytui_launch(config)
+    pytui_launch(config)
 
 
 def pytui_launch(config: Config) -> None:
