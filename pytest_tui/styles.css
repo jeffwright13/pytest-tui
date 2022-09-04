@@ -9,13 +9,15 @@ div.sticky {
 pre, .pre {
     display: block;
     font-family: monospace;
-    white-space: pre;
     margin: 4px 0;
     overflow: auto
     overflow-wrap: break-word;
     word-break: break-all;
-    word-wrap: break-word;
-}
+    white-space: pre-wrap;       /* Since CSS 2.1 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */}
 
 .tab {
     overflow: hidden;
