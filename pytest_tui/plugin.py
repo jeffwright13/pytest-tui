@@ -16,23 +16,16 @@ from strip_ansi import strip_ansi
 
 from pytest_tui.__main__ import tui_launch
 from pytest_tui.html1 import main as tuihtml
-from pytest_tui.utils import (
-    TERMINAL_OUTPUT_FILE,
-    TUI_RESULT_OBJECTS_FILE,
-    TUI_SECTIONS_FILE,
-    TuiSections,
-    TuiTestResult,
-    TuiTestResults,
-    errors_section_matcher,
-    failures_section_matcher,
-    lastline_matcher,
-    passes_section_matcher,
-    short_test_summary_matcher,
-    short_test_summary_test_matcher,
-    test_session_starts_matcher,
-    test_session_starts_test_matcher,
-    warnings_summary_matcher,
-)
+from pytest_tui.utils import (TERMINAL_OUTPUT_FILE, TUI_RESULT_OBJECTS_FILE,
+                              TUI_SECTIONS_FILE, TuiSections, TuiTestResult,
+                              TuiTestResults, errors_section_matcher,
+                              failures_section_matcher, lastline_matcher,
+                              passes_section_matcher,
+                              short_test_summary_matcher,
+                              short_test_summary_test_matcher,
+                              test_session_starts_matcher,
+                              test_session_starts_test_matcher,
+                              warnings_summary_matcher)
 
 # Don't collect tests from any of these files
 collect_ignore = [
@@ -41,11 +34,23 @@ collect_ignore = [
 ]
 
 # Globals to hold Pytest TestReport instances; individual test result objects;
-#  and section objects
+# and section objects. The global variable approach was chosen becaause the pytest
+# 'config' instance is not accesible in all methods that need it; in particular,
+# pytest_runtest_logstart, where we need to access test results to assign the current
+# value of 'fqtn' to each TestReport instance.
 _tui_reports = []
 _tui_test_results = TuiTestResults()
 _tui_sections = TuiSections()
 _tui_terminal_out = tempfile.TemporaryFile("wb+")
+
+
+def pytest_cmdline_preparse(config, args):
+    """Close global tempfile if pytest is invoked with --version option."""
+    if "--version" in args or "-v" in args:
+        try:
+            _tui_terminal_out.close()
+        except:
+            pass
 
 
 def pytest_addoption(parser) -> None:
