@@ -58,7 +58,7 @@ def pytest_addoption(parser) -> None:
     group.addoption(
         "--tui",
         action="store_true",
-        help="Enable the pytest-tui plugin. Both text user interface (TUI) and HTML output are supported.",
+        help="Enable the pytest-tui plugin. Both text user interface (TUI) and HTML output are supported.\nRun TUI with console command 'tui'; run HTML report with 'tuih'. Configure autolaunch with 'tuiconf'."
     )
 
 
