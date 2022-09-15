@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2022-09-14
+
+- Fixed issue 66: refactored globals in plugin.py to reside within pytest Config object, rendering impossible the previous weirdness when files were attempted to be close that either didn't exist, or we re already closed.
+
 ## [1.4.1] - 2022-09-07
 
 - Fixed issue where if pytest was invoked only with `--version` flag, a `ResourceWarning: unclosed file` message was generated.
