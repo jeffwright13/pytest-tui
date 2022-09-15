@@ -74,20 +74,27 @@ def add_ansi_to_report(config: Config, report: TestReport) -> None:
 
 
 def pytest_cmdline_main(config: Config) -> None:
+    # Set up the TUI-specific attributes on the config object:
+    # Verbose (easier parsing of final test results)
+    # Reportchars =RA (all test results, plus Reruns)
     if hasattr(config.option, "tui"):
         if config.option.tui:
-            config.option.verbose = 1  # easier parsing of final test results
+            config.option.verbose = 1
             config.option.reportchars = (
-                "A"  # "display all" mode so all results are shown
+                "A"
             )
         if hasattr(config.option, "reruns"):
             config.option.reportchars = (
-                "AR"  # special handling for pytest-rerunfailures
+                "AR"
             )
 
 
 def pytest_report_teststatus(report: TestReport, config: Config) -> None:
-    """Construct list(s) of individual TestReport instances"""
+    # Don't process any TUI-specific code if the plugin is not enabled
+    if not hasattr(config.option, "tui"):
+        return
+    if not config.option.tui:
+        return
 
     if hasattr(report, "caplog") and report.caplog:
         for tui_test_result in config._tui_test_results.test_results:
@@ -115,6 +122,12 @@ def pytest_report_teststatus(report: TestReport, config: Config) -> None:
 
 @pytest.hookimpl()
 def pytest_runtest_setup(item):
+    # Don't process any TUI-specific code if the plugin is not enabled
+    if not hasattr(item.config.option, "tui"):
+        return
+    if not item.config.option.tui:
+        return
+
     for tui_test_result in item.config._tui_test_results.test_results:
         if tui_test_result.fqtn == item.nodeid:
             tui_test_result.start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
@@ -230,10 +243,13 @@ def pytest_configure(config: Config) -> None:
 
 
 def pytest_unconfigure(config: Config) -> None:
-    # Populate test result objects with total durations, from each test's TestReport object.
-    if not (hasattr(config.option, "tui") and config.option.tui):
+    # Don't process any TUI-specific code if the plugin is not enabled
+    if not hasattr(config.option, "tui"):
+        return
+    if not config.option.tui:
         return
 
+    # Populate test result objects with total durations, from each test's TestReport object.
     for tui_test_result, test_report in itertools.product(
         config._tui_test_results.test_results, config._tui_reports
     ):
