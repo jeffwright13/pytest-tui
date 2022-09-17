@@ -211,7 +211,7 @@ class HtmlPage:
             )
             if not content:
                 content = "No output was produced for this test"
-            collapsible_results += f"""<button type="button" class="collapsible" style="border: none; outline: none;">{re.sub(r".[0-9]*$", "", str(result.start_time))} | {result.fqtn}</button> <div class="content"> <pre>{content}</pre> </div>"""
+            collapsible_results += f"""<button type="button" class="collapsible" style="border: none; outline: none;">{re.sub(r".[0-9]*$", "", str(result.start_time))} | {result.outcome} | {result.fqtn}</button> <div class="content"> <pre>{content}</pre> </div>"""
         return collapsible_results
 
     def create_tab_script(self) -> str:
