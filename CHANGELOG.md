@@ -9,7 +9,7 @@ and this project tries to adhere to [Semantic Versioning](https://semver.org/spe
 
 - Added "All Tests" results tab.
 - Removed "nth child" css code which was masking result button highlighting on hover.
-- Added start_time to beginning of each test result button in HTML.
+- Added start_time and outcome to each test result button in HTML.
 
 ## [1.4.3] - 2022-09-14
 
