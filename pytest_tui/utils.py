@@ -126,6 +126,9 @@ class TuiTestResults:
     def all_by_outcome_then_time(self):
         return sorted(self.test_results, key=lambda x: (x.outcome, x.start_time))
 
+    def all_tests(self):
+        return list(self.test_results)
+
     def all_failures(self):
         return [
             test_result
@@ -196,6 +199,7 @@ class Results:
     """
 
     def __init__(self):
+        """Top-level class attributes: TuiTestResults, TuiSections, and full console output w/ ANSI"""
         self.tui_test_results = self._unpickle_tui_test_results()
         self.tui_sections = self._unpickle_tui_sections()
         self.terminal_output = self._get_terminal_output()

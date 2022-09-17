@@ -5,8 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.4.4] - 2022-09-16
+## [1.5.0] - 2022-09-16
 
+- Added "All Tests" results tab.
 - Removed "nth child" css code which was masking result button highlighting on hover.
 - Added start_time to beginning of each test result button in HTML.
 

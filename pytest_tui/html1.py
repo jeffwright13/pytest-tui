@@ -10,15 +10,15 @@ from ansi2html import Ansi2HTMLConverter
 
 from pytest_tui import __version__
 from pytest_tui.__main__ import Cli
-from pytest_tui.utils import (CONFIGFILE, HTML_OUTPUT_FILE,
-                              TERMINAL_OUTPUT_FILE, Results)
+from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
 
 CSS_FILE = Path(__file__).parent / "styles.css"
 
 TAB_METADATA = ["About"]
 TAB_METADATA_COLOR = {"About": "rgba(0, 0, 255, 0.33)"}
-TABS_RESULTS = ["Failures", "Passes", "Skipped", "Xfails", "Xpasses"]
+TABS_RESULTS = ["All Tests", "Failures", "Passes", "Skipped", "Xfails", "Xpasses"]
 TABS_RESULTS_COLORS = {
+    "All Tests": ("rgba(111, 104, 105, 0.34)", "rgba(128,128,0,0.5)"),
     "Failures": ("rgba(255, 10, 10, 0.75)", "rgba(255,0,0,0.5)"),
     "Passes": ("rgba(66, 228, 47, 1)", "rgba(0,0,0,0.5)"),
     "Skipped": ("rgba(111, 104, 105, 0.34)", "rgba(128,128,0,0.5)"),
@@ -55,7 +55,7 @@ class TabContent:
     def get_all_items(self):
         return self.tabs
 
-    def fetch_raw(self):
+    def fetch_raw_section(self):
         summary_section = (
             "\n"
             + self.results.tui_sections.lastline.content
@@ -71,10 +71,10 @@ class TabContent:
 
         return self.get_all_items()
 
-    def fetch_html(self):
+    def fetch_sections_html(self):
         return {
             key: self.converter.convert(value, full=False)
-            for key, value in self.fetch_raw().items()
+            for key, value in self.fetch_raw_section().items()
         }
 
 
@@ -90,28 +90,30 @@ class HtmlPage:
 
         self.results = results
         self.tab_content = TabContent(results)
-        self.fetched_html = self.tab_content.fetch_html()
+        self.fetched_sections_html = self.tab_content.fetch_sections_html()
         self.converter = Ansi2HTMLConverter()
 
     def remove_tabs_without_content(self):
         # Remove tabs for sections that do not contain any data.
-        # This way, the HTML file will only not show blank tabs.
+        # This way, the HTML file will not show blank section tabs.
         for tab in TABS_SECTIONS.copy():
-            if not self.fetched_html[tab]:
+            if not self.fetched_sections_html[tab]:
                 TABS_SECTIONS.remove(tab)
 
         # Remove tabs for outcomes that have no test results.
-        # This way, the HTML file will only not show blank tabs.
+        # This way, the HTML file will not show blank results tabs.
+        if not self.results.tui_test_results.all_tests():
+            TABS_RESULTS.remove("All Tests")
+        if not self.results.tui_test_results.all_failures():
+            TABS_RESULTS.remove("Failures")
+        if not self.results.tui_test_results.all_passes():
+            TABS_RESULTS.remove("Passes")
+        if not self.results.tui_test_results.all_skipped():
+            TABS_RESULTS.remove("Skipped")
         if not self.results.tui_test_results.all_xpasses():
             TABS_RESULTS.remove("Xpasses")
         if not self.results.tui_test_results.all_xfails():
             TABS_RESULTS.remove("Xfails")
-        if not self.results.tui_test_results.all_passes():
-            TABS_RESULTS.remove("Passes")
-        if not self.results.tui_test_results.all_failures():
-            TABS_RESULTS.remove("Failures")
-        if not self.results.tui_test_results.all_skipped():
-            TABS_RESULTS.remove("Skipped")
 
     def create_header(self) -> str:
         css = Path(CSS_FILE).read_text().replace("\n", "")
@@ -144,7 +146,7 @@ class HtmlPage:
 
         tabs_links.extend(
             [
-                f"""<div class="dropdown"> <button class="dropbtn" style="color: white; background-color: gray">Output Sections</button> <div id="myDropdown" class="dropdown-content">"""
+                """<div class="dropdown"> <button class="dropbtn" style="color: white; background-color: gray">Output Sections</button> <div id="myDropdown" class="dropdown-content">"""
             ]
         )
 
@@ -155,11 +157,7 @@ class HtmlPage:
             ]
         )
 
-        tabs_links.extend(
-            [
-                f"""</div> </div>"""
-            ]
-        )
+        tabs_links.extend(["""</div> </div>"""])
 
         tabs_links.extend(
             [
@@ -171,19 +169,27 @@ class HtmlPage:
         tab_links_section = """<div class="tab">""" + "".join(tabs_links) + """</div>"""
 
         tab_links_section += """</div>"""
-        tab_result_content = [
-            f"""<div id="{result}" class="tabcontent"> {self.get_collapsible_results(result.lower())} </div>"""
-            for result in TABS_RESULTS
-        ]
+
+        tab_result_content = []
+        for result in TABS_RESULTS:
+            if result == "All Tests":
+                tab_result_content.append(
+                    f"""<div id="{result}" class="tabcontent"> {self.get_collapsible_results("tests")} </div>"""
+                )
+            else:
+                tab_result_content.append(
+                    f"""<div id="{result}" class="tabcontent"> {self.get_collapsible_results(result.lower())} </div>"""
+                )
 
         tab_results = "".join(tab_result_content)
+
         tab_section_content = [
             f"""<div id="{section}" class="tabcontent"> <pre>{self.converter.convert(self.tab_content.tabs[section], full=False) or ""}</pre> </div>"""
             for section in TABS_SECTIONS
             if self.tab_content.tabs[section]
         ]
-
         tab_sections = "".join(tab_section_content)
+
         tab_metadata = f"""<div id="{TAB_METADATA[0]}" class="tabcontent"> <p>{self.get_metadata()}</p> </div>"""
 
         tab_fullout = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <pre>{self.get_terminal_output()}</pre> </div>"""
@@ -207,8 +213,6 @@ class HtmlPage:
                 content = "No output was produced for this test"
             collapsible_results += f"""<button type="button" class="collapsible" style="border: none; outline: none;">{re.sub(r".[0-9]*$", "", str(result.start_time))} | {result.fqtn}</button> <div class="content"> <pre>{content}</pre> </div>"""
         return collapsible_results
-
-
 
     def create_tab_script(self) -> str:
         return """<script> function openTab(evt, tabName) { var i, tabcontent, tablinks; tabcontent = document.getElementsByClassName("tabcontent"); for (i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; } tablinks = document.getElementsByClassName("tablinks"); for (i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); } document.getElementById(tabName).style.display = "block"; evt.currentTarget.className += " active"; } </script>"""

@@ -146,7 +146,7 @@ pre, .pre {
 .collapsible:hover {
     color: #000;
     background-color: transparent;
-    transition: 0.35s;
+    transition: 0.15s;
 }
 
 .content {
