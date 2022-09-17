@@ -1,5 +1,6 @@
 import configparser
 import json
+import re
 import webbrowser
 from datetime import datetime, timezone
 from pathlib import Path
@@ -203,9 +204,11 @@ class HtmlPage:
                 full=False,
             )
             if not content:
-                content = "No output"
-            collapsible_results += f"""<button type="button" class="collapsible" style="border: none; outline: none;">{result.fqtn}</button> <div class="content"> <pre>{content}</pre> </div>"""
+                content = "No output was produced for this test"
+            collapsible_results += f"""<button type="button" class="collapsible" style="border: none; outline: none;">{re.sub(r".[0-9]*$", "", str(result.start_time))} | {result.fqtn}</button> <div class="content"> <pre>{content}</pre> </div>"""
         return collapsible_results
+
+
 
     def create_tab_script(self) -> str:
         return """<script> function openTab(evt, tabName) { var i, tabcontent, tablinks; tabcontent = document.getElementsByClassName("tabcontent"); for (i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; } tablinks = document.getElementsByClassName("tablinks"); for (i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); } document.getElementById(tabName).style.display = "block"; evt.currentTarget.className += " active"; } </script>"""

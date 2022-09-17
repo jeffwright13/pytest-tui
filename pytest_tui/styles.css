@@ -117,13 +117,6 @@ pre, .pre {
     animation: fadeEffect .25s;
 }
 
-.tabcontent button:nth-child(even) {
-    background-color: #ddd;
-}
-.tabcontent button:nth-child(odd) {
-    background-color: #f1f1f1;
-}
-
 @-webkit-keyframes fadeEffect {
     from {opacity: 0;}
     to {opacity: .5;}
@@ -151,7 +144,8 @@ pre, .pre {
 
 .active,
 .collapsible:hover {
-    background-color: #ccc;
+    color: #000;
+    background-color: transparent;
     transition: 0.35s;
 }
 
