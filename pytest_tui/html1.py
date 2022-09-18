@@ -12,7 +12,8 @@ from pytest_tui import __version__
 from pytest_tui.__main__ import Cli
 from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
 
-CSS_FILE = Path(__file__).parent / "styles.css"
+CSS_FILE = Path(__file__).parent / "resources" / "styles.css"
+JS_FILE = Path(__file__).parent / "resources" / "scripts.js"
 
 TAB_METADATA = ["About"]
 TAB_METADATA_COLOR = {"About": "rgba(0, 0, 255, 0.33)"}
@@ -116,8 +117,8 @@ class HtmlPage:
             TABS_RESULTS.remove("Xfails")
 
     def create_header(self) -> str:
-        css = Path(CSS_FILE).read_text().replace("\n", "")
-        return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8, width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif';" > <div class="sticky">"""
+        my_css = Path(CSS_FILE).read_text().replace("\n", "")
+        return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8, width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {my_css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif';" > <div class="sticky">"""
 
     def create_testrun_results(self) -> str:
         return (
@@ -214,31 +215,31 @@ class HtmlPage:
             collapsible_results += f"""<button type="button" class="collapsible" style="border: none; outline: none;">{re.sub(r".[0-9]*$", "", str(result.start_time))} | {result.outcome} | {result.fqtn}</button> <div class="content"> <pre>{content}</pre> </div>"""
         return collapsible_results
 
-    def create_tab_script(self) -> str:
-        return """<script> function openTab(evt, tabName) { var i, tabcontent, tablinks; tabcontent = document.getElementsByClassName("tabcontent"); for (i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; } tablinks = document.getElementsByClassName("tablinks"); for (i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); } document.getElementById(tabName).style.display = "block"; evt.currentTarget.className += " active"; } </script>"""
+    # def create_tab_script(self) -> str:
+    #     return """<script> function openTab(evt, tabName) { var i, tabcontent, tablinks; tabcontent = document.getElementsByClassName("tabcontent"); for (i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; } tablinks = document.getElementsByClassName("tablinks"); for (i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); } document.getElementById(tabName).style.display = "block"; evt.currentTarget.className += " active"; } </script>"""
 
-    def create_tab_toggle_script(self) -> str:
-        return """<script function toggle_tab(evt, tabName) { if (content.style.display === "block") { content.style.display = "none"; } else { content.style.display = "block"; } } </script>"""
+    # def create_tab_toggle_script(self) -> str:
+    #     return """<script function toggle_tab(evt, tabName) { if (content.style.display === "block") { content.style.display = "none"; } else { content.style.display = "block"; } } </script>"""
 
-    def create_collapsible_script(self) -> str:
-        return """<script> var coll = document.getElementsByClassName("collapsible"); var i; for (i = 0; i < coll.length; i++) { coll[i].addEventListener("click", function() { this.classList.toggle("active"); var content = this.nextElementSibling; if (content.style.display === "block") { content.style.display = "none"; } else { content.style.display = "block"; } }); } </script>"""
+    # def create_collapsible_script(self) -> str:
+    #     return """<script> var coll = document.getElementsByClassName("collapsible"); var i; for (i = 0; i < coll.length; i++) { coll[i].addEventListener("click", function() { this.classList.toggle("active"); var content = this.nextElementSibling; if (content.style.display === "block") { content.style.display = "none"; } else { content.style.display = "block"; } }); } </script>"""
 
-    def create_default_open(self) -> str:
-        return """<script> document.getElementById("defaultOpen").click(); </script>"""
+    # def create_default_open(self) -> str:
+    #     return """<script> document.getElementById("defaultOpen").click(); </script>"""
 
-    def create_html(self) -> str:
-        return self.create_header() + self.create_tabs() + self.create_trailer()
+    # def create_html(self) -> str:
+    #     return self.create_header() + self.create_tabs() + self.create_trailer()
 
-    def create_html_file(self, filename: str):
-        with open(filename, "w") as f:
-            f.write(self.create_html())
+    # def create_html_file(self, filename: str):
+    #     with open(filename, "w") as f:
+    #         f.write(self.create_html())
 
-    def create_html_file_with_script(self, filename: str):
-        with open(filename, "w") as f:
-            f.write(self.create_html())
-            f.write(self.create_tab_script())
-            f.write(self.create_tab_toggle_script())
-            f.write(self.create_default_open())
+    # def create_html_file_with_script(self, filename: str):
+    #     with open(filename, "w") as f:
+    #         f.write(self.create_html())
+    #         f.write(self.create_tab_script())
+    #         f.write(self.create_tab_toggle_script())
+    #         f.write(self.create_default_open())
 
     def get_metadata(self) -> str:
         lines = self.results.tui_sections.test_session_starts.content.split("\n")
@@ -252,8 +253,8 @@ class HtmlPage:
             "border": "ridge",
             "style": "width:auto%; table-layout: auto;",
             "border-collapse": "collapse",
-            "class": "data-table",
-            "class": "sortable",
+            # "class": "data-table",
+            # "class": "sortable",
             "text-align": "left",
             "tr": "nth-child(even) {background-color: #f2f2f2;}",
         }
@@ -284,6 +285,19 @@ class HtmlPage:
             tout = str(f.read(), "utf-8")
         return self.converter.convert(tout, full=False)
 
+    def get_js(self) -> str:
+        js = ""
+
+        with open(Path(JS_FILE), "r") as f:
+            lines = f.readlines()
+
+        for line in lines:
+            if line.strip("\n"):
+                js += "<script>" + line + "</script>"
+
+        return js
+
+
 
 def main():
     results = Results()
@@ -291,12 +305,16 @@ def main():
     page.remove_tabs_without_content()
     html_header = page.create_header()
     html_tabs = page.create_tabs()
-    html_tab_script = page.create_tab_script()
-    html_default_open = page.create_default_open()
+    # html_tab_script = page.create_tab_script()
+    # html_default_open = page.create_default_open()
     html_trailer = page.create_trailer()
-    html_collapsible_result_script = page.create_collapsible_script()
-    html_scripts = html_tab_script + html_default_open + html_collapsible_result_script
-    html_out = html_header + html_tabs + html_scripts + html_trailer
+    # html_collapsible_result_script = page.create_collapsible_script()
+    # html_scripts = html_tab_script + html_default_open + html_collapsible_result_script
+
+    my_js = page.get_js()
+
+    html_out = html_header + html_tabs + "\n" + my_js + html_trailer
+    # html_out = html_header + html_tabs + html_scripts + html_trailer
 
     with open(HTML_OUTPUT_FILE, "w+") as f:
         f.write(html_out)
