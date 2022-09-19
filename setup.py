@@ -49,7 +49,7 @@ setup(
         "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
     ],
-    keywords="pytest pytest-plugin testing tui html pytermtk textual html",
+    keywords="pytest pytest-plugin testing tui textual html",
     entry_points={
         "pytest11": ["pytest_tui = pytest_tui.plugin"],
         "console_scripts": [
