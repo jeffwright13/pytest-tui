@@ -140,6 +140,7 @@ pre, .pre {
   font-size: 14px;
   white-space: normal;
   box-shadow: 0px 0px 1px 1px #bbb;
+  user-select: text;
   }
 
 .active,

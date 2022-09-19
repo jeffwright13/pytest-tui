@@ -11,9 +11,10 @@ def read(fname):
     file_path = os.path.join(os.path.dirname(__file__), fname)
     return codecs.open(file_path, encoding="utf-8").read()
 
+
 setup(
     name="pytest-tui",
-    version="1.5.0",
+    version="1.5.1",
     author="Jeff Wright",
     author_email="jeff.washcloth@gmail.com",
     license="MIT",
@@ -35,7 +36,7 @@ setup(
         "strip-ansi>=0.1.1",
         "textual>=0.1.18",
     ],
-    setup_requires=['setuptools_scm'],
+    setup_requires=["setuptools_scm"],
     include_package_data=True,
     classifiers=[
         "Framework :: Pytest",

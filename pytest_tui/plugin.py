@@ -80,13 +80,9 @@ def pytest_cmdline_main(config: Config) -> None:
     if hasattr(config.option, "tui"):
         if config.option.tui:
             config.option.verbose = 1
-            config.option.reportchars = (
-                "A"
-            )
+            config.option.reportchars = "A"
         if hasattr(config.option, "reruns"):
-            config.option.reportchars = (
-                "AR"
-            )
+            config.option.reportchars = "AR"
 
 
 def pytest_report_teststatus(report: TestReport, config: Config) -> None:
