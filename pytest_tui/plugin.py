@@ -2,7 +2,7 @@ import itertools
 import pickle
 import re
 import tempfile
-from concurrent.futures.thread import ThreadPoolExecutor
+# from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime
 from io import StringIO
 from types import SimpleNamespace
@@ -13,8 +13,8 @@ from _pytest.config import Config, create_terminal_writer
 from _pytest.reports import TestReport
 from strip_ansi import strip_ansi
 
-from pytest_tui.__main__ import tui_launch
-from pytest_tui.html1 import main as tuihtml
+# from pytest_tui.__main__ import tui_launch
+# from pytest_tui.html import main as tuihtml
 from pytest_tui.utils import (
     TERMINAL_OUTPUT_FILE,
     TUI_RESULT_OBJECTS_FILE,
@@ -45,7 +45,7 @@ def pytest_addoption(parser) -> None:
     group.addoption(
         "--tui",
         action="store_true",
-        help="Enable the pytest-tui plugin. Both text user interface (TUI) and HTML output are supported.\nRun TUI with console command 'tui'; run HTML report with 'tuih'. Configure autolaunch with 'tuiconf'.",
+        help="Enable the pytest-tui plugin. Both text user interface (TUI) and HTML output are supported.\nRun TUI with console command 'tui'; run HTML report with 'tuih'.",
     )
 
 
@@ -294,10 +294,8 @@ def pytui_launch(config: Config) -> None:
         capmanager = config.pluginmanager.getplugin("capturemanager")
         capmanager.suspend_global_capture(in_=True)
     finally:
-        # individually launch TUIand/or HTML report (if configured in config.ini to do so)
-        # config.ini is configured through use of `pyconf` console scripts
-        with ThreadPoolExecutor() as executor:
-            executor.submit(tuihtml)
-        tui_launch()
-
+        # re-enable capturing
+        # with ThreadPoolExecutor() as executor:
+        #     executor.submit(tuihtml)
+        # tui_launch()
         capmanager.resume_global_capture()

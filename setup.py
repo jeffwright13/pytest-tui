@@ -53,9 +53,8 @@ setup(
     entry_points={
         "pytest11": ["pytest_tui = pytest_tui.plugin"],
         "console_scripts": [
-            "tuiconf = pytest_tui.__main__:tui_config",
-            "tui = pytest_tui.__main__:tui_run",
-            "tuih = pytest_tui.html1:main",
+            "tui = pytest_tui.tui:main",
+            "tuih = pytest_tui.tuih:main",
         ],
     },
 )

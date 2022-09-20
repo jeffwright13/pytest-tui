@@ -1,4 +1,4 @@
-import configparser
+# import configparser
 import json
 import re
 import webbrowser
@@ -9,8 +9,9 @@ import json2table
 from ansi2html import Ansi2HTMLConverter
 
 from pytest_tui import __version__
-from pytest_tui.__main__ import Cli
-from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
+# from pytest_tui.__main__ import Cli
+# from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
+from pytest_tui.utils import HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
 
 CSS_FILE = Path(__file__).parent / "resources" / "styles.css"
 JS_FILE = Path(__file__).parent / "resources" / "scripts.js"
@@ -82,12 +83,9 @@ class TabContent:
 class HtmlPage:
     def __init__(self, results: Results):
         # Read existing config from file, or apply default if not exist
-        self.config_parser = configparser.ConfigParser()
-        try:
-            self.config_parser.read(CONFIGFILE)
-        except Exception:
-            Cli().apply_default_config()
-            self.config_parser.read(CONFIGFILE)
+        # self.config_parser = configparser.ConfigParser()
+        # self.cli = Cli()
+        # self.cli.read_config_file()
 
         self.results = results
         self.tab_content = TabContent(results)
@@ -276,9 +274,14 @@ def main():
     with open(HTML_OUTPUT_FILE, "w+") as f:
         f.write(html_out)
 
+    webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
+
+
+
     # Open in browser if autolaunch_html config is set
-    if page.config_parser["HTML"].get("html_autolaunch") == "True":
-        webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
+    # page.cli.read_config_file()
+    # if page.cli.html_autolaunch:
+    #     webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
 
 
 if __name__ == "__main__":

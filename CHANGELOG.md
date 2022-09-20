@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2022-09-20
+
+- Added "All Tests" results tab.
+- Addressed issue 63:
+  - Fixed tuih and tui console scripts not running
+  - Removed autolaunch feature
+- Migrated to Poetry.
+
 ## [1.5.0] - 2022-09-16
 
 - Added "All Tests" results tab.
