@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 5.0.1 (Python 3.10.5 on darwin)" generated="20220907 22:57:51.495" rpa="false" schemaversion="3">
+<suite id="s1" name="Robot" source="/Users/jwr003/coding/pytest-tui/testing/robot">
+<suite id="s1-s1" name="Tests" source="/Users/jwr003/coding/pytest-tui/testing/robot/Tests">
+<suite id="s1-s1-s1" name="001 Test" source="/Users/jwr003/coding/pytest-tui/testing/robot/Tests/001_test.robot">
+<test id="s1-s1-s1-t1" name="Get Pytest Version" line="6">
+<kw name="Run Process" library="Process">
+<var>${result}</var>
+<arg>pytest --version</arg>
+<doc>Runs a process and waits for it to complete.</doc>
+<msg timestamp="20220907 22:57:51.554" level="INFO">Starting process:
+"pytest --version"</msg>
+<msg timestamp="20220907 22:57:51.563" level="FAIL">FileNotFoundError: [Errno 2] No such file or directory: 'pytest --version'</msg>
+<status status="FAIL" starttime="20220907 22:57:51.554" endtime="20220907 22:57:51.586"/>
+</kw>
+<kw name="Should Contain" library="BuiltIn">
+<arg>${result}</arg>
+<arg>7.2</arg>
+<doc>Fails if ``container`` does not contain ``item`` one or more times.</doc>
+<status status="NOT RUN" starttime="20220907 22:57:51.587" endtime="20220907 22:57:51.587"/>
+</kw>
+<status status="FAIL" starttime="20220907 22:57:51.553" endtime="20220907 22:57:51.588">FileNotFoundError: [Errno 2] No such file or directory: 'pytest --version'</status>
+</test>
+<status status="FAIL" starttime="20220907 22:57:51.535" endtime="20220907 22:57:51.588"/>
+</suite>
+<status status="FAIL" starttime="20220907 22:57:51.533" endtime="20220907 22:57:51.589"/>
+</suite>
+<status status="FAIL" starttime="20220907 22:57:51.496" endtime="20220907 22:57:51.590"/>
+</suite>
+<statistics>
+<total>
+<stat pass="0" fail="1" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat pass="0" fail="1" skip="0" id="s1" name="Robot">Robot</stat>
+<stat pass="0" fail="1" skip="0" id="s1-s1" name="Tests">Robot.Tests</stat>
+<stat pass="0" fail="1" skip="0" id="s1-s1-s1" name="001 Test">Robot.Tests.001 Test</stat>
+</suite>
+</statistics>
+<errors>
+<msg timestamp="20220907 22:57:51.544" level="ERROR">Error in file '/Users/jwr003/coding/pytest-tui/testing/robot/Resources/common.resource' on line 4: Library '../Libraries/Utilities.py' does not exist.</msg>
+</errors>
+</robot>

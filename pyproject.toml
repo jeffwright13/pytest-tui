@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "pytest-tui"
+version = "1.5.1"
+description = "Text User Interface (TUI) for Pytest, with HTML report"
+authors = ["Jeff Wright <jeff.washcloth@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "pytest_tui"}]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<4.0"
+ansi2html = "^1.8.0"
+blessed = "^1.19.1"
+Faker = "^14.2.0"
+json2table = "^1.1.5"
+pytest = ">=6.2.5"
+strip-ansi = "^0.1.1"
+textual = "^0.1.18"
+single-source = "^0.3.0"
+
+[tool.poetry.group.dev.dependencies]
+pyflakes = "^2.5.0"
+black = "^22.8.0"
+ipython = "^8.5.0"
+isort = "^5.10.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+tui = "pytest_tui.tui:main"
+tuih = "pytest_tui.tuih:main"
