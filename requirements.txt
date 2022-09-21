@@ -44,7 +44,6 @@ pyparsing==3.0.9
 pytest==7.0.1
 pytest-html==3.1.1
 pytest-metadata==2.0.2
-# pytest-rerunfailures==10.2
 pytest_tui==1.1.2
 python-dateutil==2.8.2
 readme-renderer==35.0

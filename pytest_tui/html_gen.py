@@ -9,6 +9,7 @@ import json2table
 from ansi2html import Ansi2HTMLConverter
 
 from pytest_tui import __version__
+
 # from pytest_tui.__main__ import Cli
 # from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
 from pytest_tui.utils import HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
@@ -215,7 +216,10 @@ class HtmlPage:
 
     def get_metadata(self) -> str:
         lines = self.results.tui_sections.test_session_starts.content.split("\n")
-        md = [line for line in lines if line.startswith("metadata: {")][0]
+        try:
+            md = [line for line in lines if line.startswith("metadata: {")][0]
+        except IndexError:
+            return ""
         m = json.loads(md.replace("'", '"').lstrip("metadata: "))
         m.pop("JAVA_HOME")
         now = (
@@ -275,8 +279,6 @@ def main():
         f.write(html_out)
 
     webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
-
-
 
     # Open in browser if autolaunch_html config is set
     # page.cli.read_config_file()

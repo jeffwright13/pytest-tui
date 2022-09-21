@@ -1,5 +1,5 @@
 # pytest-tui
-## A Pytest plugin that auto-launches a Text User Interface (TUI) or an HTML page for viewing test run results
+## A Pytest plugin with scripts to launch a Text User Interface (TUI) or an HTML page for viewing test run results
 
 ### TUI:
 ![2022-05-01 19 25 19](https://user-images.githubusercontent.com/4308435/166174159-b442a5b5-416d-42a0-badd-7401e9980e47.gif)
@@ -17,14 +17,12 @@ Test results are categorized in the same way Pytest does it:
 
 The intent it to make it easier for you to find the specific results you want so you can examine it without all the other results getting in your way.
 
-How does it work in practice? Easy. You just run your Pytest campaigns like you normally would, adding the command line option `--tui` (`pytest --tui`). Your test session will proceed as it always does, showing you the familiar terminal output while running. Then, at the end of the session, the TUI can be launched and the results are displayed on-screen for you to examine. When you're done, just exit the TUI and you are placed back into the terminal where you were before it was launched. Wait, what? You need to look at those results again? Well, you *could* scroll back in the terminal like you've always done in the past. Or, you could execute the built-in console script `tui`, and you're back to where things were at the end of the run. Easy.
+How does it work in practice? Easy. You just run your Pytest campaigns like you normally would, adding the command line option `--tui` (`pytest --tui`). Your test session will proceed as it always does (always in verbose mode), showing you the familiar terminal output while running. Then, at the end of the session, a TUI or an HTML page can be launched via the included console scripts (`tui` and/or `tuih`). The results are displayed on-screen or in-browser for you to examine. When you're done, just exit the TUI to go back to the terminal, or close the HTML page. Don't worry about losing your test session data. Results are stored to local disk and you can always relaunch the TUI or HTML page using those same console scripts.
 
-You can also configure `pytest-tui` to auto-launch a self-contained web page, using your default browser, providing the same information in a similar format. Output sections and individual test results are expandable/collapsible, and test summary statistics are displayed for convenience. As with the TUI, the HTML page retains the original pytest ANSI-encoded color output, lending a familiar look and feel. By default, neither the HTML page nor the TUI will auto-launch (it is considered intrusive by some), but you can launch either one manually using the `tui` or `tuih` console scripts.
-
-The autolaunch capability for both TUI and HTML is configurable with the provided configuration utility, `tuiconf`. See below for details.
+Output sections and individual test results are expandable/collapsible, and test summary statistics are displayed for convenience. Both the TUI and the HTML page retain the original pytest ANSI-encoded color output, lending a familiar look and feel.
 
 ## Features
-- Autolaunch either the [Textual](https://github.com/Textualize/textual) TUI or the HTML page
+- Launch either or both of the [Textual](https://github.com/Textualize/textual) TUI or the HTML page using built in console scripts
 - ANSI text markup support - whatever the output on your console looks like is how things are going to show up in the TUI
 - Mouse and keyboard support (including scrolling)
 - Support for all output formats/modes:
@@ -41,6 +39,8 @@ The autolaunch capability for both TUI and HTML is configurable with the provide
   - `pytest-sugar`
   - `pytest-emoji-output`
   - `pytest-timestamp`
+- Untested:
+  - `pytest-xdist`
 
 ## Requirements
 - Pytest >= 6.2.5
@@ -53,21 +53,11 @@ The autolaunch capability for both TUI and HTML is configurable with the provide
 
 ### Running Tests
 
-Run the following command from the top-level directory of the codebase you want to test:
+Pretty much just run pytest like you always do, adding the `--tui` option to the list of command line options:
 
-`pytest --tui`
+`pytest --tui <whatever-else-you-normally-do>`
 
-This will perform a standard pytest run, and then launch the TUI. You can disable the autolaunch feature using the `tuiconf` configuration script (details below). To quit the TUI, either click the Quit button, or press `Q`.
-
-In some environments, where the working directory for pytest has been changed from the default, it may be necessary to cd into the working directory in order to successfully launch the TUI or HTML. Basically, you need to be in the parent directory of wherever the `/ptt_files` folder has been placed by the plugin after a test run.
-
-### Configuration Script
-
-Change the default behavior of `pytest-tui` using the built-in configuration script `tuiconf`. When executed from the command line, this script provides a menu-drive configuration utility that allows customizing some aspects of the plugin.
-
-The following items are currently customizable:
-- TUI autolaunch (yes/no)
-- HTML page autolaunch (yes/no)
+In some environments, where the working directory for pytest has been changed from the default, it may be necessary to cd into the working directory in order to successfully launch the TUI or HTML. Basically, you need to be in the parent directory of wherever the `/ptt_files` folder has been placed by the plugin after a test run. This is a known issue and will be fixed at some point.
 
 ### Demo Tests
 
@@ -87,7 +77,7 @@ On Windows, use the ALT key while click-dragging the mouse. Mac users can get th
 
 ## HTML File
 
-The HTML output file is located at `<cwd>/ptt_files/html_report.html`. By default, the HTML file is automatically launched via browser, just as with the TUI, using the system default browser upon completion of the test run. HTML autolaunch can be suppressed through the configuration console script `tuiconf`.
+The HTML output file is located at `<cwd>/ptt_files/html_report.html`. The HTML file is automatically launched via browser when the `tuih` file is invoked.
 
 ## Known Limitations / Issues
 
@@ -102,9 +92,9 @@ The HTML output file is located at `<cwd>/ptt_files/html_report.html`. By defaul
 
 This project was originally envisioned to only show test failures, and allow the user to 'fold' the details of the failed tests by clicking a line so that the details would alternately show/hide. In fact, the original repo was called `pytest-fold`. As development progressed, it became clear that what was really needed was a real TUI, one that organized the output in such a way that all of pytest's output was available in a more streamlined way.
 
-Several TUIs (using different TUI libraries) have been cycled through this project. The Textual interface currently being used is the only one available, since some internal optimization has been done to make the results simpler to consume. However, other TUIs should be able to be integrated without too much work (e.g. Asciimatics, PyTermTk, pyermgui, etc.) Contact the author if you have a desire to implement one of these.
+Several TUIs (using different TUI libraries) have been cycled through this project. The Textual interface is the only one currently supported, since some internal optimization has been done to make the results simpler to consume. However, other TUIs should be able to be integrated without too much work (e.g. Asciimatics, PyTermTk, pyermgui, etc.). Same would be true of a GUI. Contact the author if you have a desire to implement one of these. The results of any given testrun are collected and sorted in such a way that it should relatively simple to take them and put them into the presentation mode of choice.
 
-The HTML feature was put into place because of some minor limitations found in the available HTML plugins (specifically, miscounted totals in some corner cases, no color-coded output, and inability to show output from the pytest `live logs` option).
+The HTML feature was put into place because of some minor limitations found in the available HTML plugins (miscounted totals in some corner cases, no color-coded output, inability to show output from the pytest `live logs` option).
 
 ## Issues
 
@@ -112,7 +102,7 @@ If you encounter any problems, have feedback or requests, or anything else, plea
 
 ## Contributing
 
-Contributions are very welcome. Please run pyflakes and black on any code before submitting a PR.
+Contributions are welcome. Please run pyflakes, isort and black on any code before submitting a PR.
 
 I have tried to make the TUIs and the HTML page as clean as possible, but I am not a UI expert and I am sure many improvements could be made. If you are slick with user interfaces, I would love some help!
 

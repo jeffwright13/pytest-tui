@@ -7,11 +7,13 @@ and this project tries to adhere to [Semantic Versioning](https://semver.org/spe
 
 ## [1.6.0] - 2022-09-20
 
-- Added "All Tests" results tab.
 - Addressed issue 63:
   - Fixed tuih and tui console scripts not running
-  - Removed autolaunch feature
-- Migrated to Poetry.
+  - Removed autolaunch feature (TUI and HTML pages must now be launched by the user using 'tui' or 'tuih')
+  - Removed config script 'tuiconf'
+- Pinned dependencies.
+- Added pytest-metadata to dependencies.
+- Removed bullet from dependencies.
 
 ## [1.5.0] - 2022-09-16
 
