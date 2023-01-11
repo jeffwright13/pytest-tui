@@ -1,5 +1,6 @@
-import pytest
 import random
+
+import pytest
 
 
 @pytest.mark.flaky(reruns=0)

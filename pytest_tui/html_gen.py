@@ -58,7 +58,7 @@ class TabContent:
     def get_all_items(self):
         return self.tabs
 
-    def fetch_raw_section(self):
+    def fetch_raw_sections(self):
         summary_section = (
             "\n"
             + self.results.tui_sections.lastline.content
@@ -77,7 +77,7 @@ class TabContent:
     def fetch_sections_html(self):
         return {
             key: self.converter.convert(value, full=False)
-            for key, value in self.fetch_raw_section().items()
+            for key, value in self.fetch_raw_sections().items()
         }
 
 
@@ -124,6 +124,15 @@ class HtmlPage:
             """<hr><h5>Final Results:</h5><pre><b>"""
             + self.converter.convert(
                 self.results.tui_sections.lastline.content.replace("=", ""), full=False
+            )
+            + """</b></pre>"""
+        )
+
+    def create_testrun_summary(self) -> str:
+        return (
+            """<h5>Short Summary:</h5><pre><b>"""
+            + self.converter.convert(
+                self.results.tui_sections.short_test_summary.content, full=False
             )
             + """</b></pre>"""
         )
@@ -245,6 +254,7 @@ class HtmlPage:
 
         return (
             f"{self.create_testrun_results()}<hr>"
+            + f"{self.create_testrun_summary()}<hr>"
             + f"""<h5>Test results generated:</h5> <p>{results_modification_time}</p>"""
             + f"""<h5>This report generated:</h5> <p>{now}</p>"""
             + f"""<h5>pytest-tui version:</h5> <p>{__version__}</p><hr>"""
@@ -278,6 +288,7 @@ def main():
     with open(HTML_OUTPUT_FILE, "w+") as f:
         f.write(html_out)
 
+     # Open in browser
     webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
 
     # Open in browser if autolaunch_html config is set

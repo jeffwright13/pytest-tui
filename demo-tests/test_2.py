@@ -1,8 +1,9 @@
-import faker
-import pytest
 import logging
 import random
 import sys
+
+import faker
+import pytest
 
 LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
 logger = logging.getLogger()

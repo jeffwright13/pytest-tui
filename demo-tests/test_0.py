@@ -46,11 +46,23 @@ def test0_skip():
 
 @pytest.mark.xfail()
 def test0_xfail():
+    print("Test 0 XFail")
+    logger.critical("CRITICAL")
+    logger.error("ERROR")
+    logger.warning("WARNING")
+    logger.info("INFO")
+    logger.debug("DEBUG")
     assert False
 
 
 @pytest.mark.xfail()
 def test0_xpass():
+    print("Test 0 XPass")
+    logger.critical("CRITICAL")
+    logger.error("ERROR")
+    logger.warning("WARNING")
+    logger.info("INFO")
+    logger.debug("DEBUG")
     assert True
 
 

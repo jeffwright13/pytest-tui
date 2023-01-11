@@ -1,6 +1,7 @@
-import faker
 import random
 import warnings
+
+import faker
 
 
 def fake_data(min: int = 30, max: int = 120) -> str:
