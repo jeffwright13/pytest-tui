@@ -1,0 +1,53 @@
+RELEASE_INSTRUCTIONS
+--------------------
+
+- Verify package installs from source and runs correctly in editable mode:
+    $ git clone git@github.com:jeffwright13/pytest-tui.git dev-dir
+    $ cd dev-dir
+    $ pyenv local 3.9.9
+    $ python -m venv venv
+    $ source venv/bin/activate
+    $ pip install -e .
+    $ pytest --tui
+    $ tui
+    $ tuih
+
+- Install/upgrade build & release tools:
+    $ pip install --upgrade setuptools wheel twine
+
+- Clear out old builds:
+    $ rm dist/*
+
+- Build:
+    $ python setup.py sdist bdist_wheel
+
+- Publish to TestPyPi:
+    $ python -m twine upload --repository testpypi dist/*
+
+- Test the installation in a fresh directory:
+    $ cd ~/coding
+    $ mkdir ptt
+    $ cd ptt
+    $ pyenv local 3.10.5
+    $ python -m venv venv
+    $ source venv/bin/activate
+    $ python -m pip install --index-url https://test.pypi.org/simple/ pytest-tui
+    $ mkdir -p ./demo-tests/ && cp ../pytest-tui/demo-tests/* ./demo-tests/
+
+- Verify basic functionality without plugin:
+    $ pytest --version
+    $ pytest --co
+    $ pytest -k test0
+
+- Verify basic functionality with plugin:
+    $ pytest --tui --version
+    $ pytest --tui --co
+    $ pytest --tui -k test0
+    $ tui
+    $ tuih
+
+- Publish to Pypi:
+    $ deactivate
+    $ cd ~/coding/dev-dir
+    $ source venv/bin/activate
+    $ python -m twine upload dist/*
