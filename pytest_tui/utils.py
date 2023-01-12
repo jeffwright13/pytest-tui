@@ -231,4 +231,3 @@ class Results:
             raise FileNotFoundError(
                 f"Cannot find {file_path}. Have you run pytest with the '--tui' option yet?"
             ) from e
-            pass

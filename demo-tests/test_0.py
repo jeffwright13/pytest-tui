@@ -9,7 +9,6 @@ logger = logging.getLogger()
 
 def test0_pass_1():
     print("Test Pass 1!")
-    assert True
 
 
 def test0_pass_2_logs():
@@ -19,7 +18,6 @@ def test0_pass_2_logs():
     logger.warning("WARNING")
     logger.info("INFO")
     logger.debug("DEBUG")
-    assert True
 
 
 @pytest.fixture
@@ -29,7 +27,6 @@ def error_fixt():
 
 def test0_pass_3_error_in_fixture(error_fixt):
     print("Test Pass 3!")
-    assert True
 
 
 def test0_fail_1():
@@ -41,7 +38,7 @@ pytest.mark.skip(reason="Skipping this test with decorator.")
 
 
 def test0_skip():
-    assert True
+    pass
 
 
 @pytest.mark.xfail()
@@ -63,7 +60,6 @@ def test0_xpass():
     logger.warning("WARNING")
     logger.info("INFO")
     logger.debug("DEBUG")
-    assert True
 
 
 # Method and its test that causes warnings

@@ -57,7 +57,6 @@ def test_c_error(error_fixture):
     logger.warning(fake_data())
     logger.info(fake_data())
     logger.debug(fake_data())
-    pass
 
 
 def test_d1_skip():
@@ -112,4 +111,3 @@ def test_f1():
     logger.warning(fake_data())
     logger.info(fake_data())
     logger.debug(fake_data())
-    assert True

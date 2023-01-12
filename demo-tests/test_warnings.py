@@ -39,4 +39,3 @@ def test_2_passes_with_warnings():
     warnings.warn(BytesWarning(fake_data(55, 205)))
     warnings.warn(ResourceWarning(fake_data(55, 205)))
     warnings.warn((fake_data(55, 205)))
-    assert True

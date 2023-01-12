@@ -27,4 +27,3 @@ def test0_xpass():
     logger.info("INFO")
     logger.debug("DEBUG")
     warnings.warn(Warning("You ave been warned!"))
-    assert True

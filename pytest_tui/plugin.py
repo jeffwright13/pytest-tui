@@ -274,14 +274,10 @@ def pytest_unconfigure(config: Config) -> None:
     with open(TERMINAL_OUTPUT_FILE, "wb") as file:
         file.write(terminal_out)
 
-    # Pickle the test result and sections objects to files.
-    file = open(TUI_RESULT_OBJECTS_FILE, "wb")
-    pickle.dump(config._tui_test_results, file)
-    file.close()
-    file = open(TUI_SECTIONS_FILE, "wb")
-    pickle.dump(config._tui_sections, file)
-    file.close()
-
+    with open(TUI_RESULT_OBJECTS_FILE, "wb") as file:
+        pickle.dump(config._tui_test_results, file)
+    with open(TUI_SECTIONS_FILE, "wb") as file:
+        pickle.dump(config._tui_sections, file)
     pytui_launch(config)
 
 

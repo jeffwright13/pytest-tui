@@ -36,7 +36,6 @@ def test_a_ok():
     logger.warning(fake_data())
     logger.info(fake_data())
     logger.debug(fake_data())
-    pass
 
 
 def test_b_fail():
@@ -55,7 +54,6 @@ def test_c_error(error_fixture):
     logger.warning(fake_data())
     logger.info(fake_data())
     logger.debug(fake_data())
-    pass
 
 
 def test_d1_skip_inline():
@@ -112,7 +110,6 @@ def test_f1_xfails_by_inline_even_though_assertTrue_happens_before_pytestDotXfai
     logger.warning(fake_data())
     logger.info(fake_data())
     logger.debug(fake_data())
-    assert True
     pytest.xfail("Marked as Xfail with inline call to 'pytest.xfail()'.")
 
 
@@ -125,7 +122,6 @@ def test_f2_xpass_by_xfail_decorator_and_has_reason():
     logger.warning(fake_data())
     logger.info(fake_data())
     logger.debug(fake_data())
-    pass
 
 
 @pytest.mark.parametrize("test_input, expected", [("3+5", 8), ("2+4", 6), ("6*9", 42)])
@@ -154,7 +150,6 @@ def test_1_passes_and_has_logging_output(log_testname):
     logger.warning(fake_data())
     logger.info(fake_data())
     logger.debug(fake_data())
-    assert True
 
 
 def test_2_fails_and_has_logging_output(log_testname):
@@ -181,7 +176,6 @@ def test_4_passes(log_testname):
     logger.warning(fake_data())
     logger.info(fake_data())
     logger.debug(fake_data())
-    assert True
 
 
 @pytest.mark.skip
@@ -307,7 +301,6 @@ def test_11_pass_capturing(capsys):
     logger.warning(fake_data())
     logger.info(fake_data())
     logger.debug(fake_data())
-    assert True
 
 
 def test_12_fails_and_has_stdout(capsys):
@@ -329,7 +322,6 @@ def test_13_passes_and_has_stdout(capsys):
     logger.warning(fake_data())
     logger.info(fake_data())
     logger.debug(fake_data())
-    assert True
 
 
 # These 2 tests can intentionally cause an error - useful for testing

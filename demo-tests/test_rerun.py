@@ -30,4 +30,4 @@ def test_flaky_always_fail():
 
 @pytest.mark.flaky(reruns=2)
 def test_flaky_always_pass():
-    assert True
+    pass

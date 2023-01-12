@@ -48,4 +48,3 @@ def test_3(f):
     logger.warning(LOREM)
     logger.info(LOREM)
     logger.debug(LOREM)
-    assert True
