@@ -14,6 +14,8 @@ from pytest_tui import __version__
 # from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
 from pytest_tui.utils import HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
 
+# test_session_starts_progress_matcher = re.compile(r"(^.*==+\stest session starts\s==+)(.*)(collecting\s\d+\sitems\s+)(.*)")
+
 CSS_FILE = Path(__file__).parent / "resources" / "styles.css"
 JS_FILE = Path(__file__).parent / "resources" / "scripts.js"
 
@@ -128,13 +130,69 @@ class HtmlPage:
             + """</b></pre>"""
         )
 
+    def create_execution_info(self) -> str:
+        now = (
+            datetime.now(timezone.utc)
+            .replace(microsecond=0)
+            .strftime("%Y-%m-%d %H:%M:%S")
+        )
+        results_modification_time = (
+            datetime.utcfromtimestamp(Path(TERMINAL_OUTPUT_FILE).stat().st_mtime)
+            .replace(microsecond=0)
+            .strftime("%Y-%m-%d %H:%M:%S")
+        )
+        return (
+            """<button type="button" onclick="ExecutionInfoButton()">Test Execution Info</button><div id="testexecution" style="display: none"><pre><b>"""
+            + f"""<p><b>Test run completed:</b> {results_modification_time}</p>"""
+            + f"""<p><b>This report generated:</b> {now}</p>"""
+            + f"""<p><b>pytest-tui version:</b> {__version__}</p>"""
+            + """</b></pre></div>"""
+        )
+
+    def create_test_session_starts_without_meta(self) -> str:
+        regex_strip_meta = re.compile(
+            r"(^.*==+\stest session starts\s==+)(.*)(collecting\s\d+\sitems\s+)(.*)"
+        )
+        stripped = (
+            re.search(
+                regex_strip_meta,
+                self.results.tui_sections.test_session_starts.content.encode(
+                    "unicode_escape"
+                ).decode(),
+            )
+            .groups()[-1]
+            .encode()
+            .decode("unicode-escape")
+        )
+        return (
+            """<button type="button" onclick="TestSessionStartsButton()">Live Test Session Summary</button><div id="testsessionstarts" style="display: none"><pre><b>"""
+            + self.converter.convert(stripped, full=False)
+            + self.converter.convert(
+                self.results.tui_sections.lastline.content, full=False
+            )
+            + """</b></pre></div>"""
+        )
+
     def create_testrun_summary(self) -> str:
         return (
-            """<h5>Short Summary:</h5><pre><b>"""
+            """<button type="button" onclick="ShortTestSummaryButton()">Final Test Summary</button><div id="shortsummary" style="display: none"><pre><b>"""
             + self.converter.convert(
                 self.results.tui_sections.short_test_summary.content, full=False
             )
-            + """</b></pre>"""
+            + "\n"
+            + self.converter.convert(
+                self.results.tui_sections.lastline.content, full=False
+            )
+            + """</b></pre></div>"""
+        )
+
+    def create_environment_info(self, m, table_attributes) -> str:
+        return (
+            """<button type="button" onclick="EnvironmentButton()">Environment</button><div id="environment" style="display: none"><p><pre><b>"""
+            + json2table.convert(
+                m, build_direction="LEFT_TO_RIGHT", table_attributes=table_attributes
+            )
+            + """</b></pre></p></div>"""
         )
 
     def create_trailer(self) -> str:
@@ -231,16 +289,6 @@ class HtmlPage:
             return ""
         m = json.loads(md.replace("'", '"').lstrip("metadata: "))
         m.pop("JAVA_HOME")
-        now = (
-            datetime.now(timezone.utc)
-            .replace(microsecond=0)
-            .strftime("%Y-%m-%d %H:%M:%S")
-        )
-        results_modification_time = (
-            datetime.utcfromtimestamp(Path(TERMINAL_OUTPUT_FILE).stat().st_mtime)
-            .replace(microsecond=0)
-            .strftime("%Y-%m-%d %H:%M:%S")
-        )
         table_attributes = {
             "id": "metadata",
             "font-family": "Helvetica, Arial, sans-serif",
@@ -253,15 +301,12 @@ class HtmlPage:
         }
 
         return (
-            f"{self.create_testrun_results()}<hr>"
+            # f"{self.create_testrun_results()}<hr>"
+            "<hr>"
+            + f"{self.create_execution_info()}<hr>"
+            + f"{self.create_test_session_starts_without_meta()}<hr>"
             + f"{self.create_testrun_summary()}<hr>"
-            + f"""<h5>Test results generated:</h5> <p>{results_modification_time}</p>"""
-            + f"""<h5>This report generated:</h5> <p>{now}</p>"""
-            + f"""<h5>pytest-tui version:</h5> <p>{__version__}</p><hr>"""
-            + """<h5><b>Meta Data / Environment:</b></h5>"""
-            + json2table.convert(
-                m, build_direction="LEFT_TO_RIGHT", table_attributes=table_attributes
-            )
+            + f"{self.create_environment_info(m, table_attributes)}"
         )
 
     def get_terminal_output(self) -> str:
@@ -288,7 +333,7 @@ def main():
     with open(HTML_OUTPUT_FILE, "w+") as f:
         f.write(html_out)
 
-     # Open in browser
+    # Open in browser
     webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
 
     # Open in browser if autolaunch_html config is set
