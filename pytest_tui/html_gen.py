@@ -130,7 +130,7 @@ class HtmlPage:
             + """</b></pre>"""
         )
 
-    def create_execution_info(self) -> str:
+    def create_test_execution_info(self) -> str:
         now = (
             datetime.now(timezone.utc)
             .replace(microsecond=0)
@@ -142,14 +142,14 @@ class HtmlPage:
             .strftime("%Y-%m-%d %H:%M:%S")
         )
         return (
-            """<button type="button" onclick="ExecutionInfoButton()">Test Execution Info</button><div id="testexecution" style="display: none"><pre><b>"""
+            """<button class="accordion">Test Execution Info</button><div class="panel"><p><pre>"""
             + f"""<p><b>Test run completed:</b> {results_modification_time}</p>"""
             + f"""<p><b>This report generated:</b> {now}</p>"""
             + f"""<p><b>pytest-tui version:</b> {__version__}</p>"""
-            + """</b></pre></div>"""
+            + """</pre></p></div>"""
         )
 
-    def create_test_session_starts_without_meta(self) -> str:
+    def create_live_test_session_summary(self) -> str:
         regex_strip_meta = re.compile(
             r"(^.*==+\stest session starts\s==+)(.*)(collecting\s\d+\sitems\s+)(.*)"
         )
@@ -165,17 +165,17 @@ class HtmlPage:
             .decode("unicode-escape")
         )
         return (
-            """<button type="button" onclick="TestSessionStartsButton()">Live Test Session Summary</button><div id="testsessionstarts" style="display: none"><pre><b>"""
+            """<button class="accordion">Live Test Session Summary</button><div class="panel"><p><pre>"""
             + self.converter.convert(stripped, full=False)
             + self.converter.convert(
                 self.results.tui_sections.lastline.content, full=False
             )
-            + """</b></pre></div>"""
+            + """</pre></p></div>"""
         )
 
     def create_testrun_summary(self) -> str:
         return (
-            """<button type="button" onclick="ShortTestSummaryButton()">Final Test Summary</button><div id="shortsummary" style="display: none"><pre><b>"""
+            """<button class="accordion">Final Test Summary</button><div class="panel"><p><pre>"""
             + self.converter.convert(
                 self.results.tui_sections.short_test_summary.content, full=False
             )
@@ -183,16 +183,16 @@ class HtmlPage:
             + self.converter.convert(
                 self.results.tui_sections.lastline.content, full=False
             )
-            + """</b></pre></div>"""
+            + """</pre></p></div>"""
         )
 
     def create_environment_info(self, m, table_attributes) -> str:
         return (
-            """<button type="button" onclick="EnvironmentButton()">Environment</button><div id="environment" style="display: none"><p><pre><b>"""
+            """<button class="accordion">Environment</button><div class="panel"><p><pre>"""
             + json2table.convert(
                 m, build_direction="LEFT_TO_RIGHT", table_attributes=table_attributes
             )
-            + """</b></pre></p></div>"""
+            + """</pre></p></div>"""
         )
 
     def create_trailer(self) -> str:
@@ -303,8 +303,8 @@ class HtmlPage:
         return (
             # f"{self.create_testrun_results()}<hr>"
             "<hr>"
-            + f"{self.create_execution_info()}<hr>"
-            + f"{self.create_test_session_starts_without_meta()}<hr>"
+            + f"{self.create_test_execution_info()}<hr>"
+            + f"{self.create_live_test_session_summary()}<hr>"
             + f"{self.create_testrun_summary()}<hr>"
             + f"{self.create_environment_info(m, table_attributes)}"
         )

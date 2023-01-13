@@ -143,6 +143,7 @@ def pytest_configure(config: Config) -> None:
     # Ideally these would be init'd earlier in the pytest protocol, but it was found that some
     # custom implementations of pytest frameworks will call pytest.configure() BEFORE other hooks
     # (like pytest_sessionstart or pytest_load_initial_conftests), so we need to init here.
+    config._tui_session_start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
     if not hasattr(config, "_tui_sessionstart"):
         config._tui_sessionstart = True
     if not hasattr(config, "_tui_current_section"):
@@ -276,7 +277,8 @@ def pytest_unconfigure(config: Config) -> None:
 
     # Pickle the test run's result and sections objects to files.
     file = open(TUI_RESULT_OBJECTS_FILE, "wb")
-    pickle.dump(config._tui_test_results, file)
+    pickle.dump({"sesssion_start_time": config._tui_session_start_time, "tui_test-results": config._tui_test_results}, file)
+    # pickle.dump(config._tui_test_results, file)
     file.close()
     file = open(TUI_SECTIONS_FILE, "wb")
     pickle.dump(config._tui_sections, file)
