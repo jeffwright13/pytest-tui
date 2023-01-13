@@ -136,22 +136,29 @@ class HtmlPage:
             .replace(microsecond=0)
             .strftime("%Y-%m-%d %H:%M:%S")
         )
-        results_modification_time = (
-            datetime.utcfromtimestamp(Path(TERMINAL_OUTPUT_FILE).stat().st_mtime)
-            .replace(microsecond=0)
-            .strftime("%Y-%m-%d %H:%M:%S")
-        )
         return (
             """<button class="accordion">Test Execution Info</button><div class="panel"><p><pre>"""
-            + f"""<p><b>Test run completed:</b> {results_modification_time}</p>"""
-            + f"""<p><b>This report generated:</b> {now}</p>"""
-            + f"""<p><b>pytest-tui version:</b> {__version__}</p>"""
+            + f"""<p>Test run started: {self.results.tui_session_start_time} UTC</p>"""
+            + f"""<p>Test run completed: {self.results.tui_session_start_time} UTC</p>"""
+            + f"""<p>This report generated: {now} UTC</p>"""
+            + f"""<p>pytest-tui version: {__version__}</p>"""
             + """</pre></p></div>"""
         )
 
     def create_live_test_session_summary(self) -> str:
         regex_strip_meta = re.compile(
             r"(^.*==+\stest session starts\s==+)(.*)(collecting\s\d+\sitems\s+)(.*)"
+        )
+        ripped = (
+            re.search(
+                regex_strip_meta,
+                self.results.tui_sections.test_session_starts.content.encode(
+                    "unicode_escape"
+                ).decode(),
+            )
+            .groups()[0]
+            .encode()
+            .decode("unicode-escape")
         )
         stripped = (
             re.search(
@@ -166,6 +173,7 @@ class HtmlPage:
         )
         return (
             """<button class="accordion">Live Test Session Summary</button><div class="panel"><p><pre>"""
+            + self.converter.convert(ripped, full=False)
             + self.converter.convert(stripped, full=False)
             + self.converter.convert(
                 self.results.tui_sections.lastline.content, full=False

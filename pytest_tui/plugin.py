@@ -4,7 +4,7 @@ import re
 import tempfile
 
 # from concurrent.futures.thread import ThreadPoolExecutor
-from datetime import datetime
+from datetime import datetime, timezone
 from io import StringIO
 from types import SimpleNamespace
 
@@ -18,8 +18,7 @@ from strip_ansi import strip_ansi
 # from pytest_tui.html import main as tuihtml
 from pytest_tui.utils import (
     TERMINAL_OUTPUT_FILE,
-    TUI_RESULT_OBJECTS_FILE,
-    TUI_SECTIONS_FILE,
+    TUI_RESULTS_FILE,
     TuiSections,
     TuiTestResult,
     TuiTestResults,
@@ -143,7 +142,9 @@ def pytest_configure(config: Config) -> None:
     # Ideally these would be init'd earlier in the pytest protocol, but it was found that some
     # custom implementations of pytest frameworks will call pytest.configure() BEFORE other hooks
     # (like pytest_sessionstart or pytest_load_initial_conftests), so we need to init here.
-    config._tui_session_start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+    config._tui_session_start_time = (
+        datetime.now(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+    )
     if not hasattr(config, "_tui_sessionstart"):
         config._tui_sessionstart = True
     if not hasattr(config, "_tui_current_section"):
@@ -247,6 +248,10 @@ def pytest_unconfigure(config: Config) -> None:
     if not config.option.tui:
         return
 
+    config._tui_session_end_time = (
+        datetime.now(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+    )
+
     # Populate test result objects with total durations, from each test's TestReport object.
     for tui_test_result, test_report in itertools.product(
         config._tui_test_results.test_results, config._tui_reports
@@ -275,13 +280,16 @@ def pytest_unconfigure(config: Config) -> None:
     with open(TERMINAL_OUTPUT_FILE, "wb") as file:
         file.write(terminal_out)
 
-    # Pickle the test run's result and sections objects to files.
-    file = open(TUI_RESULT_OBJECTS_FILE, "wb")
-    pickle.dump({"sesssion_start_time": config._tui_session_start_time, "tui_test-results": config._tui_test_results}, file)
-    # pickle.dump(config._tui_test_results, file)
-    file.close()
-    file = open(TUI_SECTIONS_FILE, "wb")
-    pickle.dump(config._tui_sections, file)
+    file = open(TUI_RESULTS_FILE, "wb")
+    pickle.dump(
+        {
+            "sesssion_start_time": config._tui_session_start_time,
+            "sesssion_end_time": config._tui_session_end_time,
+            "tui_test_results": config._tui_test_results,
+            "tui_sections": config._tui_sections,
+        },
+        file,
+    )
     file.close()
 
     pytui_launch(config)

@@ -12,6 +12,7 @@ HTML_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "html_report.html"
 Path(HTML_OUTPUT_FILE).touch(exist_ok=True)
 # CONFIGFILE = PYTEST_TUI_FILES_DIR / "config.ini"
 # Path(CONFIGFILE).touch(exist_ok=True)
+TUI_RESULTS_FILE = PYTEST_TUI_FILES_DIR / "tui_results.pickle"
 TUI_RESULT_OBJECTS_FILE = PYTEST_TUI_FILES_DIR / "tui_result_objects.pickle"
 TUI_SECTIONS_FILE = PYTEST_TUI_FILES_DIR / "tui_sections.pickle"
 TERMINAL_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "terminal_output.ansi"
@@ -197,30 +198,22 @@ class Results:
 
     def __init__(self):
         """Top-level class attributes: TuiTestResults, TuiSections, and full console output w/ ANSI"""
-        self.tui_test_results = self._unpickle_tui_test_results()
-        self.tui_sections = self._unpickle_tui_sections()
+        self.tui_test_info = self._unpickle_tui_test_info()
+        self.tui_session_start_time = self.tui_test_info["sesssion_start_time"]
+        self.tui_session_end_time = self.tui_test_info["sesssion_end_time"]
+        self.tui_test_results = self.tui_test_info["tui_test_results"]
+        self.tui_sections = self.tui_test_info["tui_sections"]
         self.terminal_output = self._get_terminal_output()
 
-    def _unpickle_tui_test_results(self):
-        """Unpack pickled TuiTestResults from file"""
+    def _unpickle_tui_test_info(self):
+        """Unpack pickled results file"""
         try:
-            with open(TUI_RESULT_OBJECTS_FILE, "rb") as rfile:
+            with open(TUI_RESULTS_FILE, "rb") as rfile:
                 return pickle.load(rfile)
         except FileNotFoundError as e:
             raise FileNotFoundError(
-                f"Cannot find {TUI_RESULT_OBJECTS_FILE}. Have you run pytest with the '--tui' option yet?"
+                f"Cannot find {TUI_RESULTS_FILE}. Have you run pytest with the '--tui' option yet?"
             ) from e
-
-    def _unpickle_tui_sections(self):
-        """Unpack pickled TuiSections from file"""
-        try:
-            with open(TUI_SECTIONS_FILE, "rb") as rfile:
-                return pickle.load(rfile)
-        except FileNotFoundError as e:
-            raise FileNotFoundError(
-                f"Cannot find {TUI_SECTIONS_FILE}. Have you run pytest with the '--tui' option yet?"
-            ) from e
-            # pass
 
     def _get_terminal_output(self, file_path: Path = TERMINAL_OUTPUT_FILE) -> list:
         """Get full Pytest terminal output"""
