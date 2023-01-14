@@ -44,6 +44,7 @@ OUTCOMES = (
     "Skipped",
     "Xfails",
     "Xpasses",
+    "Reruns",
 )
 
 
@@ -57,6 +58,7 @@ class TuiTestResult:
     capstderr: str = ""
     capstdout: str = ""
     longreprtext: str = ""
+    was_rerun: bool = False
 
     @staticmethod
     def categories():
@@ -69,6 +71,7 @@ class TuiTestResult:
             "capstderr",
             "capstdout",
             "longreprtext",
+            "was_rerun",
         ]
 
     def to_list(self):
@@ -81,6 +84,7 @@ class TuiTestResult:
             self.capstderr,
             self.capstdout,
             self.longreprtext,
+            self.was_rerun
         ]
 
     def to_dict(self):
@@ -93,6 +97,7 @@ class TuiTestResult:
             "capstderr": self.capstderr,
             "capstdout": self.capstdout,
             "longreprtext": self.longreprtext,
+            "was_rerun": self.was_rerun
         }
 
 
@@ -172,6 +177,14 @@ class TuiTestResults:
             if test_result.outcome == "ERROR"
         ]
 
+    def all_reruns(self):
+        return [
+            test_result
+            for test_result in self.test_results
+            if test_result.was_rerun
+        ]
+
+
 
 @dataclass
 class TuiSection:
@@ -187,9 +200,15 @@ class TuiSections:
     failures: TuiSection = TuiSection(name="failures", content="")
     passes: TuiSection = TuiSection(name="passes", content="")
     warnings_summary: TuiSection = TuiSection(name="warnings_summary", content="")
+    rerun_test_summary: TuiSection = TuiSection(name="rerun_test_summary", content="")
     short_test_summary: TuiSection = TuiSection(name="short_test_summary", content="")
     lastline: TuiSection = TuiSection(name="lastline", content="")
 
+@dataclass
+class RerunTestGroup:
+    final_outcome: str = ""
+    final_test: TuiTestResult = None
+    forerunners: List[TuiTestResult] = field(default_factory=list)
 
 class Results:
     """
@@ -204,6 +223,16 @@ class Results:
         self.tui_test_results = self.tui_test_info["tui_test_results"]
         self.tui_sections = self.tui_test_info["tui_sections"]
         self.terminal_output = self._get_terminal_output()
+
+    def _get_rerun_groups(self):
+        """Get all tests that had 'forerunner' reruns leading up to them"""
+        rerun_groups = []
+        print()
+
+    def _present_rerun_info(self):
+        """Present rerun info, with each test's outcome and the rerun tests that led up to it"""
+        if self.tui_test_results.all_reruns():
+            pass
 
     def _unpickle_tui_test_info(self):
         """Unpack pickled results file"""

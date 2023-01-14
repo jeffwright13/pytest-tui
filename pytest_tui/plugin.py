@@ -72,6 +72,26 @@ def add_ansi_to_report(config: Config, report: TestReport) -> None:
 
     reporter._tw = original_writer
 
+def pytest_sessionstart(session: pytest.Session) -> None:
+    session.config._tui_session_start_time = (
+        datetime.now(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+    )
+    # Initialize TUI-specific attributes on the config object:
+    if not hasattr(session.config, "_tui_sessionstart"):
+        session.config._tui_sessionstart = True
+    if not hasattr(session.config, "_tui_sessionstart_meh"):
+        session.config._tui_sessionstart_meh = True
+    if not hasattr(session.config, "_tui_current_section"):
+        session.config._tui_current_section = "pre_test"
+    if not hasattr(session.config, "_tui_reports"):
+        session.config._tui_reports = []
+    if not hasattr(session.config, "_tui_test_results"):
+        session.config._tui_test_results = TuiTestResults()
+    if not hasattr(session.config, "_tui_sections"):
+        session.config._tui_sections = TuiSections()
+    if not hasattr(session.config, "_tui_terminal_out"):
+        session.config._tui_terminal_out = tempfile.TemporaryFile("wb+")
+
 
 def pytest_cmdline_main(config: Config) -> None:
     # Set up the TUI-specific attributes on the config object:
@@ -138,26 +158,6 @@ def pytest_configure(config: Config) -> None:
     if not config.option.tui:
         return
 
-    # Initialize Config object items to use throughout rest of test session.
-    # Ideally these would be init'd earlier in the pytest protocol, but it was found that some
-    # custom implementations of pytest frameworks will call pytest.configure() BEFORE other hooks
-    # (like pytest_sessionstart or pytest_load_initial_conftests), so we need to init here.
-    config._tui_session_start_time = (
-        datetime.now(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
-    )
-    if not hasattr(config, "_tui_sessionstart"):
-        config._tui_sessionstart = True
-    if not hasattr(config, "_tui_current_section"):
-        config._tui_current_section = "pre_test"
-    if not hasattr(config, "_tui_reports"):
-        config._tui_reports = []
-    if not hasattr(config, "_tui_test_results"):
-        config._tui_test_results = TuiTestResults()
-    if not hasattr(config, "_tui_sections"):
-        config._tui_sections = TuiSections()
-    if not hasattr(config, "_tui_terminal_out"):
-        config._tui_terminal_out = tempfile.TemporaryFile("wb+")
-
     # Examine Pytest terminal output to mark different sections of the output.
     # This code is based on the code in pytest's `pastebin.py`.
     tr = config.pluginmanager.getplugin("terminalreporter")
@@ -193,14 +193,20 @@ def pytest_configure(config: Config) -> None:
             # If this is an actual test outcome line in the initial `=== test session starts ==='
             # section, populate the TuiTestResult's fully qualified test name field. Do not add
             # duplicates (as may be encountered with plugins such as pytest-rerunfailures).
-            if config._tui_current_section == "test_session_starts" and re.search(
-                test_session_starts_test_matcher, s
-            ):
-                fqtn = re.search(test_session_starts_test_matcher, s)[1]
-                if fqtn not in [t.fqtn for t in config._tui_test_results.test_results]:
-                    config._tui_test_results.test_results.append(
-                        TuiTestResult(fqtn=fqtn)
-                    )
+            if config._tui_current_section == "test_session_starts":
+                if config._tui_sessionstart_meh:
+                    config._tui_sessionstart_meh = False
+                    pass
+
+                if re.search(
+                    test_session_starts_test_matcher, s
+                ):
+                    config._tui_sessionstart_meh = True
+                    fqtn = re.search(test_session_starts_test_matcher, s)[1]
+                    if fqtn not in [t.fqtn for t in config._tui_test_results.test_results]:
+                        config._tui_test_results.test_results.append(
+                            TuiTestResult(fqtn=fqtn)
+                        )
 
             # If this is an actual test outcome line in the `=== short test summary info ===' section,
             # populate the TuiTestResult's outcome field.

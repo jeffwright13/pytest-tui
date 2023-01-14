@@ -139,7 +139,7 @@ class HtmlPage:
         return (
             """<button class="accordion">Test Execution Info</button><div class="panel"><p><pre>"""
             + f"""<p>Test run started: {self.results.tui_session_start_time} UTC</p>"""
-            + f"""<p>Test run completed: {self.results.tui_session_start_time} UTC</p>"""
+            + f"""<p>Test run completed: {self.results.tui_session_end_time} UTC</p>"""
             + f"""<p>This report generated: {now} UTC</p>"""
             + f"""<p>pytest-tui version: {__version__}</p>"""
             + """</pre></p></div>"""
