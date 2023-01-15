@@ -21,7 +21,15 @@ JS_FILE = Path(__file__).parent / "resources" / "scripts.js"
 
 TAB_METADATA = ["About"]
 TAB_METADATA_COLOR = {"About": "rgba(0, 0, 255, 0.33)"}
-TABS_RESULTS = ["All Tests", "Failures", "Passes", "Skipped", "Xfails", "Xpasses"]
+TABS_RESULTS = [
+    "All Tests",
+    "Failures",
+    "Passes",
+    "Skipped",
+    "Xfails",
+    "Xpasses",
+    "Reruns",
+]
 TABS_RESULTS_COLORS = {
     "All Tests": ("rgba(111, 104, 105, 0.34)", "rgba(128,128,0,0.5)"),
     "Failures": ("rgba(255, 10, 10, 0.75)", "rgba(255,0,0,0.5)"),
@@ -29,6 +37,7 @@ TABS_RESULTS_COLORS = {
     "Skipped": ("rgba(111, 104, 105, 0.34)", "rgba(128,128,0,0.5)"),
     "Xfails": ("rgba(255, 176, 176, 0.90)", "rgba(0,0,0,0.5)"),
     "Xpasses": ("rgba(0, 255, 0, 0.43)", "rgba(0,0,0,0.5)"),
+    "Reruns": ("rgba(220,165.0,1)", "rgba(255,194,0,0.5)"),
 }
 TABS_SECTIONS = [
     "summary_section",
@@ -36,6 +45,7 @@ TABS_SECTIONS = [
     "passes_section",
     "warnings_section",
     "errors_section",
+    "reruns_section",
 ]
 TABS_SECTIONS_COLORS = {
     "summary_section": "#daeaf6",
@@ -43,6 +53,7 @@ TABS_SECTIONS_COLORS = {
     "passes_section": "rgba(66, 228, 47, 0.6)",
     "warnings_section": "#ffee93",
     "errors_section": "#ffc09f",
+    "reruns_section": "#f6e3da",
 }
 TAB_FULL_OUTPUT = ["Console Output"]
 TAB_FULL_OUTPUT_COLOR = {"Console Output": "rgba(0, 0, 255, 0.33)"}
@@ -73,6 +84,7 @@ class TabContent:
         self.add("errors_section", self.results.tui_sections.errors.content)
         self.add("passes_section", self.results.tui_sections.passes.content)
         self.add("failures_section", self.results.tui_sections.failures.content)
+        self.add("reruns_section", self.results.tui_sections.rerun_test_summary.content)
 
         return self.get_all_items()
 
@@ -116,6 +128,9 @@ class HtmlPage:
             TABS_RESULTS.remove("Xpasses")
         if not self.results.tui_test_results.all_xfails():
             TABS_RESULTS.remove("Xfails")
+        # if len(self.results.tui_rerun_test_groups) == 0:
+        if not self.results.tui_test_results.all_reruns():
+            TABS_RESULTS.remove("Reruns")
 
     def create_header(self) -> str:
         my_css = Path(CSS_FILE).read_text().replace("\n", "")
@@ -140,6 +155,7 @@ class HtmlPage:
             """<button class="accordion">Test Execution Info</button><div class="panel"><p><pre>"""
             + f"""<p>Test run started: {self.results.tui_session_start_time} UTC</p>"""
             + f"""<p>Test run completed: {self.results.tui_session_end_time} UTC</p>"""
+            + f"""<p>Test run duration: {self.results.tui_session_duration}</p>"""
             + f"""<p>This report generated: {now} UTC</p>"""
             + f"""<p>pytest-tui version: {__version__}</p>"""
             + """</pre></p></div>"""
@@ -246,14 +262,18 @@ class HtmlPage:
         tab_links_section += """</div>"""
 
         tab_result_content = []
-        for result in TABS_RESULTS:
-            if result == "All Tests":
+        for tab in TABS_RESULTS:
+            if tab == "All Tests":
                 tab_result_content.append(
-                    f"""<div id="{result}" class="tabcontent"> {self.get_collapsible_results("tests")} </div>"""
+                    f"""<div id="{tab}" class="tabcontent"> {self.get_collapsible_results("tests")} </div>"""
+                )
+            elif tab == "Reruns":
+                tab_result_content.append(
+                    f"""<div id="{tab}" class="tabcontent"> {self.get_collapsible_results("reruns")} </div>"""
                 )
             else:
                 tab_result_content.append(
-                    f"""<div id="{result}" class="tabcontent"> {self.get_collapsible_results(result.lower())} </div>"""
+                    f"""<div id="{tab}" class="tabcontent"> {self.get_collapsible_results(tab.lower())} </div>"""
                 )
 
         tab_results = "".join(tab_result_content)
@@ -267,16 +287,27 @@ class HtmlPage:
 
         tab_metadata = f"""<div id="{TAB_METADATA[0]}" class="tabcontent"> <p>{self.get_metadata()}</p> </div>"""
 
-        tab_fullout = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <pre>{self.get_terminal_output()}</pre> </div>"""
+        tab_full_output = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <pre>{self.get_terminal_output()}</pre> </div>"""
 
         return (
-            tab_links_section + tab_metadata + tab_results + tab_sections + tab_fullout
+            tab_links_section
+            + tab_metadata
+            + tab_results
+            + tab_sections
+            + tab_full_output
         )
 
     def get_collapsible_results(self, outcome) -> str:
         collapsible_results = ""
-        results_by_outcome = eval(f"self.results.tui_test_results.all_{outcome}()")
-        for result in results_by_outcome:
+        if outcome == "reruns":
+            results = []
+            for group in self.results.tui_rerun_test_groups:
+                for result in group.full_test_list:
+                    results.append(result)
+        else:
+            results = eval(f"self.results.tui_test_results.all_{outcome}()")
+            print()
+        for result in results:
             content = self.converter.convert(
                 result.caplog
                 + result.capstderr

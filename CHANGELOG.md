@@ -7,8 +7,12 @@ and this project tries to adhere to [Semantic Versioning](https://semver.org/spe
 
 ## [1.7.0] 2023-01-12
 
-- Changed look n feel of About page in the HTML report (uses accordian buttons now).
+- Implemented internal tracking of Rerun tests.
+- Added Rerun test sections to the HTML page.
+- Added duration to existing start and stop times for test session.
+- Changed look 'n' feel of About page in the HTML report (uses accordian buttons now).
 - Internal implementation of pickling now uses a single file for TestReport and Section data. The pickled data is in the form of a dict, and also has some timedate info in it.
+- Tweaked and formatted a bunch of the tests in /demo-tests.
 ## [1.6.1] 2022-09-23
 
 - Added '*' .gitignore to ptt_files/ so that when people run pytest --tui in other directories they don't see the ptt_files/ dir.
