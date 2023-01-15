@@ -14,5 +14,5 @@ REPO_BASE_DIR = "~/coding/pytest-tui/"
 ## Selenium Settings ##
 #######################
 BROWSER = "chrome"
-#BROWSER = "edge"
-#BROWSER = "firefox"
+# BROWSER = "edge"
+# BROWSER = "firefox"

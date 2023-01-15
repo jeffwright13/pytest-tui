@@ -189,6 +189,9 @@ class HtmlPage:
         )
         return (
             """<button class="accordion">Live Test Session Summary</button><div class="panel"><p><pre>"""
+            + self.converter.convert(
+                self.results.tui_sections.lastline.content, full=False
+            )
             + self.converter.convert(ripped, full=False)
             + self.converter.convert(stripped, full=False)
             + self.converter.convert(

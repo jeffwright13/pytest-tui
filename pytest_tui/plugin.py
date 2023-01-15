@@ -52,6 +52,11 @@ def pytest_addoption(parser) -> None:
     )
 
 
+# @pytest.fixture(autouse=True)
+# def inject_config(self, request):
+#     self._config = request.config
+
+
 def add_ansi_to_report(config: Config, report: TestReport) -> None:
     """
     If the report has longreprtext (traceback info), mark it up with ANSI codes
@@ -80,27 +85,6 @@ def pytest_sessionstart(session: pytest.Session) -> None:
     session.config._tui_session_start_time = (
         datetime.now(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
     )
-    # Initialize TUI-specific attributes on the config object:
-    if not hasattr(session.config, "_tui_sessionstart"):
-        session.config._tui_sessionstart = True
-    if not hasattr(session.config, "_tui_sessionstart_test_outcome_next"):
-        session.config._tui_sessionstart_test_outcome_next = False
-    if not hasattr(session.config, "_tui_sessionstart_current_fqtn"):
-        session.config._tui_sessionstart_current_fqtn = ""
-    if not hasattr(session.config, "_tui_rerun_test_groups"):
-        session.config._tui_rerun_test_groups = []
-    if not hasattr(session.config, "_tui_current_rerun_test_group"):
-        session.config._tui_current_rerun_test_group = 0
-    if not hasattr(session.config, "_tui_current_section"):
-        session.config._tui_current_section = "pre_test"
-    if not hasattr(session.config, "_tui_reports"):
-        session.config._tui_reports = []
-    if not hasattr(session.config, "_tui_test_results"):
-        session.config._tui_test_results = TuiTestResults()
-    if not hasattr(session.config, "_tui_sections"):
-        session.config._tui_sections = TuiSections()
-    if not hasattr(session.config, "_tui_terminal_out"):
-        session.config._tui_terminal_out = tempfile.TemporaryFile("wb+")
 
 
 def pytest_cmdline_main(config: Config) -> None:
@@ -113,6 +97,27 @@ def pytest_cmdline_main(config: Config) -> None:
             config.option.reportchars = "A"
         if hasattr(config.option, "reruns"):
             config.option.reportchars = "AR"
+    # Initialize TUI-specific attributes on the config object:
+    if not hasattr(config, "_tui_sessionstart"):
+        config._tui_sessionstart = True
+    if not hasattr(config, "_tui_sessionstart_test_outcome_next"):
+        config._tui_sessionstart_test_outcome_next = False
+    if not hasattr(config, "_tui_sessionstart_current_fqtn"):
+        config._tui_sessionstart_current_fqtn = ""
+    if not hasattr(config, "_tui_rerun_test_groups"):
+        config._tui_rerun_test_groups = []
+    if not hasattr(config, "_tui_current_rerun_test_group"):
+        config._tui_current_rerun_test_group = 0
+    if not hasattr(config, "_tui_current_section"):
+        config._tui_current_section = "pre_test"
+    if not hasattr(config, "_tui_reports"):
+        config._tui_reports = []
+    if not hasattr(config, "_tui_test_results"):
+        config._tui_test_results = TuiTestResults()
+    if not hasattr(config, "_tui_sections"):
+        config._tui_sections = TuiSections()
+    if not hasattr(config, "_tui_terminal_out"):
+        config._tui_terminal_out = tempfile.TemporaryFile("wb+")
 
 
 def pytest_report_teststatus(report: TestReport, config: Config) -> None:
@@ -283,8 +288,6 @@ def pytest_configure(config: Config) -> None:
 
         # Write to both terminal/console and tempfiles
         tr._tw.write = tee_write
-
-    print(config)
 
 
 def populate_rerun_groups(config: Config) -> List[TuiRerunTestGroup]:

@@ -11,6 +11,7 @@ and this project tries to adhere to [Semantic Versioning](https://semver.org/spe
 - Added Rerun test sections to the HTML page.
 - Added duration to existing start and stop times for test session.
 - Changed look 'n' feel of About page in the HTML report (uses accordian buttons now).
+- Moved initalization of pytest-tui-specific Config object attributes from pytest-sessionstart to pytest_cmdline_main, as that method seems to be visited by the code earlier. This is to prevent AttributeError seen while testing latest build: "AttributeError: 'Config' object has no attribute '_tui_test_results'."
 - Internal implementation of pickling now uses a single file for TestReport and Section data. The pickled data is in the form of a dict, and also has some timedate info in it.
 - Tweaked and formatted a bunch of the tests in /demo-tests.
 ## [1.6.1] 2022-09-23
