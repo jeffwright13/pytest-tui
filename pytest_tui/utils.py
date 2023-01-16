@@ -20,7 +20,8 @@ TERMINAL_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "terminal_output.ansi"
 # regex matching patterns for Pytest sections
 # live_log_sessionstart_matcher = re.compile(r"^==.*\s live log sessionstart\s==+")
 test_session_starts_matcher = re.compile(r"^==.*\stest session starts\s==+")
-test_session_starts_test_matcher = re.compile(r"^(.*\::\S+)\s")
+test_session_starts_results_grabber = re.compile(r"(collected\s\d+\sitems[\s\S]+)")
+test_session_starts_test_matcher = r"^(.*::.*)"
 errors_section_matcher = re.compile(r"^==.*\sERRORS\s==+")
 failures_section_matcher = re.compile(r"^==.*\sFAILURES\s==+")
 warnings_summary_matcher = re.compile(r"^==.*\swarnings summary\s.*==+")

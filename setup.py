@@ -31,7 +31,7 @@ setup(
         "Faker==13.15.0",
         "json2table==1.1.5",
         "pytest>=6.2.5",
-        "pytest-metadata==2.0.2",
+        "pytest-metadata==2.0.4",
         "single-source==0.3.0",
         "strip-ansi==0.1.1",
         "textual==0.1.18",

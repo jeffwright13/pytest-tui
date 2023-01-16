@@ -12,9 +12,12 @@ from pytest_tui import __version__
 
 # from pytest_tui.__main__ import Cli
 # from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
-from pytest_tui.utils import HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
-
-# test_session_starts_progress_matcher = re.compile(r"(^.*==+\stest session starts\s==+)(.*)(collecting\s\d+\sitems\s+)(.*)")
+from pytest_tui.utils import (
+    HTML_OUTPUT_FILE,
+    TERMINAL_OUTPUT_FILE,
+    Results,
+    test_session_starts_results_grabber,
+)
 
 CSS_FILE = Path(__file__).parent / "resources" / "styles.css"
 JS_FILE = Path(__file__).parent / "resources" / "scripts.js"
@@ -162,38 +165,19 @@ class HtmlPage:
         )
 
     def create_live_test_session_summary(self) -> str:
-        regex_strip_meta = re.compile(
-            r"(^.*==+\stest session starts\s==+)(.*)(collecting\s\d+\sitems\s+)(.*)"
+        search = re.search(
+            test_session_starts_results_grabber,
+            self.results.tui_sections.test_session_starts.content.encode(
+                "unicode_escape"
+            ).decode(),
         )
-        ripped = (
-            re.search(
-                regex_strip_meta,
-                self.results.tui_sections.test_session_starts.content.encode(
-                    "unicode_escape"
-                ).decode(),
-            )
-            .groups()[0]
-            .encode()
-            .decode("unicode-escape")
-        )
-        stripped = (
-            re.search(
-                regex_strip_meta,
-                self.results.tui_sections.test_session_starts.content.encode(
-                    "unicode_escape"
-                ).decode(),
-            )
-            .groups()[-1]
-            .encode()
-            .decode("unicode-escape")
-        )
+        ripped = search.groups()[0].encode().decode("unicode-escape") if search else ""
         return (
             """<button class="accordion">Live Test Session Summary</button><div class="panel"><p><pre>"""
             + self.converter.convert(
                 self.results.tui_sections.lastline.content, full=False
             )
             + self.converter.convert(ripped, full=False)
-            + self.converter.convert(stripped, full=False)
             + self.converter.convert(
                 self.results.tui_sections.lastline.content, full=False
             )

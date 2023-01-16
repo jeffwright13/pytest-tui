@@ -1,5 +1,5 @@
 What is the difference between an Outcome (which, per comments in /pytest/src/_pytest/reports.py, can only be one of Pass/Fail/Skip), and a result (which could be any of those, PLUS XF, XP, Err, Warn, or even Rerun or possibly something else if a plugin is installed)?
-There are multiple third-part plugins that don't get the same tallies as the console stats: pytest-html, pytest-json, pytest-tui. Their tallies don't agree with what Pytest itself claims on the final `=== short test summary info ===` line in the console at the end of a test run. And if anything shoul be correct, it's that, right? To wit:
+There are multiple third-part plugins that don't get the same tallies as the console stats: pytest-html, pytest-json, pytest-tui. Their tallies don't agree with what Pytest itself claims on the final `=== short test summary info ===` line in the console at the end of a test run. And if anything should be correct, it's that, right? To wit:
   console: 17 failed, 19 passed, 5 skipped, 7 xfailed, 4 xpassed, 21 warnings, 9 errors
   pytest-html: 17 failed, 17 passed, 5 skipped, 7 xfailed, 4 xpassed, 8 errors ()
   pytest-json: 16 failed, 17 passed, 5 skipped, 7 xfailed, 4 xpassed, 9 errors (57)

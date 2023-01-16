@@ -12,6 +12,7 @@ from typing import List
 import pytest
 from _pytest._io.terminalwriter import TerminalWriter
 from _pytest.config import Config, create_terminal_writer
+from _pytest.nodes import Item
 from _pytest.reports import TestReport
 from strip_ansi import strip_ansi
 
@@ -52,11 +53,6 @@ def pytest_addoption(parser) -> None:
     )
 
 
-# @pytest.fixture(autouse=True)
-# def inject_config(self, request):
-#     self._config = request.config
-
-
 def add_ansi_to_report(config: Config, report: TestReport) -> None:
     """
     If the report has longreprtext (traceback info), mark it up with ANSI codes
@@ -82,9 +78,7 @@ def add_ansi_to_report(config: Config, report: TestReport) -> None:
 
 
 def pytest_sessionstart(session: pytest.Session) -> None:
-    session.config._tui_session_start_time = (
-        datetime.now(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
-    )
+    pass
 
 
 def pytest_cmdline_main(config: Config) -> None:
@@ -98,6 +92,9 @@ def pytest_cmdline_main(config: Config) -> None:
         if hasattr(config.option, "reruns"):
             config.option.reportchars = "AR"
     # Initialize TUI-specific attributes on the config object:
+    config._tui_session_start_time = (
+        datetime.now(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+    )
     if not hasattr(config, "_tui_sessionstart"):
         config._tui_sessionstart = True
     if not hasattr(config, "_tui_sessionstart_test_outcome_next"):
@@ -151,40 +148,32 @@ def pytest_report_teststatus(report: TestReport, config: Config) -> None:
     config._tui_reports.append(report)
 
 
-@pytest.hookimpl()
-def pytest_runtest_setup(item):
-    # Don't process any TUI-specific code if the plugin is not enabled
+def timestamp_result(config: Config, item: Item) -> None:
     if not hasattr(item.config.option, "tui"):
         return
     if not item.config.option.tui:
         return
 
+    now = datetime.now()
+    now_str = now.strftime("%Y-%m-%d %H:%M:%S.%f")
     for tui_test_result in item.config._tui_test_results.test_results:
-        if tui_test_result.fqtn == item.nodeid:
-            tui_test_result.start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-            # break
+        if tui_test_result.fqtn == item.nodeid and not tui_test_result.start_time:
+            tui_test_result.start_time = now_str
+
+
+@pytest.hookimpl()
+def pytest_runtest_setup(item):
+    timestamp_result(item.config, item)
 
 
 @pytest.hookimpl()
 def pytest_runtest_call(item):
-    for tui_test_result in item.config._tui_test_results.test_results:
-        if tui_test_result.fqtn == item.nodeid:
-            if not tui_test_result.start_time:
-                tui_test_result.start_time = datetime.now().strftime(
-                    "%Y-%m-%d %H:%M:%S.%f"
-                )
-            # break
+    timestamp_result(item.config, item)
 
 
 @pytest.hookimpl()
 def pytest_runtest_teardown(item):
-    for tui_test_result in item.config._tui_test_results.test_results:
-        if tui_test_result.fqtn == item.nodeid:
-            if not tui_test_result.start_time:
-                tui_test_result.start_time = datetime.now().strftime(
-                    "%Y-%m-%d %H:%M:%S.%f"
-                )
-            # break
+    timestamp_result(item.config, item)
 
 
 @pytest.hookimpl(trylast=True)
@@ -230,18 +219,18 @@ def pytest_configure(config: Config) -> None:
                     config._tui_sessionstart = False
 
             # If this is an actual test outcome line in the initial `=== test session starts ==='
-            # section, populate the TuiTestResult's fully qualified test name field. Do not add
-            # duplicates (as may be encountered with plugins such as pytest-rerunfailures).
+            # section, populate the TuiTestResult's fully qualified test name field.
             if config._tui_current_section == "test_session_starts":
                 if config._tui_sessionstart_test_outcome_next:
                     outcome = s.strip()
                     config._tui_test_results.test_results[-1].outcome = outcome
                     config._tui_sessionstart_test_outcome_next = False
 
-                if re.search(
-                    test_session_starts_test_matcher, s
-                ):  #  and not config._tui_sessionstart_test_outcome_next:
-                    fqtn = re.search(test_session_starts_test_matcher, s)[1].strip()
+                search = re.search(test_session_starts_test_matcher, s, re.MULTILINE)
+                if search:
+                    fqtn = re.search(test_session_starts_test_matcher, s, re.MULTILINE)[
+                        1
+                    ].rstrip()
                     config._tui_sessionstart_current_fqtn = fqtn
                     config._tui_test_results.test_results.append(
                         TuiTestResult(fqtn=fqtn)
