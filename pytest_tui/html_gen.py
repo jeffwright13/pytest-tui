@@ -289,8 +289,7 @@ class HtmlPage:
         if outcome == "reruns":
             results = []
             for group in self.results.tui_rerun_test_groups:
-                for result in group.full_test_list:
-                    results.append(result)
+                results.extend(iter(group.full_test_list))
         else:
             results = eval(f"self.results.tui_test_results.all_{outcome}()")
             print()

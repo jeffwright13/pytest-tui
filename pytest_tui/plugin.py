@@ -348,20 +348,18 @@ def pytest_unconfigure(config: Config) -> None:
     with open(TERMINAL_OUTPUT_FILE, "wb") as file:
         file.write(terminal_out)
 
-    file = open(TUI_RESULTS_FILE, "wb")
-    pickle.dump(
-        {
-            "session_start_time": config._tui_session_start_time,
-            "session_end_time": config._tui_session_end_time,
-            "session_duration": config._tui_session_duration,
-            "tui_rerun_test_groups": config._tui_rerun_test_groups,
-            "tui_test_results": config._tui_test_results,
-            "tui_sections": config._tui_sections,
-        },
-        file,
-    )
-    file.close()
-
+    with open(TUI_RESULTS_FILE, "wb") as file:
+        pickle.dump(
+            {
+                "session_start_time": config._tui_session_start_time,
+                "session_end_time": config._tui_session_end_time,
+                "session_duration": config._tui_session_duration,
+                "tui_rerun_test_groups": config._tui_rerun_test_groups,
+                "tui_test_results": config._tui_test_results,
+                "tui_sections": config._tui_sections,
+            },
+            file,
+        )
     pytui_launch(config)
 
 
