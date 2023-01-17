@@ -5,3 +5,5 @@ function toggle_tab(evt, tabName) { if (content.style.display === "block") { con
 var coll = document.getElementsByClassName("collapsible"); var i; for (i = 0; i < coll.length; i++) { coll[i].addEventListener("click", function() { this.classList.toggle("active"); var content = this.nextElementSibling; if (content.style.display === "block") { content.style.display = "none"; } else { content.style.display = "block"; } }); }
 
 document.getElementById("defaultOpen").click();
+
+var i, acc = document.getElementsByClassName("accordion"); for (i=0; i<acc.length; i++) acc[i].addEventListener("click",(function(){this.classList.toggle("active"); var panel = this.nextElementSibling; "block" === panel.style.display?panel.style.display="none":panel.style.display="block"}));

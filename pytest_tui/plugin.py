@@ -4,13 +4,15 @@ import re
 import tempfile
 
 # from concurrent.futures.thread import ThreadPoolExecutor
-from datetime import datetime
+from datetime import datetime, timezone
 from io import StringIO
 from types import SimpleNamespace
+from typing import List
 
 import pytest
 from _pytest._io.terminalwriter import TerminalWriter
 from _pytest.config import Config, create_terminal_writer
+from _pytest.nodes import Item
 from _pytest.reports import TestReport
 from strip_ansi import strip_ansi
 
@@ -18,8 +20,8 @@ from strip_ansi import strip_ansi
 # from pytest_tui.html import main as tuihtml
 from pytest_tui.utils import (
     TERMINAL_OUTPUT_FILE,
-    TUI_RESULT_OBJECTS_FILE,
-    TUI_SECTIONS_FILE,
+    TUI_RESULTS_FILE,
+    TuiRerunTestGroup,
     TuiSections,
     TuiTestResult,
     TuiTestResults,
@@ -27,6 +29,7 @@ from pytest_tui.utils import (
     failures_section_matcher,
     lastline_matcher,
     passes_section_matcher,
+    rerun_test_summary_matcher,
     short_test_summary_matcher,
     short_test_summary_test_matcher,
     test_session_starts_matcher,
@@ -74,6 +77,10 @@ def add_ansi_to_report(config: Config, report: TestReport) -> None:
     reporter._tw = original_writer
 
 
+def pytest_sessionstart(session: pytest.Session) -> None:
+    pass
+
+
 def pytest_cmdline_main(config: Config) -> None:
     # Set up the TUI-specific attributes on the config object:
     # Verbose (easier parsing of final test results)
@@ -84,6 +91,30 @@ def pytest_cmdline_main(config: Config) -> None:
             config.option.reportchars = "A"
         if hasattr(config.option, "reruns"):
             config.option.reportchars = "AR"
+    # Initialize TUI-specific attributes on the config object:
+    config._tui_session_start_time = (
+        datetime.now(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+    )
+    if not hasattr(config, "_tui_sessionstart"):
+        config._tui_sessionstart = True
+    if not hasattr(config, "_tui_sessionstart_test_outcome_next"):
+        config._tui_sessionstart_test_outcome_next = False
+    if not hasattr(config, "_tui_sessionstart_current_fqtn"):
+        config._tui_sessionstart_current_fqtn = ""
+    if not hasattr(config, "_tui_rerun_test_groups"):
+        config._tui_rerun_test_groups = []
+    if not hasattr(config, "_tui_current_rerun_test_group"):
+        config._tui_current_rerun_test_group = 0
+    if not hasattr(config, "_tui_current_section"):
+        config._tui_current_section = "pre_test"
+    if not hasattr(config, "_tui_reports"):
+        config._tui_reports = []
+    if not hasattr(config, "_tui_test_results"):
+        config._tui_test_results = TuiTestResults()
+    if not hasattr(config, "_tui_sections"):
+        config._tui_sections = TuiSections()
+    if not hasattr(config, "_tui_terminal_out"):
+        config._tui_terminal_out = tempfile.TemporaryFile("wb+")
 
 
 def pytest_report_teststatus(report: TestReport, config: Config) -> None:
@@ -117,18 +148,32 @@ def pytest_report_teststatus(report: TestReport, config: Config) -> None:
     config._tui_reports.append(report)
 
 
-@pytest.hookimpl()
-def pytest_runtest_setup(item):
-    # Don't process any TUI-specific code if the plugin is not enabled
+def timestamp_result(config: Config, item: Item) -> None:
     if not hasattr(item.config.option, "tui"):
         return
     if not item.config.option.tui:
         return
 
+    now = datetime.now()
+    now_str = now.strftime("%Y-%m-%d %H:%M:%S.%f")
     for tui_test_result in item.config._tui_test_results.test_results:
-        if tui_test_result.fqtn == item.nodeid:
-            tui_test_result.start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-            break
+        if tui_test_result.fqtn == item.nodeid and not tui_test_result.start_time:
+            tui_test_result.start_time = now_str
+
+
+@pytest.hookimpl()
+def pytest_runtest_setup(item):
+    timestamp_result(item.config, item)
+
+
+@pytest.hookimpl()
+def pytest_runtest_call(item):
+    timestamp_result(item.config, item)
+
+
+@pytest.hookimpl()
+def pytest_runtest_teardown(item):
+    timestamp_result(item.config, item)
 
 
 @pytest.hookimpl(trylast=True)
@@ -138,23 +183,6 @@ def pytest_configure(config: Config) -> None:
         return
     if not config.option.tui:
         return
-
-    # Initialize Config object items to use throughout rest of test session.
-    # Ideally these would be init'd earlier in the pytest protocol, but it was found that some
-    # custom implementations of pytest frameworks will call pytest.configure() BEFORE other hooks
-    # (like pytest_sessionstart or pytest_load_initial_conftests), so we need to init here.
-    if not hasattr(config, "_tui_sessionstart"):
-        config._tui_sessionstart = True
-    if not hasattr(config, "_tui_current_section"):
-        config._tui_current_section = "pre_test"
-    if not hasattr(config, "_tui_reports"):
-        config._tui_reports = []
-    if not hasattr(config, "_tui_test_results"):
-        config._tui_test_results = TuiTestResults()
-    if not hasattr(config, "_tui_sections"):
-        config._tui_sections = TuiSections()
-    if not hasattr(config, "_tui_terminal_out"):
-        config._tui_terminal_out = tempfile.TemporaryFile("wb+")
 
     # Examine Pytest terminal output to mark different sections of the output.
     # This code is based on the code in pytest's `pastebin.py`.
@@ -178,6 +206,8 @@ def pytest_configure(config: Config) -> None:
                 config._tui_current_section = "warnings_summary"
             if re.search(passes_section_matcher, s):
                 config._tui_current_section = "passes"
+            if re.search(rerun_test_summary_matcher, s):
+                config._tui_current_section = "rerun_test_summary"
             if re.search(short_test_summary_matcher, s):
                 config._tui_current_section = "short_test_summary"
             if re.search(lastline_matcher, s):
@@ -189,16 +219,23 @@ def pytest_configure(config: Config) -> None:
                     config._tui_sessionstart = False
 
             # If this is an actual test outcome line in the initial `=== test session starts ==='
-            # section, populate the TuiTestResult's fully qualified test name field. Do not add
-            # duplicates (as may be encountered with plugins such as pytest-rerunfailures).
-            if config._tui_current_section == "test_session_starts" and re.search(
-                test_session_starts_test_matcher, s
-            ):
-                fqtn = re.search(test_session_starts_test_matcher, s)[1]
-                if fqtn not in [t.fqtn for t in config._tui_test_results.test_results]:
+            # section, populate the TuiTestResult's fully qualified test name field.
+            if config._tui_current_section == "test_session_starts":
+                if config._tui_sessionstart_test_outcome_next:
+                    outcome = s.strip()
+                    config._tui_test_results.test_results[-1].outcome = outcome
+                    config._tui_sessionstart_test_outcome_next = False
+
+                search = re.search(test_session_starts_test_matcher, s, re.MULTILINE)
+                if search:
+                    fqtn = re.search(test_session_starts_test_matcher, s, re.MULTILINE)[
+                        1
+                    ].rstrip()
+                    config._tui_sessionstart_current_fqtn = fqtn
                     config._tui_test_results.test_results.append(
                         TuiTestResult(fqtn=fqtn)
                     )
+                    config._tui_sessionstart_test_outcome_next = True
 
             # If this is an actual test outcome line in the `=== short test summary info ===' section,
             # populate the TuiTestResult's outcome field.
@@ -214,7 +251,10 @@ def pytest_configure(config: Config) -> None:
                 ).groups()[1]
 
                 for tui_test_result in config._tui_test_results.test_results:
-                    if tui_test_result.fqtn == fqtn:
+                    if (
+                        tui_test_result.fqtn == fqtn
+                        and tui_test_result.outcome != "RERUN"
+                    ):
                         tui_test_result.outcome = outcome
                         break
 
@@ -239,12 +279,46 @@ def pytest_configure(config: Config) -> None:
         tr._tw.write = tee_write
 
 
+def populate_rerun_groups(config: Config) -> List[TuiRerunTestGroup]:
+    """Build a list of TuiRerunTestGroup objects from the test results."""
+    rerun_test_groups = []
+    for test_result in config._tui_test_results.test_results:
+        if test_result.outcome == "RERUN":
+            if test_result.fqtn not in [group.fqtn for group in rerun_test_groups]:
+                tui_test_run_group = TuiRerunTestGroup(
+                    fqtn=test_result.fqtn, forerunners=[test_result]
+                )
+                rerun_test_groups.append(tui_test_run_group)
+            else:
+                for group in rerun_test_groups:
+                    if group.fqtn == test_result.fqtn:
+                        group.forerunners.append(test_result)
+    for test_result in config._tui_test_results.test_results:
+        if test_result.outcome != "RERUN":
+            for group in rerun_test_groups:
+                if group.fqtn == test_result.fqtn:
+                    group.final_outcome = test_result.outcome
+                    group.final_test = test_result
+    for group in rerun_test_groups:
+        group.full_test_list = group.forerunners + [group.final_test]
+    return rerun_test_groups
+
+
 def pytest_unconfigure(config: Config) -> None:
     # Don't process any TUI-specific code if the plugin is not enabled
     if not hasattr(config.option, "tui"):
         return
     if not config.option.tui:
         return
+
+    config._tui_rerun_test_groups = populate_rerun_groups(config)
+
+    config._tui_session_end_time = (
+        datetime.now(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+    )
+    config._tui_session_duration = datetime.strptime(
+        config._tui_session_end_time, "%Y-%m-%d %H:%M:%S"
+    ) - datetime.strptime(config._tui_session_start_time, "%Y-%m-%d %H:%M:%S")
 
     # Populate test result objects with total durations, from each test's TestReport object.
     for tui_test_result, test_report in itertools.product(
@@ -274,12 +348,18 @@ def pytest_unconfigure(config: Config) -> None:
     with open(TERMINAL_OUTPUT_FILE, "wb") as file:
         file.write(terminal_out)
 
-    # Pickle the test result and sections objects to files.
-    file = open(TUI_RESULT_OBJECTS_FILE, "wb")
-    pickle.dump(config._tui_test_results, file)
-    file.close()
-    file = open(TUI_SECTIONS_FILE, "wb")
-    pickle.dump(config._tui_sections, file)
+    file = open(TUI_RESULTS_FILE, "wb")
+    pickle.dump(
+        {
+            "session_start_time": config._tui_session_start_time,
+            "session_end_time": config._tui_session_end_time,
+            "session_duration": config._tui_session_duration,
+            "tui_rerun_test_groups": config._tui_rerun_test_groups,
+            "tui_test_results": config._tui_test_results,
+            "tui_sections": config._tui_sections,
+        },
+        file,
+    )
     file.close()
 
     pytui_launch(config)

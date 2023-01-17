@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] 2023-01-12
+
+- Implemented internal tracking of Rerun tests.
+- Added Rerun test sections to the HTML page.
+- Added duration to existing start and stop times for test session.
+- Changed look 'n' feel of About page in the HTML report (uses accordian buttons now).
+- Moved initalization of pytest-tui-specific Config object attributes from pytest-sessionstart to pytest_cmdline_main, as that method seems to be visited by the code earlier. This is to prevent AttributeError seen while testing latest build: "AttributeError: 'Config' object has no attribute '_tui_test_results'."
+- Internal implementation of pickling now uses a single file for TestReport and Section data. The pickled data is in the form of a dict, and also has some timedate info in it.
+- Tweaked and formatted a bunch of the tests in /demo-tests.
 ## [1.6.1] 2022-09-23
 
 - Added '*' .gitignore to ptt_files/ so that when people run pytest --tui in other directories they don't see the ptt_files/ dir.

@@ -51,7 +51,7 @@ Output sections and individual test results are expandable/collapsible, and test
 
 ## Usage
 
-### Running Tests
+### Running Your Tests
 
 Pretty much just run pytest like you always do, adding the `--tui` option to the list of command line options:
 
@@ -59,7 +59,7 @@ Pretty much just run pytest like you always do, adding the `--tui` option to the
 
 In some environments, where the working directory for pytest has been changed from the default, it may be necessary to cd into the working directory in order to successfully launch the TUI or HTML. Basically, you need to be in the parent directory of wherever the `/ptt_files` folder has been placed by the plugin after a test run. This is a known issue and will be fixed at some point.
 
-### Demo Tests
+### Sample / Demo Tests
 
 If you would like some dummy tests that will allow you to take pytest-tui for a testdrive, copy all the files at https://github.com/jeffwright13/pytest-tui/tree/main/demo-tests into a folder called `demo-tests/` where your test environment resides. Then:
 
@@ -94,7 +94,7 @@ This project was originally envisioned to only show test failures, and allow the
 
 Several TUIs (using different TUI libraries) have been cycled through this project. The Textual interface is the only one currently supported, since some internal optimization has been done to make the results simpler to consume. However, other TUIs should be able to be integrated without too much work (e.g. Asciimatics, PyTermTk, pyermgui, etc.). Same would be true of a GUI. Contact the author if you have a desire to implement one of these. The results of any given testrun are collected and sorted in such a way that it should relatively simple to take them and put them into the presentation mode of choice.
 
-The HTML feature was put into place because of some minor limitations found in the available HTML plugins (miscounted totals in some corner cases, no color-coded output, inability to show output from the pytest `live logs` option).
+The HTML feature was put into place because of some minor limitations the author found in the available HTML plugins (miscounted totals in some corner cases, no color-coded output, inability to show output from the pytest `live logs` option). There is no intent to replace existing HTML plugins, but if you like this one, please do spread the word. :-)
 
 ## Issues
 

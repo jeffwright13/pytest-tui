@@ -12,6 +12,7 @@ HTML_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "html_report.html"
 Path(HTML_OUTPUT_FILE).touch(exist_ok=True)
 # CONFIGFILE = PYTEST_TUI_FILES_DIR / "config.ini"
 # Path(CONFIGFILE).touch(exist_ok=True)
+TUI_RESULTS_FILE = PYTEST_TUI_FILES_DIR / "tui_results.pickle"
 TUI_RESULT_OBJECTS_FILE = PYTEST_TUI_FILES_DIR / "tui_result_objects.pickle"
 TUI_SECTIONS_FILE = PYTEST_TUI_FILES_DIR / "tui_sections.pickle"
 TERMINAL_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "terminal_output.ansi"
@@ -19,20 +20,22 @@ TERMINAL_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "terminal_output.ansi"
 # regex matching patterns for Pytest sections
 # live_log_sessionstart_matcher = re.compile(r"^==.*\s live log sessionstart\s==+")
 test_session_starts_matcher = re.compile(r"^==.*\stest session starts\s==+")
-test_session_starts_test_matcher = re.compile(r"^(.*\::\S+)\s")
+test_session_starts_results_grabber = re.compile(r"(collected\s\d+\sitems[\s\S]+)")
+test_session_starts_test_matcher = r"^(.*::.*)"
 errors_section_matcher = re.compile(r"^==.*\sERRORS\s==+")
 failures_section_matcher = re.compile(r"^==.*\sFAILURES\s==+")
 warnings_summary_matcher = re.compile(r"^==.*\swarnings summary\s.*==+")
 passes_section_matcher = re.compile(r"^==.*\sPASSES\s==+")
+rerun_test_summary_matcher = re.compile(r"^==.*\srerun test summary info\s.*==+")
 short_test_summary_matcher = re.compile(r"^==.*\sshort test summary info\s.*==+")
 short_test_summary_test_matcher = re.compile(
-    r"^(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)\s+(?:\[\d+\]\s)?(\S+)(?:.*)?$"
+    r"^(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS|RERUN)\s+(?:\[\d+\]\s)?(\S+)(?:.*)?$"
 )
 warnings_summary_test_matcher = re.compile(r"^([^\n]+:{1,2}[^\n]+)\n([^\n]+\n)+")
 lastline_matcher = re.compile(r"^==.*in\s\d+.\d+s.*=+")
 section_name_matcher = re.compile(r"~~>PYTEST_TUI_(\w+)")
 standard_test_matcher = re.compile(
-    r"(.*\::\S+)\s(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS)"
+    r"(.*\::\S+)\s(PASSED|FAILED|ERROR|SKIPPED|XFAIL|XPASS|RERUN)"
 )
 
 
@@ -43,6 +46,7 @@ OUTCOMES = (
     "Skipped",
     "Xfails",
     "Xpasses",
+    "Reruns",
 )
 
 
@@ -171,6 +175,13 @@ class TuiTestResults:
             if test_result.outcome == "ERROR"
         ]
 
+    def all_reruns(self):
+        return [
+            test_result
+            for test_result in self.test_results
+            if test_result.outcome == "RERUN"
+        ]
+
 
 @dataclass
 class TuiSection:
@@ -186,8 +197,24 @@ class TuiSections:
     failures: TuiSection = TuiSection(name="failures", content="")
     passes: TuiSection = TuiSection(name="passes", content="")
     warnings_summary: TuiSection = TuiSection(name="warnings_summary", content="")
+    rerun_test_summary: TuiSection = TuiSection(name="rerun_test_summary", content="")
     short_test_summary: TuiSection = TuiSection(name="short_test_summary", content="")
     lastline: TuiSection = TuiSection(name="lastline", content="")
+
+
+@dataclass
+class TuiRerunTestGroup:
+    # A 'rerun test group' consists of a single test that has been run multiple times with the
+    # 'pytest-rerunfailures' plugin.
+    # 'fqtn': fully-qualified test name (same for all tests in a TuiRerunTestGroup);
+    # 'final_outcome': final outcome of the test;
+    # 'final_test' TuiTestResult object for the final test (with outcome != RERUN);
+    # 'forerunners':list of TuiTestResult objects for all test that preceded final outcome.
+    fqtn: str = ""
+    final_outcome: str = ""
+    final_test: TuiTestResult = None
+    forerunners: List[TuiTestResult] = field(default_factory=list)
+    full_test_list: List[TuiTestResult] = field(default_factory=list)
 
 
 class Results:
@@ -197,30 +224,24 @@ class Results:
 
     def __init__(self):
         """Top-level class attributes: TuiTestResults, TuiSections, and full console output w/ ANSI"""
-        self.tui_test_results = self._unpickle_tui_test_results()
-        self.tui_sections = self._unpickle_tui_sections()
+        self.tui_test_info = self._unpickle_tui_test_info()
+        self.tui_session_start_time = self.tui_test_info["session_start_time"]
+        self.tui_session_end_time = self.tui_test_info["session_end_time"]
+        self.tui_session_duration = self.tui_test_info["session_duration"]
+        self.tui_test_results = self.tui_test_info["tui_test_results"]
+        self.tui_rerun_test_groups = self.tui_test_info["tui_rerun_test_groups"]
+        self.tui_sections = self.tui_test_info["tui_sections"]
         self.terminal_output = self._get_terminal_output()
 
-    def _unpickle_tui_test_results(self):
-        """Unpack pickled TuiTestResults from file"""
+    def _unpickle_tui_test_info(self):
+        """Unpack pickled results file"""
         try:
-            with open(TUI_RESULT_OBJECTS_FILE, "rb") as rfile:
+            with open(TUI_RESULTS_FILE, "rb") as rfile:
                 return pickle.load(rfile)
         except FileNotFoundError as e:
             raise FileNotFoundError(
-                f"Cannot find {TUI_RESULT_OBJECTS_FILE}. Have you run pytest with the '--tui' option yet?"
+                f"Cannot find {TUI_RESULTS_FILE}. Have you run pytest with the '--tui' option yet?"
             ) from e
-
-    def _unpickle_tui_sections(self):
-        """Unpack pickled TuiSections from file"""
-        try:
-            with open(TUI_SECTIONS_FILE, "rb") as rfile:
-                return pickle.load(rfile)
-        except FileNotFoundError as e:
-            raise FileNotFoundError(
-                f"Cannot find {TUI_SECTIONS_FILE}. Have you run pytest with the '--tui' option yet?"
-            ) from e
-            # pass
 
     def _get_terminal_output(self, file_path: Path = TERMINAL_OUTPUT_FILE) -> list:
         """Get full Pytest terminal output"""
