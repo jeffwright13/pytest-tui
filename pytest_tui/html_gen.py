@@ -327,11 +327,10 @@ class HtmlPage:
         }
 
         return (
-            # f"{self.create_testrun_results()}<hr>"
             "<hr>"
-            + f"{self.create_test_execution_info()}<hr>"
-            + f"{self.create_live_test_session_summary()}<hr>"
             + f"{self.create_testrun_summary()}<hr>"
+            + f"{self.create_live_test_session_summary()}<hr>"
+            + f"{self.create_test_execution_info()}<hr>"
             + f"{self.create_environment_info(m, table_attributes)}"
         )
 
