@@ -191,15 +191,24 @@ class TuiSection:
 
 @dataclass
 class TuiSections:
-    live_log_sessionstart: TuiSection = TuiSection(name="pre_test", content="")
-    test_session_starts: TuiSection = TuiSection(name="test_session_starts", content="")
-    errors: TuiSection = TuiSection(name="errors", content="")
-    failures: TuiSection = TuiSection(name="failures", content="")
-    passes: TuiSection = TuiSection(name="passes", content="")
-    warnings_summary: TuiSection = TuiSection(name="warnings_summary", content="")
-    rerun_test_summary: TuiSection = TuiSection(name="rerun_test_summary", content="")
-    short_test_summary: TuiSection = TuiSection(name="short_test_summary", content="")
-    lastline: TuiSection = TuiSection(name="lastline", content="")
+    live_log_sessionstart: TuiSection
+    test_session_starts: TuiSection
+    errors: TuiSection
+    failures: TuiSection
+    passes: TuiSection
+    warnings_summary: TuiSection
+    rerun_test_summary: TuiSection
+    short_test_summary: TuiSection
+    lastline: TuiSection
+    # live_log_sessionstart: TuiSection = TuiSection(name="pre_test", content="")
+    # test_session_starts: TuiSection = TuiSection(name="test_session_starts", content="")
+    # errors: TuiSection = TuiSection(name="errors", content="")
+    # failures: TuiSection = TuiSection(name="failures", content="")
+    # passes: TuiSection = TuiSection(name="passes", content="")
+    # warnings_summary: TuiSection = TuiSection(name="warnings_summary", content="")
+    # rerun_test_summary: TuiSection = TuiSection(name="rerun_test_summary", content="")
+    # short_test_summary: TuiSection = TuiSection(name="short_test_summary", content="")
+    # lastline: TuiSection = TuiSection(name="lastline", content="")
 
 
 @dataclass
