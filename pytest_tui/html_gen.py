@@ -314,7 +314,7 @@ class HtmlPage:
         except IndexError:
             return ""
         m = json.loads(md.replace("'", '"').lstrip("metadata: "))
-        m.pop("JAVA_HOME")
+        m.pop("JAVA_HOME") if "JAVA_HOME" in m else None
         table_attributes = {
             "id": "metadata",
             "font-family": "Helvetica, Arial, sans-serif",
