@@ -24,13 +24,13 @@ RELEASE_INSTRUCTIONS
 - Publish to TestPyPi:
     $ python -m twine upload --repository testpypi dist/*
 
-- Test the installation in a fresh directory by running the 'temp.sh' bash script.
+- Test the installation in a fresh directory by running the 'test.sh' bash script.
   Verify TUI and HTML page for each iteration/Python version.
     $ deactivate
-    $ ./testing/bash/temp.sh 3.8.10
-    $ ./testing/bash/temp.sh 3.9.9
-    $ ./testing/bash/temp.sh 3.10.5
-    $ ./testing/bash/temp.sh 3.11.1
+    $ ./testing/bash/test.sh 3.8.10
+    $ ./testing/bash/test.sh 3.9.9
+    $ ./testing/bash/test.sh 3.10.5
+    $ ./testing/bash/test.sh 3.11.1
     $ cd testing/robot
     $ robot .
 

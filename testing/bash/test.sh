@@ -1,22 +1,39 @@
 #!/bin/bash
 
+set -eu
+
+function usage() {
+  printf "\nUsage: test.sh [--version PYTHON_VERSION] [--help]\n"
+  exit 1
+}
+
 clean_up() {
   test -d "$1" && rm -rf "$1"
 }
 
-printf "%s\n" "$0"
-printf "%s\n" "$1"
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --version) shift; pyversion="$1" ;;
+    --help) usage ;;
+    --) shift; break ;;
+    -*) echo "Unknown flag '$1'" 1>&2; usage ;;
+    *) break ;;
+  esac
+  shift
+done
+
+printf "%s %s\n" "$0" "$pyversion"
 
 tmpdir=$( mktemp -d -t pytest-tui )
 printf "Creating temporary directory %s\n" "$tmpdir"
 cd "$tmpdir" || exit
 
-printf "Creating virtual Python environment with Python version %s\n" "$1"
-pyenv local "$1"
-python --version
+# Use Python version specified on command line
+printf "Creating virtual Python environment with Python version %s\n" "$pyversion"
+pyenv local "$pyversion"
 
 # Verify Python version being used is one being tested
-[[ $1 == $(python --version | awk '{print $2}') ]] || { echo "Python version being used is not the one being tested - are you running this script from a virtual environment? Exiting..."; exit 1; }
+[[ $pyversion == $(python --version | awk '{print $2}') ]] || { echo "Python version being used is not the one being tested - are you running this script from a virtual environment? Exiting..."; exit 1; }
 
 python -m venv venv
 source ./venv/bin/activate
