@@ -53,6 +53,11 @@ coverage.xml
 *,cover
 .hypothesis/
 
+# Robot Framework
+log.html
+report.html
+output.xml
+
 # Pytest and plugins
 .pytest_cache
 report.html

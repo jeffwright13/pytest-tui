@@ -1,37 +1,70 @@
 #!/bin/bash
 
 clean_up() {
-  test -d "$tmpdir" && rm -ri "$tmpdir"
+  test -d "$1" && rm -rf "$1"
 }
 
-tmpdir=$( mktemp -d -t pytest-tui )
-printf "Creating temporary directory %s" "$tmpdir"
+printf "%s\n" "$0"
+printf "%s\n" "$1"
 
+tmpdir=$( mktemp -d -t pytest-tui )
+printf "Creating temporary directory %s\n" "$tmpdir"
 cd "$tmpdir" || exit
 
-printf "\nCreating virtual Python environment"
-pyenv local 3.11.1
+printf "Creating virtual Python environment with Python version %s\n" "$1"
+pyenv local "$1"
+python --version
+
+# Verify Python version being used is one being tested
+[[ $1 == $(python --version | awk '{print $2}') ]] || { echo "Python version being used is not the one being tested - are you running this script from a virtual environment? Exiting..."; exit 1; }
+
 python -m venv venv
 source ./venv/bin/activate
 
-printf "\nUpgrading build tools"
+printf "Upgrading build tools\n"
 pip install --upgrade pip setuptools wheel
 
-printf "\nInstalling pytest-tui"
-pip install pytest-tui
-pip list | grep pytest-tui
+printf "Installing pytest-tui from Test-PyPi\n"
+pip install -i https://test.pypi.org/simple/ pytest-tui
+pip install pytest-rerunfailures
 
-printf "\nInstalling pytest-tui"
+printf "\Cloning pytest-tui so we can use its demo-tests\n"
 git clone git@github.com:jeffwright13/pytest-tui.git
-ls -la
+mkdir demo-tests
+cp pytest-tui/demo-tests/* ./demo-tests/
+clean_up pytest-tui
+ls -la demo-tests/
 rm -f conftest.py
 
-printf "\nExecuting pytest-tui"
-cd pytest-tui || exit
-pytest --tui
+printf "Executing pytest-tui\n"
+pytest --tui -k test_0
 
-tui
-q
+printf "Launching TUI and verifying content\n"
+expect <(cat <<'EOD'
+  spawn tui
+  # interact
+  expect {"Summary"}
+  # expect {"Passes"}
+  # expect {"Failures"}
+  # expect {"Skipped"}
+  # expect {"Xfails"}
+  # expect {"Xpasses"}
+  # expect {"Warnings"}
+  # expect {"Errors"}
+  # expect {"Full Output"}
+  # expect {"Quit (Q)"}    sleep 5
+    send "q"
+    exit
+EOD
+)
+
+
+
+# Recover from any ANSI corruption that may have occured as a result of running pytest-tui
+reset
+
+printf "Launching HTML\n"
 tuih
 
-trap 'clean_up $tmpdir' EXIT
+clean_up "$tmpdir"
+printf "Script finished"
