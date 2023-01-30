@@ -10,7 +10,7 @@ printf "Creating temporary directory %s" "$tmpdir"
 cd "$tmpdir" || exit
 
 printf "\nCreating virtual Python environment"
-pyenv local 3.10.5
+pyenv local 3.11.1
 python -m venv venv
 source ./venv/bin/activate
 
@@ -29,5 +29,9 @@ rm -f conftest.py
 printf "\nExecuting pytest-tui"
 cd pytest-tui || exit
 pytest --tui
+
+tui
+q
+tuih
 
 trap 'clean_up $tmpdir' EXIT

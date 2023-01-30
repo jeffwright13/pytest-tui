@@ -23,6 +23,7 @@ from pytest_tui.utils import (
     TERMINAL_OUTPUT_FILE,
     TUI_RESULTS_FILE,
     TuiRerunTestGroup,
+    TuiSection,
     TuiSections,
     TuiTestResult,
     TuiTestResults,
@@ -117,10 +118,20 @@ def pytest_cmdline_main(config: Config) -> None:
         config._tui_reports = []
     if not hasattr(config, "_tui_test_results"):
         config._tui_test_results = TuiTestResults()
-    if not hasattr(config, "_tui_sections"):
-        config._tui_sections = TuiSections()
     if not hasattr(config, "_tui_terminal_out"):
         config._tui_terminal_out = tempfile.TemporaryFile("wb+")
+    if not hasattr(config, "_tui_sections"):
+        config._tui_sections = TuiSections(
+            live_log_sessionstart=TuiSection(name="pre_test", content=""),
+            test_session_starts=TuiSection(name="test_session_starts", content=""),
+            errors=TuiSection(name="errors", content=""),
+            failures=TuiSection(name="failures", content=""),
+            passes=TuiSection(name="passes", content=""),
+            warnings_summary=TuiSection(name="warnings_summary", content=""),
+            rerun_test_summary=TuiSection(name="rerun_test_summary", content=""),
+            short_test_summary=TuiSection(name="short_test_summary", content=""),
+            lastline=TuiSection(name="lastline", content=""),
+        )
 
     # Override default HTML report file name, if specified on the command line
     if (
