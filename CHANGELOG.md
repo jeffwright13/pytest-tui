@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] 2023-01-26
+- New command-line option `tui-reportfile', which allows user to specify the name of the HTML file produced when the console script `tuih` is run.
 ## [1.7.0] 2023-01-12
 
 - Implemented internal tracking of Rerun tests.

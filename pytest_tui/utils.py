@@ -9,7 +9,7 @@ from typing import List
 PYTEST_TUI_FILES_DIR = Path.cwd().resolve() / "ptt_files"
 PYTEST_TUI_FILES_DIR.mkdir(exist_ok=True)
 HTML_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "html_report.html"
-Path(HTML_OUTPUT_FILE).touch(exist_ok=True)
+# Path(HTML_OUTPUT_FILE).touch(exist_ok=True)
 # CONFIGFILE = PYTEST_TUI_FILES_DIR / "config.ini"
 # Path(CONFIGFILE).touch(exist_ok=True)
 TUI_RESULTS_FILE = PYTEST_TUI_FILES_DIR / "tui_results.pickle"

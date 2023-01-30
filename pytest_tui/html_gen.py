@@ -13,6 +13,7 @@ from pytest_tui import __version__
 # from pytest_tui.__main__ import Cli
 # from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
 from pytest_tui.utils import (
+    PYTEST_TUI_FILES_DIR,
     HTML_OUTPUT_FILE,
     TERMINAL_OUTPUT_FILE,
     Results,
@@ -293,7 +294,6 @@ class HtmlPage:
                     results.append(result)
         else:
             results = eval(f"self.results.tui_test_results.all_{outcome}()")
-            print()
         for result in results:
             content = self.converter.convert(
                 result.caplog
@@ -355,6 +355,8 @@ def main():
     my_js = page.get_js()
     html_out = html_header + html_tabs + "\n" + my_js + html_trailer
 
+    if "tui_htmlfile" in results.tui_test_info and results.tui_test_info['tui_htmlfile']:
+        HTML_OUTPUT_FILE = Path(PYTEST_TUI_FILES_DIR / results.tui_test_info['tui_htmlfile'])
     with open(HTML_OUTPUT_FILE, "w+") as f:
         f.write(html_out)
 
