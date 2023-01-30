@@ -72,7 +72,7 @@ If you would like some dummy tests that will allow you to take pytest-tui for a 
 
 ### Looking at Results After Quitting TUI
 
-If you have already exited the TUI and would like to re-enter it with the same data generated from the last Pytest run, simply type `tui`. To re-launch the HTML page using your default browser, issue the command `tuih'`.
+If you have already exited the TUI and would like to re-enter it with the same data generated from the last Pytest run, simply type `tui`. To re-launch the HTML page using your default browser, issue the command `tuih`.
 
 ### TUI Copy/Paste
 
@@ -92,6 +92,7 @@ The HTML output file is located at `<cwd>/ptt_files/html_report.html`. The HTML 
   - All code here is like a sausage factory: pleasant enough, until you look inside - do so at your own peril!
 - Not fully tested with all combinations of output formats. Probably some use-cases where things won't work 100% right.
 - `pytest-tui` is currently incompatible with pytest command line option `--tb=native`, and will cause an INTERNALERROR if the two are used together.
+- HTML page cannot offer clickable links to local filesystem. This is one of the workflows I depend on when using iTerm2...traceback lines with a `file://` link to a locally-hosted resource are clickable, and open up my VSCode to that line in that file. Unfortunately, web browsers are much more security-minded than terminal apps, and actions like this are strictly disallowed.
 
 ## History
 
