@@ -31,6 +31,7 @@ RELEASE_INSTRUCTIONS
     $ ./testing/bash/test.sh 3.9.9
     $ ./testing/bash/test.sh 3.10.5
     $ ./testing/bash/test.sh 3.11.1
+    $ source venv/bin/activate
     $ cd testing/robot
     $ robot .
 
