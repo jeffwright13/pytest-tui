@@ -19,6 +19,7 @@ from strip_ansi import strip_ansi
 # from pytest_tui.__main__ import tui_launch
 # from pytest_tui.html import main as tuihtml
 from pytest_tui.utils import (
+    HTML_OUTPUT_FILE,
     TERMINAL_OUTPUT_FILE,
     TUI_RESULTS_FILE,
     TuiRerunTestGroup,
@@ -51,6 +52,10 @@ def pytest_addoption(parser) -> None:
         "--tui",
         action="store_true",
         help="Enable the pytest-tui plugin. Both text user interface (TUI) and HTML output are supported.\nRun TUI with console command 'tui'; run HTML report with 'tuih'.",
+    )
+    group.addoption(
+        "--tui-htmlfile",
+        help="Specify a non-default name for the HTML report file. Default is 'html-report.html,' and will be placed in the ptt_files/ folder.",
     )
 
 
@@ -92,6 +97,7 @@ def pytest_cmdline_main(config: Config) -> None:
             config.option.reportchars = "A"
         if hasattr(config.option, "reruns"):
             config.option.reportchars = "AR"
+
     # Initialize TUI-specific attributes on the config object:
     config._tui_session_start_time = (
         datetime.now(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
@@ -126,6 +132,16 @@ def pytest_cmdline_main(config: Config) -> None:
             short_test_summary=TuiSection(name="short_test_summary", content=""),
             lastline=TuiSection(name="lastline", content=""),
         )
+
+    # Override default HTML report file name, if specified on the command line
+    if (
+        hasattr(config.option, "tui_htmlfile")
+        and not config.option.tui_htmlfile
+        or not hasattr(config.option, "tui_htmlfile")
+    ):
+        config._tui_htmlfile = HTML_OUTPUT_FILE
+    else:
+        config._tui_htmlfile = config.option.tui_htmlfile
 
 
 def pytest_report_teststatus(report: TestReport, config: Config) -> None:
@@ -359,20 +375,19 @@ def pytest_unconfigure(config: Config) -> None:
     with open(TERMINAL_OUTPUT_FILE, "wb") as file:
         file.write(terminal_out)
 
-    file = open(TUI_RESULTS_FILE, "wb")
-    pickle.dump(
-        {
-            "session_start_time": config._tui_session_start_time,
-            "session_end_time": config._tui_session_end_time,
-            "session_duration": config._tui_session_duration,
-            "tui_rerun_test_groups": config._tui_rerun_test_groups,
-            "tui_test_results": config._tui_test_results,
-            "tui_sections": config._tui_sections,
-        },
-        file,
-    )
-    file.close()
-
+    with open(TUI_RESULTS_FILE, "wb") as file:
+        pickle.dump(
+            {
+                "session_start_time": config._tui_session_start_time,
+                "session_end_time": config._tui_session_end_time,
+                "session_duration": config._tui_session_duration,
+                "tui_rerun_test_groups": config._tui_rerun_test_groups,
+                "tui_test_results": config._tui_test_results,
+                "tui_sections": config._tui_sections,
+                "tui_htmlfile": config._tui_htmlfile,
+            },
+            file,
+        )
     pytui_launch(config)
 
 

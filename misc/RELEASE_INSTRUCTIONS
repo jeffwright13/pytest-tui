@@ -24,15 +24,15 @@ RELEASE_INSTRUCTIONS
 - Publish to TestPyPi:
     $ python -m twine upload --repository testpypi dist/*
 
-- Test the installation in a fresh directory:
-    $ cd ~/coding
-    $ mkdir ptt
-    $ cd ptt
-    $ pyenv local 3.10.5
-    $ python -m venv venv
-    $ source venv/bin/activate
-    $ python -m pip install --index-url https://test.pypi.org/simple/ pytest-tui
-    $ mkdir -p ./demo-tests/ && cp ../pytest-tui/demo-tests/* ./demo-tests/
+- Test the installation in a fresh directory by running the 'test.sh' bash script.
+  Verify TUI and HTML page for each iteration/Python version.
+    $ deactivate
+    $ ./testing/bash/test.sh 3.8.10
+    $ ./testing/bash/test.sh 3.9.9
+    $ ./testing/bash/test.sh 3.10.5
+    $ ./testing/bash/test.sh 3.11.1
+    $ cd testing/robot
+    $ robot .
 
 - Verify basic functionality without plugin:
     $ pytest --version
