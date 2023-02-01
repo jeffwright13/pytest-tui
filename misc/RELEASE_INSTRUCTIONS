@@ -26,11 +26,13 @@ RELEASE_INSTRUCTIONS
 
 - Test the installation in a fresh directory by running the 'test.sh' bash script.
   Verify TUI and HTML page for each iteration/Python version.
+    $ cd ~/coding/pytest-tui (or top level of name of repo)
     $ deactivate
-    $ ./testing/bash/test.sh 3.8.10
-    $ ./testing/bash/test.sh 3.9.9
-    $ ./testing/bash/test.sh 3.10.5
-    $ ./testing/bash/test.sh 3.11.1
+    $ pyenv local 3.8.10 3.9.9 3.10.5 3.11.1
+    $ ./testing/bash/test.sh --version 3.8.10
+    $ ./testing/bash/test.sh --version 3.9.9
+    $ ./testing/bash/test.sh --version 3.10.5
+    $ ./testing/bash/test.sh --version 3.11.1
     $ source venv/bin/activate
     $ cd testing/robot
     $ robot .
