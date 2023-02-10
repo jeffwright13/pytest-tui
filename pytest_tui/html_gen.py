@@ -1,6 +1,7 @@
 # import configparser
 import json
 import re
+import sys
 import webbrowser
 from datetime import datetime, timezone
 from pathlib import Path
@@ -355,7 +356,8 @@ def main():
     my_js = page.get_js()
     html_out = html_header + html_tabs + "\n" + my_js + html_trailer
 
-    if "tui_htmlfile" in results.tui_test_info and results.tui_test_info['tui_htmlfile']:
+    global HTML_OUTPUT_FILE
+    if "tui_htmlfile" in results.tui_test_info and results.tui_test_info['tui_htmlfile'].name:
         HTML_OUTPUT_FILE = Path(PYTEST_TUI_FILES_DIR / results.tui_test_info['tui_htmlfile'])
     with open(HTML_OUTPUT_FILE, "w+") as f:
         f.write(html_out)
