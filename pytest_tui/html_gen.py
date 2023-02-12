@@ -1,7 +1,6 @@
 # import configparser
 import json
 import re
-import sys
 import webbrowser
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,6 +18,10 @@ from pytest_tui.utils import (
     TERMINAL_OUTPUT_FILE,
     Results,
     test_session_starts_results_grabber,
+    TUI_FOLD_CONTENT_BEGIN,
+    TUI_FOLD_CONTENT_END,
+    TUI_FOLD_TITLE,
+
 )
 
 CSS_FILE = Path(__file__).parent / "resources" / "styles.css"
@@ -345,6 +348,22 @@ class HtmlPage:
             lines = f.readlines()
         return "".join(f"<script>{line}</script>" for line in lines if line.strip("\n"))
 
+def fold(str) -> str:
+    out = []
+    for line in str.splitlines():
+        if TUI_FOLD_TITLE in line:
+            regex = r"(<pre>)?TUI_FOLD(.*)~~tui_fold_title~~"
+            subst = "<details><summary>\\1\\2</summary>"
+            line = re.sub(regex, subst, line, 0, re.MULTILINE)
+            print()
+        elif "~~tui_fold_content_begin~~" in line:
+            line = "<p>"
+            print()
+        elif "~~tui_fold_content_end~~" in line:
+            line = "</p></details>"
+            print()
+        out.append(line)
+    return "".join(out)
 
 def main():
     results = Results()
@@ -356,11 +375,15 @@ def main():
     my_js = page.get_js()
     html_out = html_header + html_tabs + "\n" + my_js + html_trailer
 
+    html_out_new = fold(html_out)
+
     global HTML_OUTPUT_FILE
     if "tui_htmlfile" in results.tui_test_info and results.tui_test_info['tui_htmlfile'].name:
         HTML_OUTPUT_FILE = Path(PYTEST_TUI_FILES_DIR / results.tui_test_info['tui_htmlfile'])
     with open(HTML_OUTPUT_FILE, "w+") as f:
         f.write(html_out)
+    with open("NEW.html", "w+") as f:
+        f.write(html_out_new)
 
     # Open in browser
     webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")

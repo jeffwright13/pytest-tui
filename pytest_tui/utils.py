@@ -17,6 +17,12 @@ TUI_RESULT_OBJECTS_FILE = PYTEST_TUI_FILES_DIR / "tui_result_objects.pickle"
 TUI_SECTIONS_FILE = PYTEST_TUI_FILES_DIR / "tui_sections.pickle"
 TERMINAL_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "terminal_output.ansi"
 
+# TUI Fold stuff
+tui_fold_matcher = re.compile(r"^TUI_FOLD")
+TUI_FOLD_TITLE = "~~tui_fold_title~~"
+TUI_FOLD_CONTENT_BEGIN = "~~tui_fold_content_begin~~"
+TUI_FOLD_CONTENT_END = "~~tui_fold_content_end~~"
+
 # regex matching patterns for Pytest sections
 # live_log_sessionstart_matcher = re.compile(r"^==.*\s live log sessionstart\s==+")
 test_session_starts_matcher = re.compile(r"^==.*\stest session starts\s==+")
