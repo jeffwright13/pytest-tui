@@ -227,31 +227,6 @@ def pytest_configure(config: Config) -> None:
         # identify and mark each results section
         def tee_write(s, **kwargs):
 
-            # # TUI_FOLD line? Then mark it.
-            # if re.search(tui_fold_matcher, s):
-            #     if TUI_FOLD_TITLE in s:
-            #         # s = f"{TUI_FOLD_TITLE}{s}{TUI_FOLD_TITLE}"
-            #         config._tui_fold_section = "tui_fold_title"
-            #         # s = f"<details><summary>{s}</summary>"
-            #     elif TUI_FOLD_CONTENT_BEGIN in s:
-            #         # s = f"{TUI_FOLD_CONTENT_BEGIN}{s}{TUI_FOLD_CONTENT_BEGIN}"
-            #         config._tui_fold_section = "tui_fold_content_begin"
-            #         # s = f"<p>{s}"
-            #     elif TUI_FOLD_CONTENT_END in s:
-            #         # s = f"{TUI_FOLD_CONTENT_END}{s}{TUI_FOLD_CONTENT_END}"
-            #         config._tui_fold_section = "tui_fold_content_end"
-            #         # config._tui_fold_section = ""
-            #         # s = f"{s}</p></details>"
-
-            # # If this is a TUI_FOLD line, process it according to its section
-            # if hasattr(config, "_tui_fold_section"):
-            #     if config._tui_fold_section == "tui_fold_title":
-            #         s = f"{TUI_FOLD_TITLE}{s}{TUI_FOLD_TITLE}"
-            #     elif config._tui_fold_section == "tui_fold_content_begin":
-            #         s = f"{TUI_FOLD_CONTENT_BEGIN}{s}{TUI_FOLD_CONTENT_BEGIN}"
-            #     elif config._tui_fold_section == "tui_fold_content_end":
-            #         s = f"{TUI_FOLD_CONTENT_END}{s}{TUI_FOLD_CONTENT_END}"
-
             # Check to see if current line is a section start marker
             if re.search(test_session_starts_matcher, s):
                 config._tui_current_section = "test_session_starts"
