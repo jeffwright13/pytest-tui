@@ -20,7 +20,8 @@ from pytest_tui.utils import (
     test_session_starts_results_grabber,
     TUI_FOLD_CONTENT_BEGIN,
     TUI_FOLD_CONTENT_END,
-    TUI_FOLD_TITLE,
+    TUI_FOLD_TITLE_BEGIN,
+    TUI_FOLD_TITLE_END,
 
 )
 
@@ -351,19 +352,32 @@ class HtmlPage:
 def fold(str) -> str:
     out = []
     for line in str.splitlines():
-        if TUI_FOLD_TITLE in line:
-            regex = r"(<pre>)?TUI_FOLD(.*)~~tui_fold_title~~"
-            subst = "<details><summary>\\1\\2</summary>"
-            line = re.sub(regex, subst, line, 0, re.MULTILINE)
+        if TUI_FOLD_TITLE_BEGIN in line:
+            # regex = r"(<pre>)?(.*)~~tui_fold_title~~"
+            # subst = "<details><summary>\\1\\2</summary>"
+            # line = re.sub(regex, subst, line, 0, re.MULTILINE)
+            line = line.replace(TUI_FOLD_TITLE_BEGIN, "<details><summary>")
             print()
-        elif "~~tui_fold_content_begin~~" in line:
-            line = "<p>"
+        if TUI_FOLD_TITLE_END in line:
+            # regex = r"~~tui_fold_title_end~~(</pre>)?"
+            # subst = "</details>\\1"
+            # line = re.sub(regex, subst, line, 0, re.MULTILINE)
+            line = line.replace(TUI_FOLD_TITLE_END, "</summary>")
             print()
-        elif "~~tui_fold_content_end~~" in line:
-            line = "</p></details>"
+        if TUI_FOLD_CONTENT_BEGIN in line:
+            # regex = r"~~tui_fold_content_begin~~"
+            # subst = "<p>"
+            # line = re.sub(regex, subst, line, 0, re.MULTILINE)
+            line = line.replace(TUI_FOLD_CONTENT_BEGIN, "<p>")
+            print()
+        if TUI_FOLD_CONTENT_END in line:
+            # regex = r"~~tui_fold_content_end~~"
+            # subst = "</p></details>"
+            # line = re.sub(regex, subst, line, 0, re.MULTILINE)
+            line = line.replace(TUI_FOLD_CONTENT_END, "</p></details>")
             print()
         out.append(line)
-    return "".join(out)
+    return "\n".join(out)
 
 def main():
     results = Results()
