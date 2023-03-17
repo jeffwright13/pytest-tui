@@ -329,7 +329,7 @@ def populate_rerun_groups(config: Config) -> List[TuiRerunTestGroup]:
         if test_result.outcome != "RERUN":
             for group in rerun_test_groups:
                 if group.fqtn == test_result.fqtn:
-                    group.final_outcome = test_result.outcome
+                    group.test_outcome = test_result.outcome
                     group.final_test = test_result
     for group in rerun_test_groups:
         group.full_test_list = group.forerunners + [group.final_test]

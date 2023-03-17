@@ -18,11 +18,23 @@ TUI_SECTIONS_FILE = PYTEST_TUI_FILES_DIR / "tui_sections.pickle"
 TERMINAL_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "terminal_output.ansi"
 
 # TUI Fold stuff
-tui_fold_matcher = re.compile(r"^~~tui_")
-TUI_FOLD_TITLE_BEGIN = "~~tui_fold_title_begin~~"
-TUI_FOLD_TITLE_END = "~~tui_fold_title_end~~"
-TUI_FOLD_CONTENT_BEGIN = "~~tui_fold_content_begin~~"
-TUI_FOLD_CONTENT_END = "~~tui_fold_content_end~~"
+# Non printable chars:
+# E2808BE2 808B0A20 EFBFBC0A E2808BEF BFBC0A20 EFBFBCEF BFBC0A
+TUI_FOLD_TITLE_BEGIN = r"""​​"""
+TUI_FOLD_TITLE_END = r""" ￼"""
+TUI_FOLD_CONTENT_BEGIN = r"""​￼"""
+TUI_FOLD_CONTENT_END = r"""￼￼"""
+tui_fold_matcher = re.compile(r"""""")
+# TUI_FOLD_TITLE_BEGIN = "~~tui_fold_title_begin~~"
+# TUI_FOLD_TITLE_END = "~~tui_fold_title_end~~"
+# TUI_FOLD_CONTENT_BEGIN = "~~tui_fold_content_begin~~"
+# TUI_FOLD_CONTENT_END = "~~tui_fold_content_end~~"
+
+# tui_fold_matcher = re.compile(r"^~~tui_")
+# TUI_FOLD_TITLE_BEGIN = "~~tui_fold_title_begin~~"
+# TUI_FOLD_TITLE_END = "~~tui_fold_title_end~~"
+# TUI_FOLD_CONTENT_BEGIN = "~~tui_fold_content_begin~~"
+# TUI_FOLD_CONTENT_END = "~~tui_fold_content_end~~"
 
 # regex matching patterns for Pytest sections
 # live_log_sessionstart_matcher = re.compile(r"^==.*\s live log sessionstart\s==+")
