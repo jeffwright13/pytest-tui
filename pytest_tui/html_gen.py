@@ -13,16 +13,15 @@ from pytest_tui import __version__
 # from pytest_tui.__main__ import Cli
 # from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
 from pytest_tui.utils import (
-    PYTEST_TUI_FILES_DIR,
     HTML_OUTPUT_FILE,
+    PYTEST_TUI_FILES_DIR,
     TERMINAL_OUTPUT_FILE,
-    Results,
-    test_session_starts_results_grabber,
     TUI_FOLD_CONTENT_BEGIN,
     TUI_FOLD_CONTENT_END,
     TUI_FOLD_TITLE_BEGIN,
     TUI_FOLD_TITLE_END,
-
+    Results,
+    test_session_starts_results_grabber,
 )
 
 CSS_FILE = Path(__file__).parent / "resources" / "styles.css"
@@ -349,23 +348,23 @@ class HtmlPage:
             lines = f.readlines()
         return "".join(f"<script>{line}</script>" for line in lines if line.strip("\n"))
 
+
 def fold(str) -> str:
     out = []
     for line in str.splitlines():
         if TUI_FOLD_TITLE_BEGIN in line:
             line = line.replace(TUI_FOLD_TITLE_BEGIN, "<details><summary>")
-            print()
         if TUI_FOLD_TITLE_END in line:
             line = line.replace(TUI_FOLD_TITLE_END, "</summary>")
-            print()
         if TUI_FOLD_CONTENT_BEGIN in line:
-            line = line.replace(TUI_FOLD_CONTENT_BEGIN, "<p>")
-            print()
+            # line = line.replace(TUI_FOLD_CONTENT_BEGIN, "<p>")
+            pass
         if TUI_FOLD_CONTENT_END in line:
-            line = line.replace(TUI_FOLD_CONTENT_END, "</p></details>")
-            print()
+            # line = line.replace(TUI_FOLD_CONTENT_END, "</p></details>")
+            line = line.replace(TUI_FOLD_CONTENT_END, "</details>")
         out.append(line)
     return "\n".join(out)
+
 
 def main():
     results = Results()
@@ -380,8 +379,13 @@ def main():
     html_out_new = fold(html_out)
 
     global HTML_OUTPUT_FILE
-    if "tui_htmlfile" in results.tui_test_info and results.tui_test_info['tui_htmlfile'].name:
-        HTML_OUTPUT_FILE = Path(PYTEST_TUI_FILES_DIR / results.tui_test_info['tui_htmlfile'])
+    if (
+        "tui_htmlfile" in results.tui_test_info
+        and results.tui_test_info["tui_htmlfile"].name
+    ):
+        HTML_OUTPUT_FILE = Path(
+            PYTEST_TUI_FILES_DIR / results.tui_test_info["tui_htmlfile"]
+        )
     with open(HTML_OUTPUT_FILE, "w+") as f:
         f.write(html_out)
     with open("NEW.html", "w+") as f:

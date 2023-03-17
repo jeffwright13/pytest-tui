@@ -75,7 +75,6 @@ class TreeNode(Generic[NodeDataType]):
         if self.expanded and self.children:
             return self.children[0]
         else:
-
             sibling = self.next_sibling
             if sibling is not None:
                 return sibling
@@ -311,7 +310,6 @@ class TreeControl(Generic[NodeDataType], Widget):
 
 
 if __name__ == "__main__":
-
     from textual.app import App
 
     class TreeApp(App):

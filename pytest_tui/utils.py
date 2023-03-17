@@ -17,14 +17,15 @@ TUI_RESULT_OBJECTS_FILE = PYTEST_TUI_FILES_DIR / "tui_result_objects.pickle"
 TUI_SECTIONS_FILE = PYTEST_TUI_FILES_DIR / "tui_sections.pickle"
 TERMINAL_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "terminal_output.ansi"
 
-# TUI Fold stuff
-# Non printable chars:
-# E2808BE2 808B0A20 EFBFBC0A E2808BEF BFBC0A20 EFBFBCEF BFBC0A
-TUI_FOLD_TITLE_BEGIN = r"""​​"""
-TUI_FOLD_TITLE_END = r""" ￼"""
-TUI_FOLD_CONTENT_BEGIN = r"""​￼"""
-TUI_FOLD_CONTENT_END = r"""￼￼"""
-tui_fold_matcher = re.compile(r"""""")
+# 3 consecutive ZWS
+TUI_FOLD_TITLE_BEGIN = r"""​​​"""
+# 1 BOM followed by 1 ZWS
+TUI_FOLD_TITLE_END = r"""￼​"""
+# 3 consecutive ZWJ
+TUI_FOLD_CONTENT_BEGIN = r"""‍‍‍"""
+# 1 BOM followed by 1 ZWJ
+TUI_FOLD_CONTENT_END = r"""￼‍"""
+
 # TUI_FOLD_TITLE_BEGIN = "~~tui_fold_title_begin~~"
 # TUI_FOLD_TITLE_END = "~~tui_fold_title_end~~"
 # TUI_FOLD_CONTENT_BEGIN = "~~tui_fold_content_begin~~"

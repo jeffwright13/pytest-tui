@@ -37,11 +37,6 @@ from pytest_tui.utils import (
     test_session_starts_matcher,
     test_session_starts_test_matcher,
     warnings_summary_matcher,
-    tui_fold_matcher,
-    TUI_FOLD_CONTENT_BEGIN,
-    TUI_FOLD_CONTENT_END,
-    TUI_FOLD_TITLE_BEGIN,
-    TUI_FOLD_TITLE_END,
 )
 
 # Don't collect tests from any of these files
@@ -220,13 +215,11 @@ def pytest_configure(config: Config) -> None:
     # This code is based on code in pytest's 'pastebin.py'.
     tr = config.pluginmanager.getplugin("terminalreporter")
     if tr is not None:
-
         # Save the old terminal writer instance so we can restore it later
         oldwrite = tr._tw.write
 
         # identify and mark each results section
         def tee_write(s, **kwargs):
-
             # Check to see if current line is a section start marker
             if re.search(test_session_starts_matcher, s):
                 config._tui_current_section = "test_session_starts"
@@ -274,7 +267,6 @@ def pytest_configure(config: Config) -> None:
             if config._tui_current_section == "short_test_summary" and re.search(
                 short_test_summary_test_matcher, strip_ansi(s)
             ):
-
                 outcome = re.search(
                     short_test_summary_test_matcher, strip_ansi(s)
                 ).groups()[0]
