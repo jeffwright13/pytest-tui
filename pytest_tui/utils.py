@@ -17,6 +17,17 @@ TUI_RESULT_OBJECTS_FILE = PYTEST_TUI_FILES_DIR / "tui_result_objects.pickle"
 TUI_SECTIONS_FILE = PYTEST_TUI_FILES_DIR / "tui_sections.pickle"
 TERMINAL_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "terminal_output.ansi"
 
+# ZWNJ = "\u200C"
+# ZWS = "\u200B"
+# BOM = "\uFEFF"
+# ZWJ = "\u200D"
+
+
+# TUI_FOLD_CONTENT_BEGIN = r'​​​'
+# TUI_FOLD_TITLE_BEGIN = r'‌‌‌'
+# TUI_FOLD_CONTENT_END = r'‍‍‍'
+# TUI_FOLD_TITLE_END = r'   '
+
 # 3 consecutive ZWS
 TUI_FOLD_TITLE_BEGIN = r"""​​​"""
 # 1 BOM followed by 1 ZWS
@@ -243,7 +254,8 @@ class Results:
     """
 
     def __init__(self):
-        """Top-level class attributes: TuiTestResults, TuiSections, and full console output w/ ANSI"""
+        """Top-level class attributes: TuiTestResults, TuiSections, and full console output w/ ANSI
+        """
         self.tui_test_info = self._unpickle_tui_test_info()
         self.tui_session_start_time = self.tui_test_info["session_start_time"]
         self.tui_session_end_time = self.tui_test_info["session_end_time"]
@@ -260,7 +272,8 @@ class Results:
                 return pickle.load(rfile)
         except FileNotFoundError as e:
             raise FileNotFoundError(
-                f"Cannot find {TUI_RESULTS_FILE}. Have you run pytest with the '--tui' option yet?"
+                f"Cannot find {TUI_RESULTS_FILE}. Have you run pytest with the '--tui'"
+                " option yet?"
             ) from e
 
     def _get_terminal_output(self, file_path: Path = TERMINAL_OUTPUT_FILE) -> list:
@@ -270,6 +283,7 @@ class Results:
                 return file.read()
         except FileNotFoundError as e:
             raise FileNotFoundError(
-                f"Cannot find {file_path}. Have you run pytest with the '--tui' option yet?"
+                f"Cannot find {file_path}. Have you run pytest with the '--tui' option"
+                " yet?"
             ) from e
             pass

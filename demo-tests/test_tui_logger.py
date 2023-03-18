@@ -21,10 +21,10 @@ title_logger = TitleLogger("TitleLogger")
 content_begin_logger = ContentBeginLogger("ContentBeginLogger")
 content_logger = ContentLogger("ContentLogger")
 content_end_logger = ContentEndLogger("ContentEndLogger")
-logger.setLevel(INFO)
-title_logger.setLevel(INFO)
-content_begin_logger.setLevel(INFO)
-content_end_logger.setLevel(INFO)
+# logger.setLevel(INFO)
+# title_logger.setLevel(INFO)
+# content_begin_logger.setLevel(INFO)
+# content_end_logger.setLevel(INFO)
 
 
 def pass_or_fail():
@@ -49,7 +49,8 @@ def lorem_fail() -> str:
 
 def test_nested_outer_function():
     logger.info(
-        "This is just a regular log message at the beginning of the nested outer function."
+        "This is just a regular log message at the beginning of the nested outer"
+        " function."
     )
     title_logger.warning("Click into me to see All The Logs!")
     content_begin_logger.warning("Initial log entry from nested_outer_function")
@@ -69,7 +70,8 @@ def test_nested_outer_function():
 
 def nested_inner_function():
     logger.info(
-        "This is just a regular log message at the beginning of the nested inner function."
+        "This is just a regular log message at the beginning of the nested inner"
+        " function."
     )
     title_logger.warning("Click into me to see The Inner Logs!")
     content_begin_logger.warning("Initial log entry from nested_inner_function")
@@ -94,8 +96,3 @@ def test_tui_logger_fail():
     title_logger.warning("Big-Ass-Lorem-Fail")
     content_logger.warning(f"{lorem_fail()}")
     assert False
-
-
-# def test_nested_function_calls(tui_loggers):
-#     nested_outer_function()
-#     nested_inner_function()

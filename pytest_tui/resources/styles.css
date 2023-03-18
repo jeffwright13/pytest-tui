@@ -116,6 +116,26 @@
      outline: none;
      transition: 0.4s;
 }
+summary {
+    font-size: 12px;
+    font-weight: bold;
+    color: #000;
+    animation: pulsate 1.4s ease-out infinite;
+}
+@keyframes pulsate {
+    0% {
+      color: #0000;
+      text: 8px 8px 12px #000;
+    }
+    50% {
+      color: #303030;
+      text: 8px 8px 12px #404040;
+    }
+    100% {
+      color: #0000;
+      text: 8px 8px 12px #000;
+    }
+}
 /* Add background color to the button if it is clicked (add the .active class */
 /* with JS), and when you move the mouse over it (hover) */
  .active, .accordion:hover {
