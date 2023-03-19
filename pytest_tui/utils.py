@@ -23,19 +23,10 @@ TERMINAL_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "terminal_output.ansi"
 # ZWJ = "\u200D"
 
 
-# TUI_FOLD_CONTENT_BEGIN = r'​​​'
-# TUI_FOLD_TITLE_BEGIN = r'‌‌‌'
-# TUI_FOLD_CONTENT_END = r'‍‍‍'
-# TUI_FOLD_TITLE_END = r'   '
-
-# 3 consecutive ZWS
-TUI_FOLD_TITLE_BEGIN = r"""​​​"""
-# 1 BOM followed by 1 ZWS
-TUI_FOLD_TITLE_END = r"""￼​"""
-# 3 consecutive ZWJ
-TUI_FOLD_CONTENT_BEGIN = r"""‍‍‍"""
-# 1 BOM followed by 1 ZWJ
-TUI_FOLD_CONTENT_END = r"""￼‍"""
+TUI_FOLD_CONTENT_BEGIN = r"​​​"
+TUI_FOLD_TITLE_BEGIN = r"‌‌‌"
+TUI_FOLD_CONTENT_END = r"‍‍‍"
+TUI_FOLD_TITLE_END = r"   "
 
 # TUI_FOLD_TITLE_BEGIN = "~~tui_fold_title_begin~~"
 # TUI_FOLD_TITLE_END = "~~tui_fold_title_end~~"

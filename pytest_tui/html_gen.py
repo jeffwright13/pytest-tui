@@ -153,19 +153,16 @@ class HtmlPage:
             + """</b></pre>"""
         )
 
-    def create_test_execution_info(self) -> str:
-        now = (
-            datetime.now(timezone.utc)
-            .replace(microsecond=0)
-            .strftime("%Y-%m-%d %H:%M:%S")
-        )
+    def create_final_test_summary(self) -> str:
         return (
-            """<button class="accordion">Test Execution Info</button><div class="panel"><p><pre>"""
-            + f"""<p>Test run started: {self.results.tui_session_start_time} UTC</p>"""
-            + f"""<p>Test run completed: {self.results.tui_session_end_time} UTC</p>"""
-            + f"""<p>Test run duration: {self.results.tui_session_duration}</p>"""
-            + f"""<p>This report generated: {now} UTC</p>"""
-            + f"""<p>pytest-tui version: {__version__}</p>"""
+            """<button class="accordion">Final Test Summary  (click to expand)</button><div class="panel-closed"><p><pre>"""
+            + self.converter.convert(
+                self.results.tui_sections.short_test_summary.content, full=False
+            )
+            + "\n"
+            + self.converter.convert(
+                self.results.tui_sections.lastline.content, full=False
+            )
             + """</pre></p></div>"""
         )
 
@@ -178,7 +175,7 @@ class HtmlPage:
         )
         ripped = search.groups()[0].encode().decode("unicode-escape") if search else ""
         return (
-            """<button class="accordion">Live Test Session Summary</button><div class="panel"><p><pre>"""
+            """<button class="accordion">Live Test Session Summary  (click to expand)</button><div class="panel-closed"><p><pre>"""
             + self.converter.convert(
                 self.results.tui_sections.lastline.content, full=False
             )
@@ -189,22 +186,41 @@ class HtmlPage:
             + """</pre></p></div>"""
         )
 
-    def create_testrun_summary(self) -> str:
+    def create_test_execution_info(self) -> str:
+        now = (
+            datetime.now(timezone.utc)
+            .replace(microsecond=0)
+            .strftime("%Y-%m-%d %H:%M:%S")
+        )
+        table_attributes = {
+            "id": "test_execution_info",
+            "font-family": "Helvetica, Arial, sans-serif",
+            "font-size": "12px",
+            "border": "ridge",
+            "style": "width:auto%; table-layout: auto;",
+            "border-collapse": "collapse",
+            "text-align": "left",
+            "tr": "nth-child(even) {background-color: #f2f2f2;}",
+        }
+        d = {
+            "Test run started": f"{self.results.tui_session_start_time} UTC",
+            "Test run completed": f"{self.results.tui_session_end_time} UTC",
+            "Test run duration": f"{self.results.tui_session_duration}",
+            "This report generated": f"{now} UTC",
+            "pytest-tui version": f"{__version__}",
+        }
+        dj = json2table.convert(
+            d, build_direction="LEFT_TO_RIGHT", table_attributes=table_attributes
+        )
         return (
-            """<button class="accordion">Final Test Summary</button><div class="panel"><p><pre>"""
-            + self.converter.convert(
-                self.results.tui_sections.short_test_summary.content, full=False
-            )
-            + "\n"
-            + self.converter.convert(
-                self.results.tui_sections.lastline.content, full=False
-            )
+            """<button class="accordion">Test Execution Info</button><div class="panel-open"><p><pre>"""
+            + dj
             + """</pre></p></div>"""
         )
 
     def create_environment_info(self, m, table_attributes) -> str:
         return (
-            """<button class="accordion">Environment</button><div class="panel"><p><pre>"""
+            """<button class="accordion">Environment</button><div class="panel-open"><p><pre>"""
             + json2table.convert(
                 m, build_direction="LEFT_TO_RIGHT", table_attributes=table_attributes
             )
@@ -332,7 +348,7 @@ class HtmlPage:
 
         return (
             "<hr>"
-            + f"{self.create_testrun_summary()}<hr>"
+            + f"{self.create_final_test_summary()}<hr>"
             + f"{self.create_live_test_session_summary()}<hr>"
             + f"{self.create_test_execution_info()}<hr>"
             + f"{self.create_environment_info(m, table_attributes)}"

@@ -142,11 +142,13 @@ summary {
      background-color: #ccc;
 }
 /* Style the accordion panel. Note: hidden by default */
- .panel {
+ .panel-open {
+     max-height: 100%;
      padding: 0 16px;
-     background-color: #ccc;
-     display: none;
+     background-color: #ddd;
+     /* display: none; */
      overflow: hidden;
+     transition: max-height 0.2s ease-out;
 }
  @-webkit-keyframes fadeEffect {
      from {
@@ -164,7 +166,31 @@ summary {
         opacity: 1.5;
     }
 }
- .collapsible {
+.panel-closed {
+    max-height: 100%;
+    padding: 0 16px;
+    background-color: #ccc;
+    display: none;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+@-webkit-keyframes fadeEffect {
+    from {
+       opacity: 0;
+   }
+    to {
+       opacity: .5;
+   }
+}
+@keyframes fadeEffect {
+    from {
+       opacity: 0;
+   }
+    to {
+       opacity: 1.5;
+   }
+}
+.collapsible {
      font-weight: normal;
      font-family: "Arial", sans-serif;
      background-color: #f1f1f1;

@@ -14,7 +14,7 @@ def read(fname):
 
 setup(
     name="pytest-tui",
-    version="1.10.0+foldable",
+    version="1.9.0+dev",
     author="Jeff Wright",
     author_email="jeff.washcloth@gmail.com",
     license="MIT",
