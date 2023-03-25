@@ -1,0 +1,5 @@
+-c requirements.txt
+
+black==21.9b0
+isort==5.9.3
+pyflakes==2.3.1

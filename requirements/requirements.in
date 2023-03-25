@@ -1,0 +1,6 @@
+ansi2html==1.8.0
+json2table==1.1.5
+pytest-metadata==2.0.4
+single-source==0.3.0
+strip-ansi==0.1.1
+textual==0.1.18

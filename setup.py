@@ -27,10 +27,8 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "ansi2html==1.8.0",
-        # "blessed==1.19.1",
         "Faker==13.15.0",
         "json2table==1.1.5",
-        # "pytest>=6.2.5",
         "pytest-metadata==2.0.4",
         "single-source==0.3.0",
         "strip-ansi==0.1.1",
@@ -45,7 +43,6 @@ setup(
         "Topic :: Software Development :: Testing",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
         "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
     ],

@@ -15,15 +15,15 @@ from pytest_tui.utils import (
 # logging.getLogger(__name__)
 
 
-class CustomHandler(logging.Handler):
-    def __init__(self):
-        super().__init__()
+# class CustomHandler(logging.Handler):
+#     def __init__(self):
+#         super().__init__()
 
-    def emit(self, record):
-        log_entry = self.format(record)
-        # Here you could define how you want to handle the log entry,
-        # for example, writing to a file, sending an email, or printing to the console.
-        print(f"GO AHEAD {log_entry}")
+#     def emit(self, record):
+#         log_entry = self.format(record)
+#         # Here you could define how you want to handle the log entry,
+#         # for example, writing to a file, sending an email, or printing to the console.
+#         print(f"GO AHEAD {log_entry}")
 
 
 class TitleLogger(logging.getLoggerClass()):

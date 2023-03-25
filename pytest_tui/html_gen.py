@@ -373,10 +373,8 @@ def fold(str) -> str:
         if TUI_FOLD_TITLE_END in line:
             line = line.replace(TUI_FOLD_TITLE_END, "</summary>")
         if TUI_FOLD_CONTENT_BEGIN in line:
-            # line = line.replace(TUI_FOLD_CONTENT_BEGIN, "<p>")
             pass
         if TUI_FOLD_CONTENT_END in line:
-            # line = line.replace(TUI_FOLD_CONTENT_END, "</p></details>")
             line = line.replace(TUI_FOLD_CONTENT_END, "</details>")
         out.append(line)
     return "\n".join(out)
@@ -404,7 +402,7 @@ def main():
         )
     with open(HTML_OUTPUT_FILE, "w+") as f:
         f.write(html_out)
-    with open("NEW.html", "w+") as f:
+    with open("folded.html", "w+") as f:
         f.write(html_out_new)
 
     # Open in browser
