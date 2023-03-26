@@ -6,7 +6,13 @@ import warnings
 import faker
 import pytest
 
-LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
+LOG_LEVELS = [
+    logging.DEBUG,
+    logging.INFO,
+    logging.WARNING,
+    logging.ERROR,
+    logging.CRITICAL,
+]
 logger = logging.getLogger()
 logger.setLevel(logging.NOTSET)
 logger.propagate = True
@@ -17,6 +23,19 @@ logging.getLogger("faker").setLevel(logging.DEBUG)
 
 def fake_data(min: int = 12, max: int = 48) -> str:
     return faker.Faker().text(random.randint(min, max))
+
+
+def log_making_fixture():
+    for _ in range(random.randint(1, 10)):
+        logger.log(random.choice(LOG_LEVELS), fake_data())
+        logger.log(random.choice(LOG_LEVELS), fake_data())
+        logger.log(random.choice(LOG_LEVELS), fake_data())
+        logger.log(random.choice(LOG_LEVELS), fake_data())
+    pass
+
+
+def test_random_logs():
+    log_making_fixture()
 
 
 @pytest.fixture
@@ -322,7 +341,8 @@ def test_12_fails_and_has_stdout(capsys):
 
 def test_13_passes_and_has_stdout(capsys):
     print(
-        "This test passes. This message is a 'print' and is consumed by Pytest via stdout."
+        "This test passes. This message is a 'print' and is consumed by Pytest via"
+        " stdout."
     )  # stdout is consumed by pytest
     logger.critical(fake_data())
     logger.error(fake_data())
@@ -369,3 +389,45 @@ def test_16_fail_compare_dicts_for_pytest_icdiff():
     listofInts = [7, 10, 45, 23, 18, 77]
     assert len(listofStrings) == len(listofInts)
     assert listofStrings == listofInts
+
+
+import random
+import time
+
+import pytest
+
+
+@pytest.mark.flaky(reruns=0)
+def test_flaky_0():
+    time.sleep(random.uniform(0.1, 0.75))
+    assert random.choice([True, False])
+
+
+@pytest.mark.flaky(reruns=1)
+def test_flaky_1():
+    time.sleep(random.uniform(0.1, 0.75))
+    assert random.choice([True, False])
+
+
+@pytest.mark.flaky(reruns=2)
+def test_flaky_2():
+    time.sleep(random.uniform(0.1, 0.75))
+    assert random.choice([True, False])
+
+
+@pytest.mark.flaky(reruns=3)
+def test_flaky_3():
+    time.sleep(random.uniform(0.1, 0.75))
+    assert random.choice([True, False])
+
+
+@pytest.mark.flaky(reruns=2)
+def test_flaky_always_fail():
+    time.sleep(random.uniform(0.1, 0.75))
+    assert False
+
+
+@pytest.mark.flaky(reruns=2)
+def test_flaky_always_pass():
+    time.sleep(random.uniform(0.1, 0.75))
+    assert True

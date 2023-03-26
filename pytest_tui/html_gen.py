@@ -14,6 +14,7 @@ from pytest_tui import __version__
 # from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
 from pytest_tui.utils import (
     HTML_OUTPUT_FILE,
+    LOG_LEVEL_MAP,
     PYTEST_TUI_FILES_DIR,
     TERMINAL_OUTPUT_FILE,
     TUI_FOLD_CONTENT_BEGIN,
@@ -27,8 +28,8 @@ from pytest_tui.utils import (
 CSS_FILE = Path(__file__).parent / "resources" / "styles.css"
 JS_FILE = Path(__file__).parent / "resources" / "scripts.js"
 
-TAB_METADATA = ["About"]
-TAB_METADATA_COLOR = {"About": "rgba(0, 0, 255, 0.33)"}
+TAB_ABOUT = ["About"]
+TAB_ABOUT_COLOR = {"About": "rgba(0, 0, 255, 0.33)"}
 TABS_RESULTS = [
     "All Tests",
     "Failures",
@@ -47,6 +48,11 @@ TABS_RESULTS_COLORS = {
     "Xpasses": ("rgba(0, 255, 0, 0.43)", "rgba(0,0,0,0.5)"),
     "Reruns": ("rgba(220,165.0,1)", "rgba(255,194,0,0.5)"),
 }
+
+TAB_FULL_OUTPUT = ["Full Output"]
+TAB_FULL_OUTPUT_COLOR = {"Full Output": "rgba(0, 0, 255, 0.33)"}
+TAB_FOLDED_OUTPUT = ["Folded Output"]
+TAB_FOLDED_OUTPUT_COLOR = {"Folded Output": "rgba(0, 25, 25, 0.55)"}
 TABS_SECTIONS = [
     "summary_section",
     "failures_section",
@@ -63,8 +69,23 @@ TABS_SECTIONS_COLORS = {
     "errors_section": "#ffc09f",
     "reruns_section": "#f6e3da",
 }
-TAB_FULL_OUTPUT = ["Console Output"]
-TAB_FULL_OUTPUT_COLOR = {"Console Output": "rgba(0, 0, 255, 0.33)"}
+
+TAB_ACTIONS = ["Actions"]
+TAB_ACTIONS_COLOR = {"Actions": "rgba(249, 123, 64, 0.95)"}
+TABS_ACTIONS = [
+    "Fold/Unfold Failures",
+    "Fold/Unfold Passes",
+    "Fold/Unfold Warnings",
+    "Fold/Unfold Errors",
+    "Fold/Unfold Reruns",
+]
+TABS_ACTIONS_COLORS = {
+    "failures_action": "rgba(255, 10, 10, 0.50)",
+    "passes_action": "rgba(66, 228, 47, 0.6)",
+    "warnings_section": "#ffee93",
+    "errors_section": "#ffc09f",
+    "reruns_section": "#f6e3da",
+}
 
 
 class TabContent:
@@ -136,12 +157,12 @@ class HtmlPage:
             TABS_RESULTS.remove("Xpasses")
         if not self.results.tui_test_results.all_xfails():
             TABS_RESULTS.remove("Xfails")
-        # if len(self.results.tui_rerun_test_groups) == 0:
         if not self.results.tui_test_results.all_reruns():
             TABS_RESULTS.remove("Reruns")
 
     def create_header(self) -> str:
-        my_css = Path(CSS_FILE).read_text().replace("\n", "")
+        # my_css = Path(CSS_FILE).read_text().replace("\n", "")
+        my_css = Path(CSS_FILE).read_text()
         return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8, width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {my_css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif';" > <div class="sticky">"""
 
     def create_testrun_results(self) -> str:
@@ -227,13 +248,25 @@ class HtmlPage:
             + """</pre></p></div>"""
         )
 
+    def get_js(self) -> str:
+        """
+        Gets JS from scripts.js and wraps them in <script> tags.
+        Note that in the scripts.js file, all scripts MUST e one-liners.
+        """
+        with open(Path(JS_FILE), "r") as f:
+            lines = f.readlines()
+        # return "".join(f"<script>{line}</script>" for line in lines if line.strip("\n"))
+        return (
+            "".join(f"<script>{line}</script>" for line in lines if line.strip("\n"))
+        ).splitlines()
+
     def create_trailer(self) -> str:
-        return """</script> </body> </html>"""
+        return f"""{self.get_js()} </script> </body> </html>"""
 
     def create_tabs(self) -> str:
         tabs_links = [
-            f"""<button class="tablinks" style="background-color: {TAB_METADATA_COLOR[section]}" id="defaultOpen" onclick="openTab(event, '{section}')" >{section}</button>"""
-            for section in TAB_METADATA
+            f"""<button class="tablinks" style="background-color: {TAB_ABOUT_COLOR[section]}" id="defaultOpen" onclick="openTab(event, '{section}')" >{section}</button>"""
+            for section in TAB_ABOUT
         ]
 
         tabs_links.extend(
@@ -265,9 +298,22 @@ class HtmlPage:
             ]
         )
 
-        tab_links_section = """<div class="tab">""" + "".join(tabs_links) + """</div>"""
+        tabs_links.extend(
+            [
+                f"""<button class="tablinks" style="background-color: {TAB_FOLDED_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button>"""
+                for section in TAB_FOLDED_OUTPUT
+            ]
+        )
 
-        tab_links_section += """</div>"""
+        # tab_links_section += """</div>"""
+        tabs_links.extend(
+            [
+                f"""<button class="dropdown-item tablinks" style="background-color: {TAB_ACTIONS_COLOR[action]}" onclick="toggleDetails()">Actions</button>"""
+                for action in TAB_ACTIONS
+            ]
+        )
+
+        tab_links_section = """<div class="tab">""" + "".join(tabs_links) + """</div>"""
 
         tab_result_content = []
         for tab in TABS_RESULTS:
@@ -293,17 +339,29 @@ class HtmlPage:
         ]
         tab_sections = "".join(tab_section_content)
 
-        tab_metadata = f"""<div id="{TAB_METADATA[0]}" class="tabcontent"> <p>{self.get_metadata()}</p> </div>"""
+        tab_about = f"""<div id="{TAB_ABOUT[0]}" class="tabcontent"> <p>{self.get_metadata()}</p> </div>"""
 
         tab_full_output = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <pre>{self.get_terminal_output()}</pre> </div>"""
 
-        return (
+        if self.results.tui_fold_level:
+            tab_folded_output = f"""<div id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output(self.results.tui_fold_level)}</pre> </div>"""
+
+        # tab_actions = f"""<div id="{TAB_ACTIONS[0]}" class="tabcontent"> <pre>{self.fold_terminal_output()}</pre> </div>"""
+        tab_actions = (
+            f"""<div id="{TAB_ACTIONS[0]}" class="tabcontent"> <pre></pre> </div>"""
+        )
+
+        everything = (
             tab_links_section
-            + tab_metadata
+            + tab_about
             + tab_results
             + tab_sections
+            + tab_actions
             + tab_full_output
         )
+        if self.results.tui_fold_level:
+            everything += tab_folded_output
+        return everything
 
     def get_collapsible_results(self, outcome) -> str:
         collapsible_results = ""
@@ -359,10 +417,100 @@ class HtmlPage:
             tout = str(f.read(), "utf-8")
         return self.converter.convert(tout, full=False)
 
-    def get_js(self) -> str:
-        with open(Path(JS_FILE), "r") as f:
-            lines = f.readlines()
-        return "".join(f"<script>{line}</script>" for line in lines if line.strip("\n"))
+    def get_terminal_output_ansi(self) -> str:
+        with open(TERMINAL_OUTPUT_FILE, "rb") as f:
+            tout = str(f.read(), "utf-8")
+        return tout
+
+    # def fold_consecutive_lines(self, lines):
+    #     html_lines = []
+    #     fold_started = False
+    #     for line in lines:
+    #         if "DEBUG" in line or "WARNING" in line:
+    #             if not fold_started:
+    #                 html_lines.append("<summary>Folded DEBUG or INFO</summary><details>")
+    #                 html_lines.append('<details>')
+    #                 fold_started = True
+    #             html_lines.append(self.converter.convert(line, full=False))
+    #         else:
+    #             if fold_started:
+    #                 html_lines.append("</details>")
+    #                 fold_started = False
+    #             html_lines.append(self.converter.convert(line, full=False))
+    #     if fold_started:
+    #         html_lines.append("</details>")
+    #     return '\n'.join(html_lines)
+
+    # def fold_terminal_output(self) -> str:
+    #     terminal_output_ansi = self.get_terminal_output_ansi()
+    #     lines = terminal_output_ansi.splitlines()
+    #     return self.fold_consecutive_lines(lines)
+
+    def get_line_level(self, line: str) -> str:
+        for level, value in LOG_LEVEL_MAP.items():
+            if level in line:
+                return value
+
+    def fold_log_lines(self, lines: list, level: str) -> str:
+        """
+        Search each line of console output and look for a log level indicator (DEBUG, INFO, WARNING, ERROR, CRITICAL).
+        If a line contains a log level indicator, check if log level is <= the level passed to the function.
+        If the log level is <= the level passed to the function, then the line is folded.
+        If the log level is > than the level passed to the function, then the line is not folded.
+        """
+        # sourcery skip: hoist-similar-statement-from-if, hoist-statement-from-if, merge-else-if-into-elif, merge-list-appends-into-extend
+        html_lines = []
+        fold_started = False
+        for line in lines:
+            this_line_log_level = self.get_line_level(line)
+            if this_line_log_level:
+                if this_line_log_level <= LOG_LEVEL_MAP[level]:
+                    if not fold_started:
+                        html_lines.append(
+                            f"\n<details><summary>Folded {level}</summary>"
+                        )
+                        fold_started = True
+                else:
+                    if fold_started:
+                        html_lines.append("</details>")
+                        fold_started = False
+                html_lines.append(self.converter.convert(line, full=False))
+            else:
+                if fold_started:
+                    html_lines.append("</details>")
+                    fold_started = False
+                html_lines.append(self.converter.convert(line, full=False))
+        return "\n".join(html_lines)
+
+    def fold_terminal_output(self, level: str) -> str:
+        terminal_output_ansi = self.get_terminal_output_ansi()
+        lines = terminal_output_ansi.splitlines()
+        return self.fold_log_lines(lines, level)
+
+    # def fold_tracebacks(self, lines):
+    #     html_lines = []
+    #     folding = False
+
+    #     for line in lines:
+    #         if '_ test_' in line:
+    #             if not folding:
+    #                 html_lines.append("<details><summary>Folded DEBUG or INFO</summary>")
+    #                 folding = True
+    #         elif 'Captured log' in line and '-' in line:
+    #             if folding:
+    #                 html_lines.append('</details>')
+    #                 folding = False
+    #         html_lines.append(self.converter.convert(line, full=False))
+
+    #     if folding:
+    #         html_lines.append('</details>')
+
+    #     return '\n'.join(html_lines)
+
+    # def fold_terminal_output(self) -> str:
+    #     terminal_output_ansi = self.get_terminal_output_ansi()
+    #     lines = terminal_output_ansi.splitlines()
+    #     return self.fold_tracebacks(lines)
 
 
 def fold(str) -> str:
@@ -387,10 +535,9 @@ def main():
     html_header = page.create_header()
     html_tabs = page.create_tabs()
     html_trailer = page.create_trailer()
-    my_js = page.get_js()
-    html_out = html_header + html_tabs + "\n" + my_js + html_trailer
+    html_out = html_header + html_tabs + html_trailer
 
-    html_out_new = fold(html_out)
+    # html_out_new = fold(html_out)
 
     global HTML_OUTPUT_FILE
     if (
@@ -402,8 +549,8 @@ def main():
         )
     with open(HTML_OUTPUT_FILE, "w+") as f:
         f.write(html_out)
-    with open("folded.html", "w+") as f:
-        f.write(html_out_new)
+    # with open("folded.html", "w+") as f:
+    #     f.write(html_out_new)
 
     # Open in browser
     webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")

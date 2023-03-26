@@ -51,11 +51,26 @@ def pytest_addoption(parser) -> None:
     group.addoption(
         "--tui",
         action="store_true",
-        help="Enable the pytest-tui plugin. Both text user interface (TUI) and HTML output are supported.\nRun TUI with console command 'tui'; run HTML report with 'tuih'.",
+        help=(
+            "Enable the pytest-tui plugin. Both text user interface (TUI) and HTML"
+            " output are supported.\nRun TUI with console command 'tui'; run HTML"
+            " report with 'tuih'."
+        ),
     )
     group.addoption(
         "--tui-htmlfile",
-        help="Specify a non-default name for the HTML report file. Default is 'html-report.html,' and will be placed in the ptt_files/ folder.",
+        help=(
+            "Specify a non-default name for the HTML report file. Default is"
+            " 'html-report.html,' and will be placed in the ptt_files/ folder."
+        ),
+    )
+    group.addoption(
+        "--tui-fold-level",
+        help=(
+            "Enable auto-folding of log messages in the HTML report, and specify the"
+            " level at which folding occurs. When enabled, log messages at or below the"
+            " specified level will be folded."
+        ),
     )
 
 
@@ -142,6 +157,21 @@ def pytest_cmdline_main(config: Config) -> None:
         config._tui_htmlfile = HTML_OUTPUT_FILE
     else:
         config._tui_htmlfile = config.option.tui_htmlfile
+
+    # Set default fold level, if specified on the command line
+    if (
+        hasattr(config.option, "tui_fold_level")
+        and not config.option.tui_fold_level
+        or not hasattr(config.option, "tui_fold_level")
+    ):
+        config._tui_fold_level = None
+    else:
+        config._tui_fold_level = (
+            config.option.tui_fold_level
+            if config.option.tui_fold_level.lower()
+            in ["debug", "info", "warning", "error", "critical"]
+            else None
+        )
 
 
 def pytest_report_teststatus(report: TestReport, config: Config) -> None:
@@ -378,10 +408,11 @@ def pytest_unconfigure(config: Config) -> None:
                 "session_start_time": config._tui_session_start_time,
                 "session_end_time": config._tui_session_end_time,
                 "session_duration": config._tui_session_duration,
-                "tui_rerun_test_groups": config._tui_rerun_test_groups,
                 "tui_test_results": config._tui_test_results,
+                "tui_rerun_test_groups": config._tui_rerun_test_groups,
                 "tui_sections": config._tui_sections,
                 "tui_htmlfile": config._tui_htmlfile,
+                "tui_fold_level": config._tui_fold_level,
             },
             file,
         )

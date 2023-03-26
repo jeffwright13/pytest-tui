@@ -17,6 +17,15 @@ TUI_RESULT_OBJECTS_FILE = PYTEST_TUI_FILES_DIR / "tui_result_objects.pickle"
 TUI_SECTIONS_FILE = PYTEST_TUI_FILES_DIR / "tui_sections.pickle"
 TERMINAL_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "terminal_output.ansi"
 
+LOG_LEVEL_MAP = {
+    "DEBUG": 10,
+    "INFO": 20,
+    "WARNING": 30,
+    "ERROR": 40,
+    "CRITICAL": 50,
+}
+
+
 # ZWNJ = "\u200C"
 # ZWS = "\u200B"
 # BOM = "\uFEFF"
@@ -254,6 +263,9 @@ class Results:
         self.tui_test_results = self.tui_test_info["tui_test_results"]
         self.tui_rerun_test_groups = self.tui_test_info["tui_rerun_test_groups"]
         self.tui_sections = self.tui_test_info["tui_sections"]
+        self.tui_htmlfile = self.tui_test_info["tui_htmlfile"]
+        self.tui_fold_level = self.tui_test_info["tui_fold_level"]
+
         self.terminal_output = self._get_terminal_output()
 
     def _unpickle_tui_test_info(self):
