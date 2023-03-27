@@ -1,6 +1,10 @@
 @charset "UTF-8";
+
+/* No break (newline) */
+.nobr { white-space: nowrap }
+
 /* Dropdown Button */
- .dropbtn {
+.dropbtn {
      background-color: #04AA6D;
      color: white;
      padding: 16px;
@@ -42,7 +46,12 @@
  .dropdown:hover .dropdown-content {
     display: block;
 }
- div.sticky {
+
+btn-rt {
+    text-align: right
+}
+
+div.sticky {
      position: -webkit-sticky;
      position: sticky;
      top: 0;
@@ -79,7 +88,7 @@
 }
  .tab button:hover {
      background-color: #ddd;
-     opacity: 0.65;
+     opacity: 1.0;
      transition: 0.3s;
 }
  .tab button.focus {
@@ -93,7 +102,7 @@
 }
  .tablinks {
      font-family: "Arial", sans-serif;
-     font-size: 15px opacity: 0.4;
+     font-size: 15px opacity: 1.0;
 }
  .tabcontent {
      background-color: #ddd;

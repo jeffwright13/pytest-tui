@@ -52,7 +52,7 @@ TABS_RESULTS_COLORS = {
 TAB_FULL_OUTPUT = ["Full Output"]
 TAB_FULL_OUTPUT_COLOR = {"Full Output": "rgba(0, 0, 255, 0.33)"}
 TAB_FOLDED_OUTPUT = ["Folded Output"]
-TAB_FOLDED_OUTPUT_COLOR = {"Folded Output": "rgba(0, 25, 25, 0.55)"}
+TAB_FOLDED_OUTPUT_COLOR = {"Folded Output": "rgba(0, 225, 128, 1)"}
 TABS_SECTIONS = [
     "summary_section",
     "failures_section",
@@ -163,7 +163,7 @@ class HtmlPage:
     def create_header(self) -> str:
         # my_css = Path(CSS_FILE).read_text().replace("\n", "")
         my_css = Path(CSS_FILE).read_text()
-        return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8, width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {my_css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif';" > <div class="sticky">"""
+        return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8, width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {my_css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif';" >"""
 
     def create_testrun_results(self) -> str:
         return (
@@ -255,10 +255,10 @@ class HtmlPage:
         """
         with open(Path(JS_FILE), "r") as f:
             lines = f.readlines()
-        # return "".join(f"<script>{line}</script>" for line in lines if line.strip("\n"))
-        return (
-            "".join(f"<script>{line}</script>" for line in lines if line.strip("\n"))
-        ).splitlines()
+        return "".join(f"<script>{line}</script>" for line in lines if line.strip("\n"))
+        # return (
+        #     "".join(f"<script>{line}</script>" for line in lines if line.strip("\n"))
+        # ).splitlines()
 
     def create_trailer(self) -> str:
         return f"""{self.get_js()} </script> </body> </html>"""
@@ -306,12 +306,12 @@ class HtmlPage:
         )
 
         # tab_links_section += """</div>"""
-        tabs_links.extend(
-            [
-                f"""<button class="dropdown-item tablinks" style="background-color: {TAB_ACTIONS_COLOR[action]}" onclick="toggleDetails()">Actions</button>"""
-                for action in TAB_ACTIONS
-            ]
-        )
+        # tabs_links.extend(
+        #     [
+        #         f"""<button class="dropdown-item tablinks" style="background-color: {TAB_ACTIONS_COLOR[action]}" onclick="toggleDetails()">Actions</button>"""
+        #         for action in TAB_ACTIONS
+        #     ]
+        # )
 
         tab_links_section = """<div class="tab">""" + "".join(tabs_links) + """</div>"""
 
@@ -347,9 +347,12 @@ class HtmlPage:
             tab_folded_output = f"""<div id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output(self.results.tui_fold_level)}</pre> </div>"""
 
         # tab_actions = f"""<div id="{TAB_ACTIONS[0]}" class="tabcontent"> <pre>{self.fold_terminal_output()}</pre> </div>"""
-        tab_actions = (
-            f"""<div id="{TAB_ACTIONS[0]}" class="tabcontent"> <pre></pre> </div>"""
-        )
+        # tab_actions = (
+        #     f"""<div id="{TAB_ACTIONS[0]}" class="tabcontent"> <pre></pre> </div>"""
+        # )
+        tab_actions = """<div class="sticky"> <button class="dropdown-item tablinks btn-rt" style="background-color: #C7DBDF" id="toggle-details" onclick="toggleDetailsElements()">Show Folds</button>"""
+
+        tab_actions2 = """<button class="dropdown-item tablinks btn-rt" style="background-color: #B0D7DF" onclick="toggleDetails()">Fold/Unfold</button> </div>"""
 
         everything = (
             tab_links_section
@@ -357,6 +360,7 @@ class HtmlPage:
             + tab_results
             + tab_sections
             + tab_actions
+            + tab_actions2
             + tab_full_output
         )
         if self.results.tui_fold_level:
@@ -467,7 +471,8 @@ class HtmlPage:
                 if this_line_log_level <= LOG_LEVEL_MAP[level]:
                     if not fold_started:
                         html_lines.append(
-                            f"\n<details><summary>Folded {level}</summary>"
+                            "<details><summary style='display:inline; .nobr'>Folded"
+                            f" {level}</summary>"
                         )
                         fold_started = True
                 else:
@@ -534,6 +539,7 @@ def main():
     page.remove_tabs_without_content()
     html_header = page.create_header()
     html_tabs = page.create_tabs()
+    # html_action_button = """<button class="dropdown-item tablinks btn-rt" style="background-color: rgba(249, 123, 64, 0.95)" onclick="toggleDetails()">Actions</button>"""
     html_trailer = page.create_trailer()
     html_out = html_header + html_tabs + html_trailer
 
