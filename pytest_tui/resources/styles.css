@@ -1,12 +1,27 @@
 @charset "UTF-8";
 
 /* No break (newline) */
-.nobr { white-space: nowrap }
+.nobr { white-space: nowrap; display: inline; white-space: nowrap }
+
+.inline-flag {
+    position: relative;
+    display: inline;
+    line-height: 14px; /* play with this */
+ }
+ .inline-flag > i {
+    position: absolute;
+    display: block;
+    top: -1px; /* play with this */
+ }
+
+ .inline-flag > span {
+    margin-left: 18px; /* play with this */
+ }
 
 /* Dropdown Button */
 .dropbtn {
      background-color: #04AA6D;
-     color: white;
+     color: #EEEEEE;
      padding: 16px;
      font-size: 16px;
      border: none;
@@ -68,18 +83,17 @@ div.sticky {
  .tab {
     /* overflow: hidden;
      */
-     border: 1px solid #ccc;
-     background-color: #f1f1f1;
-     margin-right: 4px;
+     border: 0px solid #ccc;
+     border-radius: 0px;
+     background-color: ##DDDDDD;
+     margin-right: 0px;
 }
  .tab button {
-     border-radius: 3px;
      background-color: inherit;
      float: left;
      border: 1px solid #ccc;
      border-color: lightgrey;
-     border-style;
-     border-radius: 2px;
+     border-radius: 4px;
      outline: none;
      cursor: pointer;
      padding: 14px 16px;
@@ -280,7 +294,7 @@ summary {
      color: #000000;
 }
  .body_background {
-     background-color: #EEEEEE;
+     background-color: #DDDDDD;
 }
  .inv_foreground {
      color: #EEEEEE;

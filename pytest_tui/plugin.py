@@ -2,8 +2,7 @@ import itertools
 import pickle
 import re
 import tempfile
-
-# from concurrent.futures.thread import ThreadPoolExecutor
+from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime, timezone
 from io import StringIO
 from types import SimpleNamespace
@@ -17,7 +16,7 @@ from _pytest.reports import TestReport
 from strip_ansi import strip_ansi
 
 # from pytest_tui.__main__ import tui_launch
-# from pytest_tui.html import main as tuihtml
+from pytest_tui.html_gen import main as tuihtml
 from pytest_tui.utils import (
     HTML_OUTPUT_FILE,
     TERMINAL_OUTPUT_FILE,
@@ -430,7 +429,7 @@ def pytui_launch(config: Config) -> None:
         capmanager.suspend_global_capture(in_=True)
     finally:
         # re-enable capturing
-        # with ThreadPoolExecutor() as executor:
-        #     executor.submit(tuihtml)
+        with ThreadPoolExecutor() as executor:
+            executor.submit(tuihtml)
         # tui_launch()
         capmanager.resume_global_capture()

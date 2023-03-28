@@ -51,6 +51,7 @@ TABS_RESULTS_COLORS = {
 
 TAB_FULL_OUTPUT = ["Full Output"]
 TAB_FULL_OUTPUT_COLOR = {"Full Output": "rgba(0, 0, 255, 0.33)"}
+
 TAB_FOLDED_OUTPUT = ["Folded Output"]
 TAB_FOLDED_OUTPUT_COLOR = {"Folded Output": "rgba(0, 225, 128, 1)"}
 TABS_SECTIONS = [
@@ -72,19 +73,13 @@ TABS_SECTIONS_COLORS = {
 
 TAB_ACTIONS = ["Actions"]
 TAB_ACTIONS_COLOR = {"Actions": "rgba(249, 123, 64, 0.95)"}
-TABS_ACTIONS = [
-    "Fold/Unfold Failures",
-    "Fold/Unfold Passes",
-    "Fold/Unfold Warnings",
-    "Fold/Unfold Errors",
-    "Fold/Unfold Reruns",
-]
+TABS_ACTIONS = {
+    "fold_action": "toggleAllDetails",
+    "hide_action": "toggleDetailsElements",
+}
 TABS_ACTIONS_COLORS = {
-    "failures_action": "rgba(255, 10, 10, 0.50)",
-    "passes_action": "rgba(66, 228, 47, 0.6)",
-    "warnings_section": "#ffee93",
-    "errors_section": "#ffc09f",
-    "reruns_section": "#f6e3da",
+    "fold_action": "#ffee93",
+    "hide_action": "#ffc09f",
 }
 
 
@@ -265,45 +260,72 @@ class HtmlPage:
 
     def create_tabs(self) -> str:
         tabs_links = [
-            f"""<button class="tablinks" style="background-color: {TAB_ABOUT_COLOR[section]}" id="defaultOpen" onclick="openTab(event, '{section}')" >{section}</button>"""
+            f"""<span><button class="tablinks" style="background-color: {TAB_ABOUT_COLOR[section]}" id="defaultOpen" onclick="openTab(event, '{section}')" >{section}</button></span>"""
             for section in TAB_ABOUT
         ]
 
         tabs_links.extend(
             [
-                f"""<button class="tablinks" style="background-color: {TABS_RESULTS_COLORS[section][0]}" onclick="openTab(event, '{section}')" >{section}</button>"""
+                f"""<span><button class="tablinks" style="background-color: {TABS_RESULTS_COLORS[section][0]}" onclick="openTab(event, '{section}')" >{section}</button></span>"""
                 for section in TABS_RESULTS
             ]
         )
 
+        # Dropdown for output sections
         tabs_links.extend(
             [
-                """<div class="dropdown"> <button class="dropbtn" style="color: white; background-color: gray">Output Sections</button> <div id="myDropdown" class="dropdown-content">"""
+                """<span class="dropdown"> <button class="dropbtn" style="color: #dddddd; background-color: gray">Output Sections</button> <span class="dropdown-content">"""
             ]
         )
-
         tabs_links.extend(
             [
-                f"""<button class="dropdown-item tablinks" style="background-color: {TABS_SECTIONS_COLORS[section]}" onclick="openTab(event, '{section}')" >{section}</button>"""
+                f"""<span><button class="dropdown-item tablinks" style="background-color: {TABS_SECTIONS_COLORS[section]}" onclick="openTab(event, '{section}')" >{section}</button></span>"""
                 for section in TABS_SECTIONS
             ]
         )
+        tabs_links.extend(["""</span> </span>"""])
 
-        tabs_links.extend(["""</div> </div>"""])
+        # Dropdown for fold-section actions
+        if self.results.tui_fold_level:
+            tabs_links.extend(
+                [
+                    """<span class="dropdown"> <button class="dropbtn" style="color: brown; background-color: #d9ead3">Fold Actions</button> <span class="dropdown-content">"""
+                ]
+            )
+            # tabs_links.extend(
+            #     [
+            #         f"""<span><button class="dropdown-item tablinks" style="background-color: {TABS_ACTIONS_COLORS[action]}" onclick="openAction(event, '{action}')" >{action}</button></span>"""
+            #         for action in TABS_ACTIONS
+            #     ]
+            # )
 
+            tabs_links.extend(
+                [
+                    """<span class="sticky"><button class="dropdown-item tablinks" style="background-color: #C7DBDF" onclick="toggleAllDetails()">Fold/Unfold Logs</button> </span>"""
+                ]
+            )
+            tabs_links.extend(
+                [
+                    """<span class="sticky"><button class="dropdown-item tablinks btn-rt" style="background-color: #C7DBDF" id="toggle-details" onclick="toggleDetailsElements()">Show/Hide Fold Markers</button></span>"""
+                ]
+            )
+            tabs_links.extend(["""</span> </span>"""])
+
+        # Full Output tab
         tabs_links.extend(
             [
-                f"""<button class="tablinks" style="background-color: {TAB_FULL_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button>"""
+                f"""<span><button class="tablinks" style="background-color: {TAB_FULL_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button></span>"""
                 for section in TAB_FULL_OUTPUT
             ]
         )
 
-        tabs_links.extend(
-            [
-                f"""<button class="tablinks" style="background-color: {TAB_FOLDED_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button>"""
-                for section in TAB_FOLDED_OUTPUT
-            ]
-        )
+        if self.results.tui_fold_level:
+            tabs_links.extend(
+                [
+                    f"""<span><button class="tablinks" style="background-color: {TAB_FOLDED_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button></span>"""
+                    for section in TAB_FOLDED_OUTPUT
+                ]
+            )
 
         # tab_links_section += """</div>"""
         # tabs_links.extend(
@@ -312,8 +334,9 @@ class HtmlPage:
         #         for action in TAB_ACTIONS
         #     ]
         # )
-
-        tab_links_section = """<div class="tab">""" + "".join(tabs_links) + """</div>"""
+        tab_links_section = (
+            """<span class="tab">""" + "".join(tabs_links) + """</span>"""
+        )
 
         tab_result_content = []
         for tab in TABS_RESULTS:
@@ -344,27 +367,24 @@ class HtmlPage:
         tab_full_output = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <pre>{self.get_terminal_output()}</pre> </div>"""
 
         if self.results.tui_fold_level:
-            tab_folded_output = f"""<div id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output(self.results.tui_fold_level)}</pre> </div>"""
-
-        # tab_actions = f"""<div id="{TAB_ACTIONS[0]}" class="tabcontent"> <pre>{self.fold_terminal_output()}</pre> </div>"""
-        # tab_actions = (
-        #     f"""<div id="{TAB_ACTIONS[0]}" class="tabcontent"> <pre></pre> </div>"""
-        # )
-        tab_actions = """<div class="sticky"> <button class="dropdown-item tablinks btn-rt" style="background-color: #C7DBDF" id="toggle-details" onclick="toggleDetailsElements()">Show Folds</button>"""
-
-        tab_actions2 = """<button class="dropdown-item tablinks btn-rt" style="background-color: #B0D7DF" onclick="toggleDetails()">Fold/Unfold</button> </div>"""
+            tab_folded_output = f"""<span id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output(self.results.tui_fold_level)}</pre> </span>"""
+            # tab_action_hide_unhide_elements = """<span class="sticky">  <button class="dropdown-item tablinks btn-rt" style="background-color: #C7DBDF" id="toggle-details" onclick="toggleDetailsElements()">Show Folds</button>"""
+            # tab_actions2 = """<button class="dropdown-item tablinks btn-rt" style="background-color: #B0D7DF" onclick="toggleDetails()">Fold/Unfold</button>"""
+            # tab_actions3 = """<button style="background-color: #C7DBDF" onclick="openAllDetails()">Open all details</button>"""
+            # tab_actions4 = """<button style="background-color: #B0D7DF"onclick="closeAllDetails()">Close all details</button>"""
+            # tab_action_fold_unfold_details = """<button style="background-color: #C7DBDF" onclick="toggleAllDetails()">Toggle all details</button> </span>"""
+            # tab_folded = tab_folded_output + tab_action_hide_unhide_elements + tab_action_fold_unfold_details
+        else:
+            tab_folded_output = ""
 
         everything = (
             tab_links_section
             + tab_about
             + tab_results
             + tab_sections
-            + tab_actions
-            + tab_actions2
             + tab_full_output
+            + tab_folded_output
         )
-        if self.results.tui_fold_level:
-            everything += tab_folded_output
         return everything
 
     def get_collapsible_results(self, outcome) -> str:
@@ -426,31 +446,8 @@ class HtmlPage:
             tout = str(f.read(), "utf-8")
         return tout
 
-    # def fold_consecutive_lines(self, lines):
-    #     html_lines = []
-    #     fold_started = False
-    #     for line in lines:
-    #         if "DEBUG" in line or "WARNING" in line:
-    #             if not fold_started:
-    #                 html_lines.append("<summary>Folded DEBUG or INFO</summary><details>")
-    #                 html_lines.append('<details>')
-    #                 fold_started = True
-    #             html_lines.append(self.converter.convert(line, full=False))
-    #         else:
-    #             if fold_started:
-    #                 html_lines.append("</details>")
-    #                 fold_started = False
-    #             html_lines.append(self.converter.convert(line, full=False))
-    #     if fold_started:
-    #         html_lines.append("</details>")
-    #     return '\n'.join(html_lines)
-
-    # def fold_terminal_output(self) -> str:
-    #     terminal_output_ansi = self.get_terminal_output_ansi()
-    #     lines = terminal_output_ansi.splitlines()
-    #     return self.fold_consecutive_lines(lines)
-
     def get_line_level(self, line: str) -> str:
+        """Is this line a log entry (DEBUG, INFO, WARNING, ERROR, CRITICAL)?"""
         for level, value in LOG_LEVEL_MAP.items():
             if level in line:
                 return value
@@ -464,28 +461,31 @@ class HtmlPage:
         """
         # sourcery skip: hoist-similar-statement-from-if, hoist-statement-from-if, merge-else-if-into-elif, merge-list-appends-into-extend
         html_lines = []
+        html_str = ""
         fold_started = False
-        for line in lines:
-            this_line_log_level = self.get_line_level(line)
+        for l in lines:
+            line = self.converter.convert(l, full=False)
+            this_line_log_level = self.get_line_level(l)
             if this_line_log_level:
                 if this_line_log_level <= LOG_LEVEL_MAP[level]:
                     if not fold_started:
-                        html_lines.append(
-                            "<details><summary style='display:inline; .nobr'>Folded"
-                            f" {level}</summary>"
+                        html_str += (
+                            f"<details><summary style='nobr'>Folded {level}</summary>"
                         )
                         fold_started = True
                 else:
                     if fold_started:
-                        html_lines.append("</details>")
+                        html_str += "</details>"
                         fold_started = False
-                html_lines.append(self.converter.convert(line, full=False))
+                html_str += line + "\n"
             else:
                 if fold_started:
-                    html_lines.append("</details>")
+                    html_str += "</details>"
                     fold_started = False
-                html_lines.append(self.converter.convert(line, full=False))
-        return "\n".join(html_lines)
+                    html_str += line + "\n"
+                else:
+                    html_str += line + "\n"
+        return html_str
 
     def fold_terminal_output(self, level: str) -> str:
         terminal_output_ansi = self.get_terminal_output_ansi()
@@ -495,7 +495,6 @@ class HtmlPage:
     # def fold_tracebacks(self, lines):
     #     html_lines = []
     #     folding = False
-
     #     for line in lines:
     #         if '_ test_' in line:
     #             if not folding:
@@ -506,31 +505,14 @@ class HtmlPage:
     #                 html_lines.append('</details>')
     #                 folding = False
     #         html_lines.append(self.converter.convert(line, full=False))
-
     #     if folding:
     #         html_lines.append('</details>')
-
     #     return '\n'.join(html_lines)
 
     # def fold_terminal_output(self) -> str:
     #     terminal_output_ansi = self.get_terminal_output_ansi()
     #     lines = terminal_output_ansi.splitlines()
     #     return self.fold_tracebacks(lines)
-
-
-def fold(str) -> str:
-    out = []
-    for line in str.splitlines():
-        if TUI_FOLD_TITLE_BEGIN in line:
-            line = line.replace(TUI_FOLD_TITLE_BEGIN, "<details><summary>")
-        if TUI_FOLD_TITLE_END in line:
-            line = line.replace(TUI_FOLD_TITLE_END, "</summary>")
-        if TUI_FOLD_CONTENT_BEGIN in line:
-            pass
-        if TUI_FOLD_CONTENT_END in line:
-            line = line.replace(TUI_FOLD_CONTENT_END, "</details>")
-        out.append(line)
-    return "\n".join(out)
 
 
 def main():
@@ -543,8 +525,6 @@ def main():
     html_trailer = page.create_trailer()
     html_out = html_header + html_tabs + html_trailer
 
-    # html_out_new = fold(html_out)
-
     global HTML_OUTPUT_FILE
     if (
         "tui_htmlfile" in results.tui_test_info
@@ -555,10 +535,6 @@ def main():
         )
     with open(HTML_OUTPUT_FILE, "w+") as f:
         f.write(html_out)
-    # with open("folded.html", "w+") as f:
-    #     f.write(html_out_new)
-
-    # Open in browser
     webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
 
     # Open in browser if autolaunch_html config is set
