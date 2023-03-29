@@ -29,7 +29,7 @@ CSS_FILE = Path(__file__).parent / "resources" / "styles.css"
 JS_FILE = Path(__file__).parent / "resources" / "scripts.js"
 
 TAB_ABOUT = ["About"]
-TAB_ABOUT_COLOR = {"About": "rgba(0, 0, 255, 0.33)"}
+TAB_ABOUT_COLOR = {"About": "hsl(199, 100%, 50%)"}
 TABS_RESULTS = [
     "All Tests",
     "Failures",
@@ -40,17 +40,17 @@ TABS_RESULTS = [
     "Reruns",
 ]
 TABS_RESULTS_COLORS = {
-    "All Tests": ("rgba(111, 104, 105, 0.34)", "rgba(128,128,0,0.5)"),
-    "Failures": ("rgba(255, 10, 10, 0.75)", "rgba(255,0,0,0.5)"),
+    "All Tests": ("hsl(64, 11%, 68%)", "rgba(128,128,0,0.5)"),
+    "Failures": ("hsl(348, 78%, 53%)", "rgba(255,0,0,0.5)"),
     "Passes": ("rgba(66, 228, 47, 1)", "rgba(0,0,0,0.5)"),
-    "Skipped": ("rgba(111, 104, 105, 0.34)", "rgba(128,128,0,0.5)"),
-    "Xfails": ("rgba(255, 176, 176, 0.90)", "rgba(0,0,0,0.5)"),
-    "Xpasses": ("rgba(0, 255, 0, 0.43)", "rgba(0,0,0,0.5)"),
+    "Skipped": ("hsl(172, 21%, 59%)", "rgba(128,128,0,0.5)"),
+    "Xfails": ("rgba(255, 176, 176)", "rgba(0,0,0,0.5)"),
+    "Xpasses": ("hsl(141, 45%, 48%)", "rgba(0,0,0,0.5)"),
     "Reruns": ("rgba(220,165.0,1)", "rgba(255,194,0,0.5)"),
 }
 
 TAB_FULL_OUTPUT = ["Full Output"]
-TAB_FULL_OUTPUT_COLOR = {"Full Output": "rgba(0, 0, 255, 0.33)"}
+TAB_FULL_OUTPUT_COLOR = {"Full Output": "hsl(195, 100%, 47%)"}
 
 TAB_FOLDED_OUTPUT = ["Folded Output"]
 TAB_FOLDED_OUTPUT_COLOR = {"Folded Output": "rgba(0, 225, 128, 1)"}
@@ -260,7 +260,7 @@ class HtmlPage:
 
     def create_tabs(self) -> str:
         tabs_links = [
-            f"""<span><button class="tablinks" style="background-color: {TAB_ABOUT_COLOR[section]}" id="defaultOpen" onclick="openTab(event, '{section}')" >{section}</button></span>"""
+            f"""<div class="sticky"> <span><button class="tablinks" style="background-color: {TAB_ABOUT_COLOR[section]}" id="defaultOpen" onclick="openTab(event, '{section}')" >{section}</button></span>"""
             for section in TAB_ABOUT
         ]
 
@@ -301,12 +301,12 @@ class HtmlPage:
 
             tabs_links.extend(
                 [
-                    """<span class="sticky"><button class="dropdown-item tablinks" style="background-color: #C7DBDF" onclick="toggleAllDetails()">Fold/Unfold Logs</button> </span>"""
+                    """<span><button class="dropdown-item tablinks" style="background-color: #C7DBDF" onclick="toggleAllDetails()">Fold/Unfold Logs</button> </span>"""
                 ]
             )
             tabs_links.extend(
                 [
-                    """<span class="sticky"><button class="dropdown-item tablinks btn-rt" style="background-color: #C7DBDF" id="toggle-details" onclick="toggleDetailsElements()">Show/Hide Fold Markers</button></span>"""
+                    """<span><button class="dropdown-item tablinks btn-rt" style="background-color: #C7DBDF" id="toggle-details" onclick="toggleDetailsElements()">Show/Hide Fold Markers</button></span>"""
                 ]
             )
             tabs_links.extend(["""</span> </span>"""])
@@ -322,7 +322,7 @@ class HtmlPage:
         if self.results.tui_fold_level:
             tabs_links.extend(
                 [
-                    f"""<span><button class="tablinks" style="background-color: {TAB_FOLDED_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button></span>"""
+                    f"""<span><button class="tablinks" style="background-color: {TAB_FOLDED_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button></span> </div>"""
                     for section in TAB_FOLDED_OUTPUT
                 ]
             )
@@ -368,16 +368,10 @@ class HtmlPage:
 
         if self.results.tui_fold_level:
             tab_folded_output = f"""<span id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output(self.results.tui_fold_level)}</pre> </span>"""
-            # tab_action_hide_unhide_elements = """<span class="sticky">  <button class="dropdown-item tablinks btn-rt" style="background-color: #C7DBDF" id="toggle-details" onclick="toggleDetailsElements()">Show Folds</button>"""
-            # tab_actions2 = """<button class="dropdown-item tablinks btn-rt" style="background-color: #B0D7DF" onclick="toggleDetails()">Fold/Unfold</button>"""
-            # tab_actions3 = """<button style="background-color: #C7DBDF" onclick="openAllDetails()">Open all details</button>"""
-            # tab_actions4 = """<button style="background-color: #B0D7DF"onclick="closeAllDetails()">Close all details</button>"""
-            # tab_action_fold_unfold_details = """<button style="background-color: #C7DBDF" onclick="toggleAllDetails()">Toggle all details</button> </span>"""
-            # tab_folded = tab_folded_output + tab_action_hide_unhide_elements + tab_action_fold_unfold_details
         else:
             tab_folded_output = ""
 
-        everything = (
+        return (
             tab_links_section
             + tab_about
             + tab_results
@@ -385,7 +379,6 @@ class HtmlPage:
             + tab_full_output
             + tab_folded_output
         )
-        return everything
 
     def get_collapsible_results(self, outcome) -> str:
         collapsible_results = ""
