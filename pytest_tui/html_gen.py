@@ -10,8 +10,11 @@ from ansi2html import Ansi2HTMLConverter
 
 from pytest_tui import __version__
 
+# Next 3 lines are saved from earlier CLI-Config work
+# CLI CONFIG SAVED WORK
 # from pytest_tui.__main__ import Cli
 # from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
+
 from pytest_tui.utils import (
     HTML_OUTPUT_FILE,
     LOG_LEVEL_MAP,
@@ -156,7 +159,6 @@ class HtmlPage:
             TABS_RESULTS.remove("Reruns")
 
     def create_header(self) -> str:
-        # my_css = Path(CSS_FILE).read_text().replace("\n", "")
         my_css = Path(CSS_FILE).read_text()
         return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8, width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {my_css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif';" >"""
 
@@ -251,9 +253,6 @@ class HtmlPage:
         with open(Path(JS_FILE), "r") as f:
             lines = f.readlines()
         return "".join(f"<script>{line}</script>" for line in lines if line.strip("\n"))
-        # return (
-        #     "".join(f"<script>{line}</script>" for line in lines if line.strip("\n"))
-        # ).splitlines()
 
     def create_trailer(self) -> str:
         return f"""{self.get_js()} </script> </body> </html>"""
@@ -301,12 +300,12 @@ class HtmlPage:
 
             tabs_links.extend(
                 [
-                    """<span><button class="dropdown-item tablinks" style="background-color: #C7DBDF" onclick="toggleAllDetails()">Fold/Unfold Logs</button> </span>"""
+                    """<span><button class="dropdown-item tablinks" style="background-color: #a8b3dc" onclick="toggleAllDetails()">Fold/Unfold Logs</button> </span>"""
                 ]
             )
             tabs_links.extend(
                 [
-                    """<span><button class="dropdown-item tablinks btn-rt" style="background-color: #C7DBDF" id="toggle-details" onclick="toggleDetailsElements()">Show/Hide Fold Markers</button></span>"""
+                    """<span><button class="dropdown-item tablinks btn-rt" style="background-color: #b3dca8" id="toggle-details" onclick="toggleDetailsElements()">Show/Hide Fold Markers</button></span>"""
                 ]
             )
             tabs_links.extend(["""</span> </span>"""])
@@ -452,7 +451,6 @@ class HtmlPage:
         If the log level is <= the level passed to the function, then the line is folded.
         If the log level is > than the level passed to the function, then the line is not folded.
         """
-        # sourcery skip: hoist-similar-statement-from-if, hoist-statement-from-if, merge-else-if-into-elif, merge-list-appends-into-extend
         html_lines = []
         html_str = ""
         fold_started = False

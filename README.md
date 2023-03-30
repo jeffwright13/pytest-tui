@@ -4,7 +4,7 @@
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/jsh/trendlist)
 
 # pytest-tui
-## A Pytest plugin with scripts to launch a Text User Interface (TUI) or an HTML page for viewing test run results
+## A Pytest plugin for viewing test run results, with console scripts to launch a Text User Interface (TUI) or an HTML page
 
 ### TUI:
 ![2022-05-01 19 25 19](https://user-images.githubusercontent.com/4308435/166174159-b442a5b5-416d-42a0-badd-7401e9980e47.gif)
@@ -27,6 +27,7 @@ How does it work in practice? Easy. You just run your Pytest campaigns like you 
 Output sections and individual test results are expandable/collapsible, and test summary statistics are displayed for convenience. Both the TUI and the HTML page retain the original pytest ANSI-encoded color output, lending a familiar look and feel.
 
 ## Features
+- **New** Log message folding on the HTML page, configurable by log level!
 - Launch either or both of the [Textual](https://github.com/Textualize/textual) TUI or the HTML page using built in console scripts
 - ANSI text markup support - whatever the output on your console looks like is how things are going to show up in the TUI
 - Mouse and keyboard support (including scrolling)
@@ -46,10 +47,11 @@ Output sections and individual test results are expandable/collapsible, and test
   - `pytest-timestamp`
 - Untested:
   - `pytest-xdist`
+  - `loguru`
 
 ## Requirements
 - Pytest >= 6.2.5
-- Python >= 3.8
+- Python >= 3.8 (but see "Known Limitations/Issues" below if you want to run 3.10+)
 
 ## Installation
 `pip install pytest-tui`
@@ -80,12 +82,20 @@ On Linux terminals, you can typically press and hold the SHIFT key on your keybo
 
 On Windows, use the ALT key while click-dragging the mouse. Mac users can get the same effect with the Option key.
 
-## HTML File
+### Generating and viewing the HTML File
 
-The HTML output file is located at `<cwd>/ptt_files/html_report.html`. The HTML file is automatically launched via browser when the `tuih` file is invoked.
+The HTML output file is located at `<cwd>/ptt_files/html_report.html`. The HTML file is generated and launched via browser when the `tuih` script is invoked on the command line.
+
+### Python Log Message Folding (HTML file)
+
+New in 1.9.1 is the "folding" feature, which will automatically roll up any output lines from the test run which are from the Python logger and which are at or below a configurable level. This lets you view verbose debug-level output when you need it, and fold it away, out of sight when you don't. There is no special configuration that has to be done to use this feature, other than enabling at run time with the `--tui-fold-level` option (see `pytest --help`).
+
+For example, specifying `--tui-fold-level=DEBUG` will produce a new section in the HTML report file called "Folded Output", which displays the test run's console output with all lines of log level DEBUG folded up. Each folded section can be individually toggled opened/closed by clicking the "Folded DEBUG" line. Or, you can toggle all "Folded DEBUG" sections by clicking the "Fold/Unfold Logs" button inside the "Fold Actions" menu at the top right of the HTML page.
+
 
 ## Known Limitations / Issues
 
+- Python support for 3.10+ is not guaranteed. Changes were made to the `importlib.metadata` library that are not backwards-compatible, and may result in exceptions when attempting to run. I have not had the chance to chase this down definitively, so until such a time that I fully understand the issue, I recommend using Python 3.8 or 3.9. Of course, YMMV...give it a try, and let me know how things go. :-)
 - User interfaces need work:
   - Overall layouts need optimization (I am definitely not a UX guy)
   - Textual interface may be sluggish, esp. if run within an IDE
@@ -102,7 +112,7 @@ Several TUIs (using different TUI libraries) have been cycled through this proje
 
 The HTML feature was put into place because of some minor limitations the author found in the available HTML plugins (miscounted totals in some corner cases, no color-coded output, inability to show output from the pytest `live logs` option). There is no intent to replace existing HTML plugins, but if you like this one, please do spread the word. :-)
 
-## Issues
+## Reporting Issues
 
 If you encounter any problems, have feedback or requests, or anything else, please [file an issue](https://github.com/jeffwright13/pytest-tui/issues/new), along with a detailed description.
 

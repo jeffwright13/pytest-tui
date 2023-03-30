@@ -14,7 +14,7 @@ def read(fname):
 
 setup(
     name="pytest-tui",
-    version="1.9.0+dev",
+    version="1.9.1+dev",
     author="Jeff Wright",
     author_email="jeff.washcloth@gmail.com",
     license="MIT",
@@ -27,7 +27,6 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "ansi2html==1.8.0",
-        "Faker==13.15.0",
         "json2table==1.1.5",
         "pytest-metadata==2.0.4",
         "single-source==0.3.0",

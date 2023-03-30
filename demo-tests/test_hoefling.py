@@ -3,6 +3,7 @@ import logging
 import pytest
 
 logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 
 
 LOREM = """
