@@ -68,7 +68,7 @@ In some environments, where the working directory for pytest has been changed fr
 
 ### Sample / Demo Tests
 
-If you would like some dummy tests that will allow you to take pytest-tui for a testdrive, copy all the files at https://github.com/jeffwright13/pytest-tui/tree/main/demo-tests into a folder called `demo-tests/` where your test environment resides. Then:
+If you would like some dummy tests that will allow you to take pytest-tui for a testdrive, copy all the files at https://github.com/jeffwright13/pytest-tui/tree/main/demo-tests into a folder called `demo-tests/` where your test environment resides. You will need the additional libraries listed in /requirements/requirements-dev.txt, so install them (`pip install -r requirements-dev.txt`). Then:
 
 `pytest demo-tests/`
 
@@ -78,7 +78,7 @@ If you have already exited the TUI and would like to re-enter it with the same d
 
 ### TUI Copy/Paste
 
-On Linux terminals, you can typically press and hold the SHIFT key on your keyboard to temporarily bypass the TUI and access the terminal’s native mouse copy/paste functionality (commonly, click-drag-release or double-click to select text, middle-click to paste). This copy/paste works with the terminal’s selection buffer, as opposed to the TUI’s buffer.
+On Linux terminals, you can typically press and hold the SHIFT key on your keyboard to temporarily bypass the TUI and access the terminal's native mouse copy/paste functionality (commonly, click-drag-release or double-click to select text, middle-click to paste). This copy/paste works with the terminal's selection buffer, as opposed to the TUI's buffer.
 
 On Windows, use the ALT key while click-dragging the mouse. Mac users can get the same effect with the Option key.
 
