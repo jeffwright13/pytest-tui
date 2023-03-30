@@ -87,6 +87,8 @@ div.sticky {
      border-radius: 0px;
      background-color: ##DDDDDD;
      margin-right: 0px;
+     position: sticky;
+     left: 0px;
 }
  .tab button {
      background-color: inherit;
