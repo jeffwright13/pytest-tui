@@ -159,8 +159,8 @@ class HtmlPage:
             TABS_RESULTS.remove("Reruns")
 
     def create_header(self) -> str:
-        my_css = Path(CSS_FILE).read_text()
-        return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8, width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {my_css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif';" >"""
+        my_css = Path(CSS_FILE).read_text().replace("\n", "")
+        return f"""<!DOCTYPE html> <html> <head> <meta http-equiv="Content-Type" content="text/html; charset=utf-8, width=device-width, initial-scale=1.0"> <title>Test Run Results</title> <style> {my_css} </style> </head> <body class="body_foreground body_background" style="font-family: 'Helvetica, Arial, sans-serif';" > <div class="sticky">"""
 
     def create_testrun_results(self) -> str:
         return (
