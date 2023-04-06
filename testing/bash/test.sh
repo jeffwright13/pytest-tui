@@ -42,6 +42,7 @@ pip install --upgrade pip setuptools wheel
 printf "Installing pytest-tui from Test-PyPi\n"
 pip install -i https://test.pypi.org/simple/ pytest-tui
 pip install pytest-rerunfailures
+pip install faker
 
 printf "Cloning pytest-tui so we can use its demo-tests\n"
 git clone git@github.com:jeffwright13/pytest-tui.git

@@ -481,10 +481,7 @@ def main():
     html_out = html_header + html_tabs + html_trailer
 
     global HTML_OUTPUT_FILE
-    if (
-        "tui_htmlfile" in results.tui_test_info
-        and results.tui_test_info["tui_htmlfile"].name
-    ):
+    if results.tui_test_info.get("tui_htmlfile"):
         HTML_OUTPUT_FILE = Path(
             PYTEST_TUI_FILES_DIR / results.tui_test_info["tui_htmlfile"]
         )
