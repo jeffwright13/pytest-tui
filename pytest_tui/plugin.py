@@ -1,4 +1,5 @@
 import itertools
+import logging
 import pickle
 import re
 import tempfile
@@ -163,13 +164,13 @@ def pytest_cmdline_main(config: Config) -> None:
         and not config.option.tui_fold_level
         or not hasattr(config.option, "tui_fold_level")
     ):
-        config._tui_fold_level = None
+        config._tui_fold_level = "WARNING"
     else:
         config._tui_fold_level = (
             config.option.tui_fold_level
             if config.option.tui_fold_level.lower()
             in ["debug", "info", "warning", "error", "critical"]
-            else None
+            else "WARNING"
         )
 
 

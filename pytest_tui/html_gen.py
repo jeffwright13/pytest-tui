@@ -9,12 +9,6 @@ import json2table
 from ansi2html import Ansi2HTMLConverter
 
 from pytest_tui import __version__
-
-# Next 3 lines are saved from earlier CLI-Config work
-# CLI CONFIG SAVED WORK
-# from pytest_tui.__main__ import Cli
-# from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
-
 from pytest_tui.utils import (
     HTML_OUTPUT_FILE,
     LOG_LEVEL_MAP,
@@ -27,6 +21,12 @@ from pytest_tui.utils import (
     Results,
     test_session_starts_results_grabber,
 )
+
+# Next 3 lines are saved from earlier CLI-Config work
+# CLI CONFIG SAVED WORK
+# from pytest_tui.__main__ import Cli
+# from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
+
 
 CSS_FILE = Path(__file__).parent / "resources" / "styles.css"
 JS_FILE = Path(__file__).parent / "resources" / "scripts.js"
@@ -291,12 +291,6 @@ class HtmlPage:
                     """<span class="dropdown"> <button class="dropbtn" style="color: brown; background-color: #d9ead3">Fold Actions</button> <span class="dropdown-content">"""
                 ]
             )
-            # tabs_links.extend(
-            #     [
-            #         f"""<span><button class="dropdown-item tablinks" style="background-color: {TABS_ACTIONS_COLORS[action]}" onclick="openAction(event, '{action}')" >{action}</button></span>"""
-            #         for action in TABS_ACTIONS
-            #     ]
-            # )
 
             tabs_links.extend(
                 [
@@ -326,13 +320,6 @@ class HtmlPage:
                 ]
             )
 
-        # tab_links_section += """</div>"""
-        # tabs_links.extend(
-        #     [
-        #         f"""<button class="dropdown-item tablinks" style="background-color: {TAB_ACTIONS_COLOR[action]}" onclick="toggleDetails()">Actions</button>"""
-        #         for action in TAB_ACTIONS
-        #     ]
-        # )
         tab_links_section = (
             """<span class="tab">""" + "".join(tabs_links) + """</span>"""
         )
@@ -483,28 +470,6 @@ class HtmlPage:
         lines = terminal_output_ansi.splitlines()
         return self.fold_log_lines(lines, level)
 
-    # def fold_tracebacks(self, lines):
-    #     html_lines = []
-    #     folding = False
-    #     for line in lines:
-    #         if '_ test_' in line:
-    #             if not folding:
-    #                 html_lines.append("<details><summary>Folded DEBUG or INFO</summary>")
-    #                 folding = True
-    #         elif 'Captured log' in line and '-' in line:
-    #             if folding:
-    #                 html_lines.append('</details>')
-    #                 folding = False
-    #         html_lines.append(self.converter.convert(line, full=False))
-    #     if folding:
-    #         html_lines.append('</details>')
-    #     return '\n'.join(html_lines)
-
-    # def fold_terminal_output(self) -> str:
-    #     terminal_output_ansi = self.get_terminal_output_ansi()
-    #     lines = terminal_output_ansi.splitlines()
-    #     return self.fold_tracebacks(lines)
-
 
 def main():
     results = Results()
@@ -512,7 +477,6 @@ def main():
     page.remove_tabs_without_content()
     html_header = page.create_header()
     html_tabs = page.create_tabs()
-    # html_action_button = """<button class="dropdown-item tablinks btn-rt" style="background-color: rgba(249, 123, 64, 0.95)" onclick="toggleDetails()">Actions</button>"""
     html_trailer = page.create_trailer()
     html_out = html_header + html_tabs + html_trailer
 

@@ -27,7 +27,7 @@ How does it work in practice? Easy. You just run your Pytest campaigns like you 
 Output sections and individual test results are expandable/collapsible, and test summary statistics are displayed for convenience. Both the TUI and the HTML page retain the original pytest ANSI-encoded color output, lending a familiar look and feel.
 
 ## Features
-- **New** Log message folding on the HTML page, configurable by log level!
+- **New** Log message folding on the HTML page, configurable by log level! See "Python Log Message Folding" section below.
 - Launch either or both of the [Textual](https://github.com/Textualize/textual) TUI or the HTML page using built in console scripts
 - ANSI text markup support - whatever the output on your console looks like is how things are going to show up in the TUI
 - Mouse and keyboard support (including scrolling)
@@ -54,7 +54,10 @@ Output sections and individual test results are expandable/collapsible, and test
 - Python >= 3.8 (but see "Known Limitations/Issues" below if you want to run 3.10+)
 
 ## Installation
-`pip install pytest-tui`
+
+For most users, simply issue the command `pip install pytest-tui` and you are good to go.
+
+For those users wishing to install via a requirements.txt file, they are located in the /requirements directory.
 
 ## Usage
 
@@ -88,9 +91,9 @@ The HTML output file is located at `<cwd>/ptt_files/html_report.html`. The HTML 
 
 ### Python Log Message Folding (HTML file)
 
-New in 1.9.1 is the "folding" feature, which will automatically roll up any output lines from the test run which are from the Python logger and which are at or below a configurable level. This lets you view verbose debug-level output when you need it, and fold it away, out of sight when you don't. There is no special configuration that has to be done to use this feature, other than enabling at run time with the `--tui-fold-level` option (see `pytest --help`).
+New in 1.9.1 is the "folding" feature, which will automatically roll up any output lines from the test run which are from the Python logger and which are at or below a configurable level. This lets you view verbose debug-level output when you need it, and fold it away, out of sight when you don't. There is no special configuration that has to be done to use this feature, other than enabling at run time with the `--tui-fold-level` option (see `pytest --help`). By default, this value is set to WARNING, in keeping with the default level of Python's logging module when creating a new logger.
 
-For example, specifying `--tui-fold-level=DEBUG` will produce a new section in the HTML report file called "Folded Output", which displays the test run's console output with all lines of log level DEBUG folded up. Each folded section can be individually toggled opened/closed by clicking the "Folded DEBUG" line. Or, you can toggle all "Folded DEBUG" sections by clicking the "Fold/Unfold Logs" button inside the "Fold Actions" menu at the top right of the HTML page.
+This new feature produces a section in the HTML report file called "Folded Output", which displays the test run's console output with all lines of the configured log level folded up. Each folded section can be individually toggled opened/closed by clicking the "Folded WARNING" line (or whatever level you have configured). You can toggle all folded sections by clicking the "Fold/Unfold Logs" button inside the "Fold Actions" menu at the top right of the HTML page, and they can be hidden entirely by double-clicking the "Show/Hide Fold Markers" button.
 
 
 ## Known Limitations / Issues

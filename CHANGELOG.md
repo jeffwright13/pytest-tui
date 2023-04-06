@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.2] 2023-04-36
+- Fixed issue 100 - an unfortunate bug where if the user does not specify the `--tui-fold-level` option, the HTML report will not render individual test cases correctly (they won't open/close when clicked). `--tui-fold-level ` is still supported but now if user does not specify it, the level defaults to WARNING, and displays the new Foldedd Output section anyway.
+
 ## [1.9.1] 2023-03-30
 - Re-implemented the folding feature for HTML report. This version doesn't rely on the user having to do anything with their tests other than smartly partition their log statements into the proper debug levels for their application (i.e. no clunky logfile shananigans). The folding feature automatically folds all log output that is less than a configurable level. This is controlled with new command line option '--tui-fold-level'. Also, there is a new 'Actions' button in the HTML which folds/unfolds all fold sections.
 - Fix sticky issue with topbar.
