@@ -53,3 +53,4 @@ RELEASE_INSTRUCTIONS
     $ cd ~/coding/dev-dir
     $ source venv/bin/activate
     $ python -m twine upload dist/*
+python -m twine upload dist/*k*A7c7JHvw
