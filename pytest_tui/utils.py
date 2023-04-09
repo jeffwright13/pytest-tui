@@ -265,6 +265,9 @@ class Results:
         self.tui_sections = self.tui_test_info["tui_sections"]
         self.tui_htmlfile = self.tui_test_info["tui_htmlfile"]
         self.tui_fold_level = self.tui_test_info["tui_fold_level"]
+        self.tui_fold_regex = self.tui_test_info["tui_fold_regex"]
+        if ";" in self.tui_fold_regex:
+            self.tui_fold_regex = self.tui_fold_regex.split(";")
 
         self.terminal_output = self._get_terminal_output()
 

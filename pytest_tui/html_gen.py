@@ -4,6 +4,7 @@ import re
 import webbrowser
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, List, Union
 
 import json2table
 from ansi2html import Ansi2HTMLConverter
@@ -285,7 +286,7 @@ class HtmlPage:
         tabs_links.extend(["""</span> </span>"""])
 
         # Dropdown for fold-section actions
-        if self.results.tui_fold_level:
+        if self.results.tui_fold_level or self.results.tui_fold_regex:
             tabs_links.extend(
                 [
                     """<span class="dropdown"> <button class="dropbtn" style="color: brown; background-color: #d9ead3">Fold Actions</button> <span class="dropdown-content">"""
@@ -312,7 +313,7 @@ class HtmlPage:
             ]
         )
 
-        if self.results.tui_fold_level:
+        if self.results.tui_fold_level or self.results.tui_fold_regex:
             tabs_links.extend(
                 [
                     f"""<span><button class="tablinks" style="background-color: {TAB_FOLDED_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button></span> </div>"""
@@ -354,6 +355,8 @@ class HtmlPage:
 
         if self.results.tui_fold_level:
             tab_folded_output = f"""<span id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output(self.results.tui_fold_level)}</pre> </span>"""
+        elif self.results.tui_fold_regex:
+            tab_folded_output = f"""<span id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output(self.results.tui_fold_regex)}</pre> </span>"""
         else:
             tab_folded_output = ""
 
@@ -432,6 +435,7 @@ class HtmlPage:
                 return value
 
     def fold_log_lines(self, lines: list, level: str) -> str:
+        # sourcery skip: hoist-similar-statement-from-if, hoist-statement-from-if, merge-duplicate-blocks, merge-else-if-into-elif, remove-pass-elif, remove-redundant-if
         """
         Search each line of console output and look for a log level indicator (DEBUG, INFO, WARNING, ERROR, CRITICAL).
         If a line contains a log level indicator, check if log level is <= the level passed to the function.
@@ -443,9 +447,9 @@ class HtmlPage:
         fold_started = False
         for l in lines:
             line = self.converter.convert(l, full=False)
-            this_line_log_level = self.get_line_level(l)
-            if this_line_log_level:
-                if this_line_log_level <= LOG_LEVEL_MAP[level]:
+            this_line_log_level_match = self.get_line_level(l)
+            if this_line_log_level_match:
+                if this_line_log_level_match <= LOG_LEVEL_MAP[level]:
                     if not fold_started:
                         html_str += (
                             f"<details><summary style='nobr'>Folded {level}</summary>"
@@ -465,10 +469,84 @@ class HtmlPage:
                     html_str += line + "\n"
         return html_str
 
-    def fold_terminal_output(self, level: str) -> str:
+    def fold_regex_lines(self, lines: list, regex: str) -> str:
+        """
+        Search each line of console output and look for a regex match.
+        If a line contains a regex match, then the line is folded.
+        Consecutive lines that match the regex are folded together.
+        """
+        html_lines = []
+        html_str = ""
+        fold_started = False
+        for l in lines:
+            line = self.converter.convert(l, full=False)
+            if re.search(regex, l):
+                if not fold_started:
+                    html_str += (
+                        f"<details><summary style='nobr'>Folded RegEx {regex}</summary>"
+                    )
+                    fold_started = True
+                html_str += line + "\n"
+            else:
+                if fold_started:
+                    html_str += "</details>"
+                    fold_started = False
+                html_str += line + "\n"
+        return html_str
+
+    def fold_regex_lines_2(self, lines: list, regex: str) -> str:
+        """
+        Search each line of console output and look for a regex match.
+        If a line contains a regex match, then the line is folded.
+        Consecutive lines that match the regex are folded together.
+        """
+        """
+        fold_started = False
+        for line in input_file:
+            if "starter" in line:
+                summary_text = line.replace("starter", "<summary>starter</summary>")
+                output_file.write(summary_text)
+                fold_started = True
+                output_file.write("<details>\n")
+            elif "ending" in line:
+                fold_started = False
+                output_file.write(line.replace("ending", "</details>\n"))
+            elif fold_started:
+                output_file.write(line)
+            else:
+                output_file.write(line)
+        """
+        html_lines = []
+        html_str = ""
+        fold_started = False
+        for l in lines:
+            line = self.converter.convert(l, full=False)
+            if re.search(regex[0], line):
+                if not fold_started:
+                    html_str += (
+                        f"<details><summary style='nobr'>Folded RegEx: '{regex[0]}' ..."
+                        f" '{regex[1]}'</summary>"
+                    )
+                    fold_started = True
+                html_str += line + "\n"
+            elif re.search(regex[1], line):
+                fold_started = False
+                html_str += line + "</details>"
+            elif fold_started:
+                html_str += line + "\n"
+            else:
+                html_str += line + "\n"
+        return html_str
+
+    def fold_terminal_output(self, searcher: str) -> Union[str, None]:
         terminal_output_ansi = self.get_terminal_output_ansi()
         lines = terminal_output_ansi.splitlines()
-        return self.fold_log_lines(lines, level)
+        if self.results.tui_fold_level:
+            return self.fold_log_lines(lines, searcher)
+        elif self.results.tui_fold_regex:
+            return self.fold_regex_lines_2(lines, searcher)
+        else:
+            return None
 
 
 def main():
