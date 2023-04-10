@@ -75,8 +75,8 @@ def pytest_addoption(parser) -> None:
     group.addoption(
         "--tui-fold-regex",
         help=(
-            "Enable auto-folding in the HTML report of console output lines that match"
-            " a given regex pattern."
+            "Enable auto-folding in the HTML report for console output lines that"
+            " reside between the two lines that match the two provided regex patterns."
         ),
     )
 
