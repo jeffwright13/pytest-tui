@@ -15,10 +15,6 @@ from pytest_tui.utils import (
     LOG_LEVEL_MAP,
     PYTEST_TUI_FILES_DIR,
     TERMINAL_OUTPUT_FILE,
-    TUI_FOLD_CONTENT_BEGIN,
-    TUI_FOLD_CONTENT_END,
-    TUI_FOLD_TITLE_BEGIN,
-    TUI_FOLD_TITLE_END,
     Results,
     test_session_starts_results_grabber,
 )
@@ -480,47 +476,6 @@ class HtmlPage:
         fold_started = False
         for l in lines:
             line = self.converter.convert(l, full=False)
-            if re.search(regex, l):
-                if not fold_started:
-                    html_str += (
-                        f"<details><summary style='nobr'>Folded RegEx {regex}</summary>"
-                    )
-                    fold_started = True
-                html_str += line + "\n"
-            else:
-                if fold_started:
-                    html_str += "</details>"
-                    fold_started = False
-                html_str += line + "\n"
-        return html_str
-
-    def fold_regex_lines_2(self, lines: list, regex: str) -> str:
-        """
-        Search each line of console output and look for a regex match.
-        If a line contains a regex match, then the line is folded.
-        Consecutive lines that match the regex are folded together.
-        """
-        """
-        fold_started = False
-        for line in input_file:
-            if "starter" in line:
-                summary_text = line.replace("starter", "<summary>starter</summary>")
-                output_file.write(summary_text)
-                fold_started = True
-                output_file.write("<details>\n")
-            elif "ending" in line:
-                fold_started = False
-                output_file.write(line.replace("ending", "</details>\n"))
-            elif fold_started:
-                output_file.write(line)
-            else:
-                output_file.write(line)
-        """
-        html_lines = []
-        html_str = ""
-        fold_started = False
-        for l in lines:
-            line = self.converter.convert(l, full=False)
             if re.search(regex[0], line):
                 if not fold_started:
                     html_str += (
@@ -531,7 +486,7 @@ class HtmlPage:
                 html_str += line + "\n"
             elif re.search(regex[1], line):
                 fold_started = False
-                html_str += line + "</details>"
+                html_str += f"{line}</details>"
             elif fold_started:
                 html_str += line + "\n"
             else:
@@ -544,7 +499,7 @@ class HtmlPage:
         if self.results.tui_fold_level:
             return self.fold_log_lines(lines, searcher)
         elif self.results.tui_fold_regex:
-            return self.fold_regex_lines_2(lines, searcher)
+            return self.fold_regex_lines(lines, searcher)
         else:
             return None
 

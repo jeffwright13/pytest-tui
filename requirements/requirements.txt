@@ -27,7 +27,7 @@ pytest==7.2.2
     # via pytest-metadata
 pytest-metadata==2.0.4
     # via -r requirements/requirements.in
-rich==13.3.0
+rich==12.6.0
     # via textual
 single-source==0.3.0
     # via -r requirements/requirements.in
