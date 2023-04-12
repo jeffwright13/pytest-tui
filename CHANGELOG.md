@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.10.0] 2023-04-11
+## [1.10.0] 2023-04-12
 - Added new folding mode `--tui-fold-regex`. This mode allows specifying reg-ex's marking the beginning and end of a section that the user wants to fold. See README for details.
 - Bumped `rich` library version to 12.6.0 to allow for use of SeleniumBase library during testing.
 - Fixed issue 100, where if the user does not specify the `--tui-fold-level` option, the HTML report will not render individual test cases correctly (they won't open/close when clicked). `--tui-fold-level ` is still supported but now if user does not specify it, the level defaults to WARNING, and displays the new Folded Output section anyway.
