@@ -72,6 +72,13 @@ def pytest_addoption(parser) -> None:
             " specified level will be folded."
         ),
     )
+    group.addoption(
+        "--tui-fold-regex",
+        help=(
+            "Enable auto-folding in the HTML report for console output lines that"
+            " reside between the two lines that match the two provided regex patterns."
+        ),
+    )
 
 
 def add_ansi_to_report(config: Config, report: TestReport) -> None:
@@ -159,19 +166,20 @@ def pytest_cmdline_main(config: Config) -> None:
         config._tui_htmlfile = config.option.tui_htmlfile
 
     # Set default fold level, if specified on the command line
-    if (
-        hasattr(config.option, "tui_fold_level")
-        and not config.option.tui_fold_level
-        or not hasattr(config.option, "tui_fold_level")
-    ):
-        config._tui_fold_level = "WARNING"
-    else:
+    if config.option.tui_fold_level and not config.option.tui_fold_regex:
+        config._tui_fold_regex = None
         config._tui_fold_level = (
             config.option.tui_fold_level
             if config.option.tui_fold_level.lower()
             in ["debug", "info", "warning", "error", "critical"]
             else "WARNING"
         )
+    elif not config.option.tui_fold_level and config.option.tui_fold_regex:
+        config._tui_fold_level = None
+        config._tui_fold_regex = config.option.tui_fold_regex or ""
+    else:
+        config._tui_fold_level = None
+        config._tui_fold_regex = None
 
 
 def pytest_report_teststatus(report: TestReport, config: Config) -> None:
@@ -413,6 +421,7 @@ def pytest_unconfigure(config: Config) -> None:
                 "tui_sections": config._tui_sections,
                 "tui_htmlfile": config._tui_htmlfile,
                 "tui_fold_level": config._tui_fold_level,
+                "tui_fold_regex": config._tui_fold_regex,
             },
             file,
         )

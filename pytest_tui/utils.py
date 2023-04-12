@@ -25,28 +25,15 @@ LOG_LEVEL_MAP = {
     "CRITICAL": 50,
 }
 
-
 # ZWNJ = "\u200C"
 # ZWS = "\u200B"
 # BOM = "\uFEFF"
 # ZWJ = "\u200D"
 
-
-TUI_FOLD_CONTENT_BEGIN = r"​​​"
-TUI_FOLD_TITLE_BEGIN = r"‌‌‌"
-TUI_FOLD_CONTENT_END = r"‍‍‍"
-TUI_FOLD_TITLE_END = r"   "
-
-# TUI_FOLD_TITLE_BEGIN = "~~tui_fold_title_begin~~"
-# TUI_FOLD_TITLE_END = "~~tui_fold_title_end~~"
-# TUI_FOLD_CONTENT_BEGIN = "~~tui_fold_content_begin~~"
-# TUI_FOLD_CONTENT_END = "~~tui_fold_content_end~~"
-
-# tui_fold_matcher = re.compile(r"^~~tui_")
-# TUI_FOLD_TITLE_BEGIN = "~~tui_fold_title_begin~~"
-# TUI_FOLD_TITLE_END = "~~tui_fold_title_end~~"
-# TUI_FOLD_CONTENT_BEGIN = "~~tui_fold_content_begin~~"
-# TUI_FOLD_CONTENT_END = "~~tui_fold_content_end~~"
+# 3 consecutive ZWS
+TUI_FOLD_TITLE_BEGIN = r"""​​​"""
+# 1 BOM followed by 1 ZWS
+TUI_FOLD_TITLE_END = r"""￼​"""
 
 # regex matching patterns for Pytest sections
 # live_log_sessionstart_matcher = re.compile(r"^==.*\s live log sessionstart\s==+")
@@ -265,6 +252,16 @@ class Results:
         self.tui_sections = self.tui_test_info["tui_sections"]
         self.tui_htmlfile = self.tui_test_info["tui_htmlfile"]
         self.tui_fold_level = self.tui_test_info["tui_fold_level"]
+        self.tui_fold_regex = self.tui_test_info["tui_fold_regex"]
+
+        if hasattr(self, "tui_fold_regex"):
+            if self.tui_fold_regex:
+                if ";" in self.tui_fold_regex:
+                    self.tui_fold_regex = self.tui_fold_regex.split(";")
+                else:
+                    raise ValueError(
+                        "tui_fold_regex must be a list of strings separated by ';'."
+                    )
 
         self.terminal_output = self._get_terminal_output()
 
