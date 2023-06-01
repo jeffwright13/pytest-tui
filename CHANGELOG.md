@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] 2023-06-01
+- Modify --tui-fold-regex feture to allow for multiple regex's to be specified in a file, rather than on the command line. This allows for more complex folding scenarios.
+- Remove --tui-fold-level option, now replaced by modified --tui-fold-regex implementation (previous bullet point).
+- Close Issue 100 (obviated by previous change in fold behavior).
+
 ## [1.10.0] 2023-04-12
 - Added new folding mode `--tui-fold-regex`. This mode allows specifying reg-ex's marking the beginning and end of a section that the user wants to fold. See README for details.
 - Bumped `rich` library version to 12.6.0 to allow for use of SeleniumBase library during testing.
