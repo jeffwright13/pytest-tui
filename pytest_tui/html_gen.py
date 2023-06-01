@@ -1,23 +1,27 @@
 # import configparser
 import json
+import logging
 import re
 import webbrowser
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, List, Union
+from typing import Dict, List, Tuple, Union
 
 import json2table
 from ansi2html import Ansi2HTMLConverter
+from strip_ansi import strip_ansi
 
 from pytest_tui import __version__
 from pytest_tui.utils import (
     HTML_OUTPUT_FILE,
-    LOG_LEVEL_MAP,
     PYTEST_TUI_FILES_DIR,
     TERMINAL_OUTPUT_FILE,
+    TUI_REGEXES,
     Results,
     test_session_starts_results_grabber,
 )
+
+logger = logging.getLogger(__name__)
 
 # Next 3 lines are saved from earlier CLI-Config work
 # CLI CONFIG SAVED WORK
@@ -281,8 +285,8 @@ class HtmlPage:
         )
         tabs_links.extend(["""</span> </span>"""])
 
-        # Dropdown for fold-section actions
-        if self.results.tui_fold_level or self.results.tui_fold_regex:
+        # "Fold Actions": dropdown for fold-section actions
+        if self.results.tui_regexfile:
             tabs_links.extend(
                 [
                     """<span class="dropdown"> <button class="dropbtn" style="color: brown; background-color: #d9ead3">Fold Actions</button> <span class="dropdown-content">"""
@@ -309,7 +313,7 @@ class HtmlPage:
             ]
         )
 
-        if self.results.tui_fold_level or self.results.tui_fold_regex:
+        if self.results.tui_regexfile:
             tabs_links.extend(
                 [
                     f"""<span><button class="tablinks" style="background-color: {TAB_FOLDED_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button></span> </div>"""
@@ -349,10 +353,8 @@ class HtmlPage:
 
         tab_full_output = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <pre>{self.get_terminal_output()}</pre> </div>"""
 
-        if self.results.tui_fold_level:
-            tab_folded_output = f"""<span id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output(self.results.tui_fold_level)}</pre> </span>"""
-        elif self.results.tui_fold_regex:
-            tab_folded_output = f"""<span id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output(self.results.tui_fold_regex)}</pre> </span>"""
+        if self.results.tui_regexfile:
+            tab_folded_output = f"""<span id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output_by_regex()}</pre> </span>"""
         else:
             tab_folded_output = ""
 
@@ -424,82 +426,103 @@ class HtmlPage:
             tout = str(f.read(), "utf-8")
         return tout
 
-    def get_line_level(self, line: str) -> str:
-        """Is this line a log entry (DEBUG, INFO, WARNING, ERROR, CRITICAL)?"""
-        for level, value in LOG_LEVEL_MAP.items():
-            if level in line:
-                return value
+    # def python_log_level_mapping(self) -> Tuple[Dict]:
+    #     """Get a mapping of python log levels to their string representation.
+    #     Also return the inverse mapping."""
+    #     try:
+    #         levels = [a for a in logging.__all__ if a.upper() == a]
+    #         mapping = {a: getattr(logging, a) for a in levels}
+    #         mapping.pop("BASIC_FORMAT") # unused
+    #         mapping.pop("WARN") # deprecated
+    #         mapping.pop("FATAL") # we don't need no stkin' java
+    #         return mapping, {v: k for k, v in mapping.items()}
+    #     except Exception as e:
+    #         logger.error(f"Error getting python log level mapping: {e}")
+    #         return {}, {}
 
-    def fold_log_lines(self, lines: list, level: str) -> str:
-        # sourcery skip: hoist-similar-statement-from-if, hoist-statement-from-if, merge-duplicate-blocks, merge-else-if-into-elif, remove-pass-elif, remove-redundant-if
+    # def get_line_level(self, line: str) -> str:
+    #     """Is this line a log entry (DEBUG, INFO, WARNING, ERROR, CRITICAL)?"""
+    #     mapping, rev_mapping = self.python_log_level_mapping()
+    #     if mapping:
+    #         for level, value in mapping.items():
+    #             if level in line:
+    #                 return value
+    #     else:
+    #         return ""
+
+    # def fold_regex_lines(self, lines: List[str]) -> str:
+    #     """
+    #     Refactored code
+    #     Search each line of console output and look for a regex match,
+    #     using the regex patterns defined in TUI_REGEXES (obtained from file).
+    #     If a line contains a match for any of the regex patterrns, the line
+    #     will be folded. Consecutive lines that match a regex are grouped
+    #     together wihin the same fold.
+    #     """
+    #     converter = Ansi2HTMLConverter()
+    #     html_str = ""
+    #     fold_started = False
+
+    #     for line in lines:
+    #         line_stripped = strip_ansi(line)
+    #         line_converted = converter.convert(line, full=False)
+
+    #         if any(re.search(regex, line_stripped) for regex in TUI_REGEXES):
+    #             if not fold_started:
+    #                 fold_started = True
+    #                 html_str += (
+    #                     f"<details><summary style='nobr'>Folded RegEx Match</summary>"
+    #                 )
+    #             elif fold_started:
+    #                 fold_started = False
+    #                 html_str += "</details>"
+    #             html_str += line_converted + "\n"
+
+    #     return html_str
+
+    def fold_regex_lines(self, lines: List[str]) -> str:
         """
-        Search each line of console output and look for a log level indicator (DEBUG, INFO, WARNING, ERROR, CRITICAL).
-        If a line contains a log level indicator, check if log level is <= the level passed to the function.
-        If the log level is <= the level passed to the function, then the line is folded.
-        If the log level is > than the level passed to the function, then the line is not folded.
+        Refactored code
+        Search each line of console output and look for a regex match,
+        using the regex patterns defined in TUI_REGEXES (obtained from file).
+        If a line contains a match for any of the regex patterrns, the line
+        will be folded. Consecutive lines that match a regex are grouped
+        together wihin the same fold.
         """
-        html_lines = []
+        converter = Ansi2HTMLConverter()
         html_str = ""
         fold_started = False
-        for l in lines:
-            line = self.converter.convert(l, full=False)
-            this_line_log_level_match = self.get_line_level(l)
-            if this_line_log_level_match:
-                if this_line_log_level_match <= LOG_LEVEL_MAP[level]:
-                    if not fold_started:
-                        html_str += (
-                            f"<details><summary style='nobr'>Folded {level}</summary>"
-                        )
-                        fold_started = True
-                else:
-                    if fold_started:
-                        html_str += "</details>"
-                        fold_started = False
-                html_str += line + "\n"
-            else:
-                if fold_started:
-                    html_str += "</details>"
-                    fold_started = False
-                    html_str += line + "\n"
-                else:
-                    html_str += line + "\n"
-        return html_str
+        regex = "^DEBUG"
 
-    def fold_regex_lines(self, lines: list, regex: str) -> str:
-        """
-        Search each line of console output and look for a regex match.
-        If a line contains a regex match, then the line is folded.
-        Consecutive lines that match the regex are folded together.
-        """
-        html_lines = []
-        html_str = ""
-        fold_started = False
-        for l in lines:
-            line = self.converter.convert(l, full=False)
-            if re.search(regex[0], line):
+        for line in lines:
+            line_stripped = strip_ansi(line)
+            line_converted = converter.convert(line, full=False)
+
+            match = re.search(regex, line_stripped)
+            if match:
                 if not fold_started:
-                    html_str += (
-                        f"<details><summary style='nobr'>Folded RegEx: '{regex[0]}' ..."
-                        f" '{regex[1]}'</summary>"
-                    )
                     fold_started = True
-                html_str += line + "\n"
-            elif re.search(regex[1], line):
-                fold_started = False
-                html_str += f"{line}</details>"
+                    html_str += (
+                        "<details><summary style='nobr'>Folded RegEx:"
+                        f" '{regex}'</summary>"
+                    )
+                html_str += line_converted + "\n"
+
             elif fold_started:
-                html_str += line + "\n"
+                fold_started = False
+                html_str += "</details>"
+                html_str += line_converted + "\n"
+
             else:
-                html_str += line + "\n"
+                html_str += line_converted + "\n"
+
         return html_str
 
-    def fold_terminal_output(self, searcher: str) -> Union[str, None]:
+    def fold_terminal_output_by_regex(self) -> Union[str, None]:
         terminal_output_ansi = self.get_terminal_output_ansi()
         lines = terminal_output_ansi.splitlines()
-        if self.results.tui_fold_level:
-            return self.fold_log_lines(lines, searcher)
-        elif self.results.tui_fold_regex:
-            return self.fold_regex_lines(lines, searcher)
+        if self.results.tui_regexfile:
+            return self.fold_regex_lines(lines)
         else:
             return None
 

@@ -7,6 +7,9 @@ RELEASE_INSTRUCTIONS
     $ pyenv local 3.9.9
     $ python -m venv venv
     $ source venv/bin/activate
+    $ pip install pip-tools
+    $ pip-compile --no-emit-index-url requirements/requirements.in && pip-compile --no-emit-index-url requirements/requirements-dev.in
+    $ pip install -r requirements/requirements.txt
     $ pip install -e .
     $ pytest --tui
     $ tui
@@ -53,4 +56,3 @@ RELEASE_INSTRUCTIONS
     $ cd ~/coding/dev-dir
     $ source venv/bin/activate
     $ python -m twine upload dist/*
-python -m twine upload dist/*k*A7c7JHvw

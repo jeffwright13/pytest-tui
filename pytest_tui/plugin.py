@@ -59,24 +59,19 @@ def pytest_addoption(parser) -> None:
     )
     group.addoption(
         "--tui-htmlfile",
+        "--thf",
         help=(
             "Specify a non-default name for the HTML report file. Default is"
             " 'html-report.html,' and will be placed in the ptt_files/ folder."
         ),
     )
     group.addoption(
-        "--tui-fold-level",
+        "--tui-regexfile",
+        "--trf",
         help=(
-            "Enable auto-folding of log messages in the HTML report, and specify the"
-            " level at which folding occurs. When enabled, log messages at or below the"
-            " specified level will be folded."
-        ),
-    )
-    group.addoption(
-        "--tui-fold-regex",
-        help=(
-            "Enable auto-folding in the HTML report for console output lines that"
-            " reside between the two lines that match the two provided regex patterns."
+            "Enable folding in the HTML report for console output lines that match any"
+            " regex given in the specified TUI_REGEXFILE (default: regexes.txt)."
+            " File format: one or more Python regular expressions, one per line."
         ),
     )
 
@@ -120,7 +115,8 @@ def pytest_cmdline_main(config: Config) -> None:
         if hasattr(config.option, "reruns"):
             config.option.reportchars = "AR"
 
-    # Initialize TUI-specific attributes on the config object:
+    # Using global Config object to store TUI-specific attributes.
+    # TODO: port to Stash.
     config._tui_session_start_time = (
         datetime.now(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
     )
@@ -155,31 +151,15 @@ def pytest_cmdline_main(config: Config) -> None:
             lastline=TuiSection(name="lastline", content=""),
         )
 
-    # Override default HTML report file name, if specified on the command line
-    if (
-        hasattr(config.option, "tui_htmlfile")
-        and not config.option.tui_htmlfile
-        or not hasattr(config.option, "tui_htmlfile")
-    ):
+    # Command line options for HTML output file and regex file
+    if not hasattr(config.option, "tui_htmlfile"):
+        config._tui_htmlfile = HTML_OUTPUT_FILE
+    elif hasattr(config.option, "tui_htmlfile") and not config.option.tui_htmlfile:
         config._tui_htmlfile = HTML_OUTPUT_FILE
     else:
         config._tui_htmlfile = config.option.tui_htmlfile
 
-    # Set default fold level, if specified on the command line
-    if config.option.tui_fold_level and not config.option.tui_fold_regex:
-        config._tui_fold_regex = None
-        config._tui_fold_level = (
-            config.option.tui_fold_level
-            if config.option.tui_fold_level.lower()
-            in ["debug", "info", "warning", "error", "critical"]
-            else "WARNING"
-        )
-    elif not config.option.tui_fold_level and config.option.tui_fold_regex:
-        config._tui_fold_level = None
-        config._tui_fold_regex = config.option.tui_fold_regex or ""
-    else:
-        config._tui_fold_level = None
-        config._tui_fold_regex = None
+    config._tui_regexfile = config.option.tui_regexfile or None
 
 
 def pytest_report_teststatus(report: TestReport, config: Config) -> None:
@@ -374,7 +354,6 @@ def pytest_unconfigure(config: Config) -> None:
         return
 
     config._tui_rerun_test_groups = populate_rerun_groups(config)
-
     config._tui_session_end_time = (
         datetime.now(timezone.utc).replace(microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
     )
@@ -392,7 +371,7 @@ def pytest_unconfigure(config: Config) -> None:
     # Assume any test that was not categorized earlier with an outcome is a Skipped test.
     # JUSTIFICATION:
     # Pytest displays Skipped tests in a different format than all other test categories in the
-    # "=== short test summary info ===" section, truncating their fqtns and appending a line number
+    # "== short test summary info ==" section, truncating their fqtns and appending a line number
     # instead of specifying their test names. This plugin identifies all other test categories
     # (passed, failed, errors, etc.) and populates their fqtns and outcomes with the appropriate
     # values, leaving open one other possibility (Skipped).
@@ -400,7 +379,9 @@ def pytest_unconfigure(config: Config) -> None:
         if tui_test_result.outcome == "":
             tui_test_result.outcome = "SKIPPED"
 
-    config.pluginmanager.getplugin("terminalreporter")  # <= ???
+    config.pluginmanager.getplugin(
+        "terminalreporter"
+    )  # <= ???  does not appear to be used
 
     # Rewind the temp file containing all the raw ANSI lines sent to the terminal;
     # read its contents;  then close it. Then, write info to file.
@@ -420,8 +401,7 @@ def pytest_unconfigure(config: Config) -> None:
                 "tui_rerun_test_groups": config._tui_rerun_test_groups,
                 "tui_sections": config._tui_sections,
                 "tui_htmlfile": config._tui_htmlfile,
-                "tui_fold_level": config._tui_fold_level,
-                "tui_fold_regex": config._tui_fold_regex,
+                "tui_regexfile": config._tui_regexfile,
             },
             file,
         )

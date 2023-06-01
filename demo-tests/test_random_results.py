@@ -22,7 +22,7 @@ logger = logging.getLogger()
 
 
 @pytest.fixture
-def random_result(faker):
+def random_result_loglevel(faker):
     @dataclass
     class Result:
         outcome: str
@@ -64,287 +64,86 @@ def random_result(faker):
         )
 
 
-def test_0(random_result, faker):
-    if random_result.outcome == "passed":
-        logger.info(random_result.log_msg)
-    elif random_result.outcome == "failed":
-        logger.error(random_result.log_msg)
-        assert False
-    elif random_result.outcome == "skipped":
-        logger.info(random_result.log_msg)
-        pytest.skip(random_result.log_msg)
-    elif random_result.outcome == "xfailed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "xpassed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "warning":
-        logger.warning(random_result.log_msg)
-        warnings.warn(random_result.log_msg)
-    elif random_result.outcome == "error":
-        logger.error(random_result.log_msg)
-        raise RuntimeError(random_result.log_msg)
-    elif random_result.outcome == "rerun":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
+def random_result_regex(
+    pattern: str, seed: int = 0, num: int = 10, rarity: int = 100
+) -> str:
+    fake = faker.Faker()
+    ret = ""
+    random.seed(seed)
+    for _ in range(10):
+        text = random.choice(
+            [f"{fake.sentence()}", f"{fake.paragraph()}", f"{fake.text()}"]
+        )
+        for j, word in enumerate(text.split(" ")):
+            if j % rarity == random.randint(1, rarity):
+                ret += f" { pattern }{word} "
+            else:
+                ret += f" {word}"
+    return ret
 
 
-def test_1(random_result, faker):
-    if random_result.outcome == "passed":
-        logger.info(random_result.log_msg)
-    elif random_result.outcome == "failed":
-        logger.error(random_result.log_msg)
-        assert False
-    elif random_result.outcome == "skipped":
-        logger.info(random_result.log_msg)
-        pytest.skip(random_result.log_msg)
-    elif random_result.outcome == "xfailed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "xpassed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "warning":
-        logger.warning(random_result.log_msg)
-        warnings.warn(random_result.log_msg)
-    elif random_result.outcome == "error":
-        logger.error(random_result.log_msg)
-        raise RuntimeError(random_result.log_msg)
-    elif random_result.outcome == "rerun":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
+def test_0():
+    logger = logging.get
+    logger.info(random_result_regex("  *-> ", 13, 10, 30))
+    assert True
 
 
-def test_2(random_result, faker):
-    if random_result.outcome == "passed":
-        logger.info(random_result.log_msg)
-    elif random_result.outcome == "failed":
-        logger.error(random_result.log_msg)
-        assert False
-    elif random_result.outcome == "skipped":
-        logger.info(random_result.log_msg)
-        pytest.skip(random_result.log_msg)
-    elif random_result.outcome == "xfailed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "xpassed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "warning":
-        logger.warning(random_result.log_msg)
-        warnings.warn(random_result.log_msg)
-    elif random_result.outcome == "error":
-        logger.error(random_result.log_msg)
-        raise RuntimeError(random_result.log_msg)
-    elif random_result.outcome == "rerun":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
+def test_1():
+    logger = logging.get
+    logger.info(random_result_regex("  *-> ", 13, 10, 30))
+    assert True
 
 
-def test_3(random_result, faker):
-    if random_result.outcome == "passed":
-        logger.info(random_result.log_msg)
-    elif random_result.outcome == "failed":
-        logger.error(random_result.log_msg)
-        assert False
-    elif random_result.outcome == "skipped":
-        logger.info(random_result.log_msg)
-        pytest.skip(random_result.log_msg)
-    elif random_result.outcome == "xfailed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "xpassed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "warning":
-        logger.warning(random_result.log_msg)
-        warnings.warn(random_result.log_msg)
-    elif random_result.outcome == "error":
-        logger.error(random_result.log_msg)
-        raise RuntimeError(random_result.log_msg)
-    elif random_result.outcome == "rerun":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
+# def random_loglevel_test_0(random_result_loglevel, faker):
+#     if random_result.outcome == "passed":
+#         logger.info(random_result.log_msg)
+#     elif random_result.outcome == "failed":
+#         logger.error(random_result.log_msg)
+#         assert False
+#     elif random_result.outcome == "skipped":
+#         logger.info(random_result.log_msg)
+#         pytest.skip(random_result.log_msg)
+#     elif random_result.outcome == "xfailed":
+#         logger.info(random_result.log_msg)
+#         pytest.xfail(random_result.log_msg)
+#     elif random_result.outcome == "xpassed":
+#         logger.info(random_result.log_msg)
+#         pytest.xfail(random_result.log_msg)
+#     elif random_result.outcome == "warning":
+#         logger.warning(random_result.log_msg)
+#         warnings.warn(random_result.log_msg)
+#     elif random_result.outcome == "error":
+#         logger.error(random_result.log_msg)
+#         raise RuntimeError(random_result.log_msg)
+#     elif random_result.outcome == "rerun":
+#         logger.info(random_result.log_msg)
+#         pytest.xfail(random_result.log_msg)
 
 
-def test_4(random_result, faker):
-    if random_result.outcome == "passed":
-        logger.info(random_result.log_msg)
-    elif random_result.outcome == "failed":
-        logger.error(random_result.log_msg)
-        assert False
-    elif random_result.outcome == "skipped":
-        logger.info(random_result.log_msg)
-        pytest.skip(random_result.log_msg)
-    elif random_result.outcome == "xfailed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "xpassed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "warning":
-        logger.warning(random_result.log_msg)
-        warnings.warn(random_result.log_msg)
-    elif random_result.outcome == "error":
-        logger.error(random_result.log_msg)
-        raise RuntimeError(random_result.log_msg)
-    elif random_result.outcome == "rerun":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
+# def random_regex_test_0():
+#     return random_result_regex(
 
-
-def test_5(random_result, faker):
-    if random_result.outcome == "passed":
-        logger.info(random_result.log_msg)
-    elif random_result.outcome == "failed":
-        logger.error(random_result.log_msg)
-        assert False
-    elif random_result.outcome == "skipped":
-        logger.info(random_result.log_msg)
-        pytest.skip(random_result.log_msg)
-    elif random_result.outcome == "xfailed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "xpassed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "warning":
-        logger.warning(random_result.log_msg)
-        warnings.warn(random_result.log_msg)
-    elif random_result.outcome == "error":
-        logger.error(random_result.log_msg)
-        raise RuntimeError(random_result.log_msg)
-    elif random_result.outcome == "rerun":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-
-
-def test_6(random_result, faker):
-    if random_result.outcome == "passed":
-        logger.info(random_result.log_msg)
-    elif random_result.outcome == "failed":
-        logger.error(random_result.log_msg)
-        assert False
-    elif random_result.outcome == "skipped":
-        logger.info(random_result.log_msg)
-        pytest.skip(random_result.log_msg)
-    elif random_result.outcome == "xfailed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "xpassed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "warning":
-        logger.warning(random_result.log_msg)
-        warnings.warn(random_result.log_msg)
-    elif random_result.outcome == "error":
-        logger.error(random_result.log_msg)
-        raise RuntimeError(random_result.log_msg)
-    elif random_result.outcome == "rerun":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-
-
-def test_7(random_result, faker):
-    if random_result.outcome == "passed":
-        logger.info(random_result.log_msg)
-    elif random_result.outcome == "failed":
-        logger.error(random_result.log_msg)
-        assert False
-    elif random_result.outcome == "skipped":
-        logger.info(random_result.log_msg)
-        pytest.skip(random_result.log_msg)
-    elif random_result.outcome == "xfailed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "xpassed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "warning":
-        logger.warning(random_result.log_msg)
-        warnings.warn(random_result.log_msg)
-    elif random_result.outcome == "error":
-        logger.error(random_result.log_msg)
-        raise RuntimeError(random_result.log_msg)
-    elif random_result.outcome == "rerun":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-
-
-def test_8(random_result, faker):
-    if random_result.outcome == "passed":
-        logger.info(random_result.log_msg)
-    elif random_result.outcome == "failed":
-        logger.error(random_result.log_msg)
-        assert False
-    elif random_result.outcome == "skipped":
-        logger.info(random_result.log_msg)
-        pytest.skip(random_result.log_msg)
-    elif random_result.outcome == "xfailed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "xpassed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "warning":
-        logger.warning(random_result.log_msg)
-        warnings.warn(random_result.log_msg)
-    elif random_result.outcome == "error":
-        logger.error(random_result.log_msg)
-        raise RuntimeError(random_result.log_msg)
-    elif random_result.outcome == "rerun":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-
-
-def test_9(random_result, faker):
-    if random_result.outcome == "passed":
-        logger.info(random_result.log_msg)
-    elif random_result.outcome == "failed":
-        logger.error(random_result.log_msg)
-        assert False
-    elif random_result.outcome == "skipped":
-        logger.info(random_result.log_msg)
-        pytest.skip(random_result.log_msg)
-    elif random_result.outcome == "xfailed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "xpassed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "warning":
-        logger.warning(random_result.log_msg)
-        warnings.warn(random_result.log_msg)
-    elif random_result.outcome == "error":
-        logger.error(random_result.log_msg)
-        raise RuntimeError(random_result.log_msg)
-    elif random_result.outcome == "rerun":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-
-
-def test_10(random_result, faker):
-    if random_result.outcome == "passed":
-        logger.info(random_result.log_msg)
-    elif random_result.outcome == "failed":
-        logger.error(random_result.log_msg)
-        assert False
-    elif random_result.outcome == "skipped":
-        logger.info(random_result.log_msg)
-        pytest.skip(random_result.log_msg)
-    elif random_result.outcome == "xfailed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "xpassed":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
-    elif random_result.outcome == "warning":
-        logger.warning(random_result.log_msg)
-        warnings.warn(random_result.log_msg)
-    elif random_result.outcome == "error":
-        logger.error(random_result.log_msg)
-        raise RuntimeError(random_result.log_msg)
-    elif random_result.outcome == "rerun":
-        logger.info(random_result.log_msg)
-        pytest.xfail(random_result.log_msg)
+# def test_2(random_result_regex, faker):
+#     if random_result.outcome == "passed":
+#         logger.info(random_result.log_msg)
+#     elif random_result.outcome == "failed":
+#         logger.error(random_result.log_msg)
+#         assert False
+#     elif random_result.outcome == "skipped":
+#         logger.info(random_result.log_msg)
+#         pytest.skip(random_result.log_msg)
+#     elif random_result.outcome == "xfailed":
+#         logger.info(random_result.log_msg)
+#         pytest.xfail(random_result.log_msg)
+#     elif random_result.outcome == "xpassed":
+#         logger.info(random_result.log_msg)
+#         pytest.xfail(random_result.log_msg)
+#     elif random_result.outcome == "warning":
+#         logger.warning(random_result.log_msg)
+#         warnings.warn(random_result.log_msg)
+#     elif random_result.outcome == "error":
+#         logger.error(random_result.log_msg)
+#         raise RuntimeError(random_result.log_msg)
+#     elif random_result.outcome == "rerun":
+#         logger.info(random_result.log_msg)
+#         pytest.xfail(random_result.log_msg)

@@ -1,3 +1,4 @@
+import ast
 import pickle
 import re
 from dataclasses import dataclass, field
@@ -16,24 +17,6 @@ TUI_RESULTS_FILE = PYTEST_TUI_FILES_DIR / "tui_results.pickle"
 TUI_RESULT_OBJECTS_FILE = PYTEST_TUI_FILES_DIR / "tui_result_objects.pickle"
 TUI_SECTIONS_FILE = PYTEST_TUI_FILES_DIR / "tui_sections.pickle"
 TERMINAL_OUTPUT_FILE = PYTEST_TUI_FILES_DIR / "terminal_output.ansi"
-
-LOG_LEVEL_MAP = {
-    "DEBUG": 10,
-    "INFO": 20,
-    "WARNING": 30,
-    "ERROR": 40,
-    "CRITICAL": 50,
-}
-
-# ZWNJ = "\u200C"
-# ZWS = "\u200B"
-# BOM = "\uFEFF"
-# ZWJ = "\u200D"
-
-# 3 consecutive ZWS
-TUI_FOLD_TITLE_BEGIN = r"""​​​"""
-# 1 BOM followed by 1 ZWS
-TUI_FOLD_TITLE_END = r"""￼​"""
 
 # regex matching patterns for Pytest sections
 # live_log_sessionstart_matcher = re.compile(r"^==.*\s live log sessionstart\s==+")
@@ -251,18 +234,7 @@ class Results:
         self.tui_rerun_test_groups = self.tui_test_info["tui_rerun_test_groups"]
         self.tui_sections = self.tui_test_info["tui_sections"]
         self.tui_htmlfile = self.tui_test_info["tui_htmlfile"]
-        self.tui_fold_level = self.tui_test_info["tui_fold_level"]
-        self.tui_fold_regex = self.tui_test_info["tui_fold_regex"]
-
-        if hasattr(self, "tui_fold_regex"):
-            if self.tui_fold_regex:
-                if ";" in self.tui_fold_regex:
-                    self.tui_fold_regex = self.tui_fold_regex.split(";")
-                else:
-                    raise ValueError(
-                        "tui_fold_regex must be a list of strings separated by ';'."
-                    )
-
+        self.tui_regexfile = self.tui_test_info["tui_regexfile"]
         self.terminal_output = self._get_terminal_output()
 
     def _unpickle_tui_test_info(self):
@@ -286,4 +258,18 @@ class Results:
                 f"Cannot find {file_path}. Have you run pytest with the '--tui' option"
                 " yet?"
             ) from e
-            pass
+
+
+def get_regexes(tui_regexfile: Path) -> List[str]:
+    """Read regex file and return list of regexes"""
+    try:
+        with open(tui_regexfile, "r") as file:
+            lines = [ast.literal_eval(line) for line in file.readlines()]
+            return [line.rstrip() for line in lines if line]
+    except FileNotFoundError as e:
+        raise FileNotFoundError(
+            f"Cannot find {tui_regexfile}. Have you created and populated that file?"
+        ) from e
+
+
+TUI_REGEXES = get_regexes(Path.cwd().resolve() / "tui_regexes.txt")
