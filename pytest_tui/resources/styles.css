@@ -120,7 +120,10 @@ div.sticky {
      font-family: "Arial", sans-serif;
      font-size: 15px opacity: 1.0;
 }
- .tabcontent {
+.tablinks.hidden {
+    display: none;
+}
+.tabcontent {
      background-color: #ddd;
      display: none;
      border: 1px solid #ccc;

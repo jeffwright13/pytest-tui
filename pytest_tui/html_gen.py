@@ -23,12 +23,6 @@ from pytest_tui.utils import (
 
 logger = logging.getLogger(__name__)
 
-# Next 3 lines are saved from earlier CLI-Config work
-# CLI CONFIG SAVED WORK
-# from pytest_tui.__main__ import Cli
-# from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
-
-
 CSS_FILE = Path(__file__).parent / "resources" / "styles.css"
 JS_FILE = Path(__file__).parent / "resources" / "scripts.js"
 
@@ -285,14 +279,22 @@ class HtmlPage:
         )
         tabs_links.extend(["""</span> </span>"""])
 
-        # "Fold Actions": dropdown for fold-section actions
+        # Full Output tab
+        tabs_links.extend(
+            [
+                f"""<span><button class="tablinks" style="background-color: {TAB_FULL_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button></span>"""
+                for section in TAB_FULL_OUTPUT
+            ]
+        )
+
+        # This variable determines if the "Folded Output" tab and "Fold Actions" tabs are displayed or not
+        fold_visibility = "" if self.results.tui_regexfile else "display: none;"
         if self.results.tui_regexfile:
             tabs_links.extend(
                 [
                     """<span class="dropdown"> <button class="dropbtn" style="color: brown; background-color: #d9ead3">Fold Actions</button> <span class="dropdown-content">"""
                 ]
             )
-
             tabs_links.extend(
                 [
                     """<span><button class="dropdown-item tablinks" style="background-color: #a8b3dc" onclick="toggleAllDetails()">Fold/Unfold Logs</button> </span>"""
@@ -305,26 +307,25 @@ class HtmlPage:
             )
             tabs_links.extend(["""</span> </span>"""])
 
-        # Full Output tab
+        # Folded Output tab; always generated but only displayed if self.results.tui_regexfile is True
+        # (i.e. if the user provided a regex file)
+        tab_folded_output = f"""<span id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output_by_regex()}</pre> </span>"""
+
+        # The actual folded output content, tab "Folded Output" is just a container for this content
         tabs_links.extend(
             [
-                f"""<span><button class="tablinks" style="background-color: {TAB_FULL_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button></span>"""
-                for section in TAB_FULL_OUTPUT
+                f"""<span><button class="tablinks" style="{fold_visibility} background-color: {TAB_FOLDED_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button></span> </div>"""
+                for section in TAB_FOLDED_OUTPUT
             ]
         )
 
-        if self.results.tui_regexfile:
-            tabs_links.extend(
-                [
-                    f"""<span><button class="tablinks" style="background-color: {TAB_FOLDED_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button></span> </div>"""
-                    for section in TAB_FOLDED_OUTPUT
-                ]
-            )
-
+        # Stitch all the tabs together to be displayed at top of page
         tab_links_section = (
             """<span class="tab">""" + "".join(tabs_links) + """</span>"""
         )
 
+        # Build up content for each tab that shows a results category (Pass, Fail, etc.)
+        # Each results tab is populated with individual result content, each of which is collapsible
         tab_result_content = []
         for tab in TABS_RESULTS:
             if tab == "All Tests":
@@ -340,8 +341,11 @@ class HtmlPage:
                     f"""<div id="{tab}" class="tabcontent"> {self.get_collapsible_results(tab.lower())} </div>"""
                 )
 
+        # Stitch all the results together to be displayed withint their individual category tabs
         tab_results = "".join(tab_result_content)
 
+        # Construct a single tab which drops down and displays individual Pytest output sections (e.g. "Summary", "Errors", etc.)
+        # This content comes ANSI-encoded, so it needs to be converted to HTML for proper display
         tab_section_content = [
             f"""<div id="{section}" class="tabcontent"> <pre>{self.converter.convert(self.tab_content.tabs[section], full=False) or ""}</pre> </div>"""
             for section in TABS_SECTIONS
@@ -349,21 +353,18 @@ class HtmlPage:
         ]
         tab_sections = "".join(tab_section_content)
 
+        # The "About" tab (metadata, etc for this test run)
         tab_about = f"""<div id="{TAB_ABOUT[0]}" class="tabcontent"> <p>{self.get_metadata()}</p> </div>"""
 
+        # The "Full Output" tab (all output from the test run), as it occured chronologically on the console
         tab_full_output = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <pre>{self.get_terminal_output()}</pre> </div>"""
-
-        if self.results.tui_regexfile:
-            tab_folded_output = f"""<span id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output_by_regex()}</pre> </span>"""
-        else:
-            tab_folded_output = ""
 
         return (
             tab_links_section
             + tab_about
             + tab_results
-            + tab_sections
             + tab_full_output
+            + tab_sections
             + tab_folded_output
         )
 
@@ -426,60 +427,6 @@ class HtmlPage:
             tout = str(f.read(), "utf-8")
         return tout
 
-    # def python_log_level_mapping(self) -> Tuple[Dict]:
-    #     """Get a mapping of python log levels to their string representation.
-    #     Also return the inverse mapping."""
-    #     try:
-    #         levels = [a for a in logging.__all__ if a.upper() == a]
-    #         mapping = {a: getattr(logging, a) for a in levels}
-    #         mapping.pop("BASIC_FORMAT") # unused
-    #         mapping.pop("WARN") # deprecated
-    #         mapping.pop("FATAL") # we don't need no stkin' java
-    #         return mapping, {v: k for k, v in mapping.items()}
-    #     except Exception as e:
-    #         logger.error(f"Error getting python log level mapping: {e}")
-    #         return {}, {}
-
-    # def get_line_level(self, line: str) -> str:
-    #     """Is this line a log entry (DEBUG, INFO, WARNING, ERROR, CRITICAL)?"""
-    #     mapping, rev_mapping = self.python_log_level_mapping()
-    #     if mapping:
-    #         for level, value in mapping.items():
-    #             if level in line:
-    #                 return value
-    #     else:
-    #         return ""
-
-    # def fold_regex_lines(self, lines: List[str]) -> str:
-    #     """
-    #     Refactored code
-    #     Search each line of console output and look for a regex match,
-    #     using the regex patterns defined in TUI_REGEXES (obtained from file).
-    #     If a line contains a match for any of the regex patterrns, the line
-    #     will be folded. Consecutive lines that match a regex are grouped
-    #     together wihin the same fold.
-    #     """
-    #     converter = Ansi2HTMLConverter()
-    #     html_str = ""
-    #     fold_started = False
-
-    #     for line in lines:
-    #         line_stripped = strip_ansi(line)
-    #         line_converted = converter.convert(line, full=False)
-
-    #         if any(re.search(regex, line_stripped) for regex in TUI_REGEXES):
-    #             if not fold_started:
-    #                 fold_started = True
-    #                 html_str += (
-    #                     f"<details><summary style='nobr'>Folded RegEx Match</summary>"
-    #                 )
-    #             elif fold_started:
-    #                 fold_started = False
-    #                 html_str += "</details>"
-    #             html_str += line_converted + "\n"
-
-    #     return html_str
-
     def fold_regex_lines(self, lines: List[str]) -> str:
         """
         Refactored code
@@ -492,7 +439,8 @@ class HtmlPage:
         converter = Ansi2HTMLConverter()
         html_str = ""
         fold_started = False
-        regex = "^DEBUG"
+        # regex = r"[DEBUG|INFO]"
+        regex = r""
 
         for line in lines:
             line_stripped = strip_ansi(line)
@@ -521,7 +469,8 @@ class HtmlPage:
     def fold_terminal_output_by_regex(self) -> Union[str, None]:
         terminal_output_ansi = self.get_terminal_output_ansi()
         lines = terminal_output_ansi.splitlines()
-        if self.results.tui_regexfile:
+        # if self.results.tui_regexfile:
+        if True:
             return self.fold_regex_lines(lines)
         else:
             return None
@@ -543,12 +492,6 @@ def main():
         )
     with open(HTML_OUTPUT_FILE, "w+") as f:
         f.write(html_out)
-    webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
-
-    # Open in browser if autolaunch_html config is set
-    # page.cli.read_config_file()
-    # if page.cli.html_autolaunch:
-    #     webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
 
 
 if __name__ == "__main__":

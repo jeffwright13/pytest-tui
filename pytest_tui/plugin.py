@@ -62,7 +62,7 @@ def pytest_addoption(parser) -> None:
         "--thf",
         help=(
             "Specify a non-default name for the HTML report file. Default is"
-            " 'html-report.html,' and will be placed in the ptt_files/ folder."
+            " 'html-report.html', located at '<cwd>/ptt_files/'."
         ),
     )
     group.addoption(
@@ -70,7 +70,7 @@ def pytest_addoption(parser) -> None:
         "--trf",
         help=(
             "Enable folding in the HTML report for console output lines that match any"
-            " regex given in the specified TUI_REGEXFILE (default: regexes.txt)."
+            " regex given in the specified TUI_REGEXFILE (default: tui_regexes.txt)."
             " File format: one or more Python regular expressions, one per line."
         ),
     )
