@@ -12,6 +12,8 @@ function openAction(evt, actionName) { var i, tabcontent, tablinks; tabcontent =
 
 // function toggleDetailsElements() { const toggleDetailsButton = document.getElementById('toggle-details'); const detailsElements = document.querySelectorAll('details'); detailsElements.forEach(detailsElement => { detailsElement.hidden = !detailsElement.hidden; }); toggleDetailsButton.addEventListener('click', () => { detailsElements.forEach(detailsElement => { detailsElement.hidden = !detailsElement.hidden; }); }); }
 
+function toggleSummaryElements(){const t=document.querySelectorAll("summary");t.forEach((t=>{t.hidden=!t.hidden}))}
+
 function toggleDetailsElements(){const t=document.querySelectorAll("details");t.forEach((t=>{t.hidden=!t.hidden}))}
 
 function toggleAllDetails() { const details = document.getElementsByTagName("details"); for (let i = 0; i < details.length; i++) { if (details[i].hasAttribute("open")) { details[i].removeAttribute("open"); } else { details[i].setAttribute("open", ""); } } }
@@ -23,3 +25,7 @@ var originalColors = new Map(); function removeOrRestoreColor() { if (originalCo
 var overrideStyleSheet = null; function removeOrRestoreColor() { if (overrideStyleSheet === null) { overrideStyleSheet = document.createElement('style'); document.head.appendChild(overrideStyleSheet); var sheet = overrideStyleSheet.sheet; sheet.insertRule("* { color: black !important; background-color: white !important; }", 0); } else { overrideStyleSheet.parentNode.removeChild(overrideStyleSheet); overrideStyleSheet = null; } }
 
 function invertColors() { document.body.classList.toggle('invert-colors'); }
+
+var originalColor = document.body.style.backgroundColor; function toggleBackground() { var body = document.getElementsByTagName("body")[0]; var currentColor = body.style.backgroundColor; if (currentColor === "" || currentColor === "white") { body.style.backgroundColor = "black"; } else if (currentColor === "black") { body.style.backgroundColor = originalColor; } else { body.style.backgroundColor = "white"; } }
+
+var preSection = document.getElementById("preSection"); var originalBackgroundColor = preSection.style.backgroundColor; var originalTextColor = preSection.style.color; function togglePreBackground() { preSection.classList.toggle("pre-bg-black"); if (preSection.classList.contains("pre-bg-black")) { preSection.style.backgroundColor = originalBackgroundColor; preSection.style.color = originalTextColor; } else { preSection.style.backgroundColor = "black"; preSection.style.color = "white"; } }

@@ -291,12 +291,17 @@ class HtmlPage:
             )
             tabs_links.extend(
                 [
-                    """<span><button class="dropdown-item tablinks" style="background-color: #a8b3dc" onclick="toggleAllDetails()">Fold/Unfold Logs</button> </span>"""
+                    """<span><button class="dropdown-item tablinks" style="background-color: #a8b3dc" onclick="toggleAllDetails()">Fold / Unfold</button> </span>"""
                 ]
             )
+            # tabs_links.extend(
+            #     [
+            #         """<span><button class="dropdown-item tablinks btn-rt" style="background-color: #b3dca8" id="toggle-details" onclick="toggleDetailsElements()">Hide / Show Fold Markers</button></span>"""
+            #     ]
+            # )
             tabs_links.extend(
                 [
-                    """<span><button class="dropdown-item tablinks btn-rt" style="background-color: #b3dca8" id="toggle-details" onclick="toggleDetailsElements()">Show/Hide Fold Markers</button></span>"""
+                    """<span><button class="dropdown-item tablinks btn-rt" style="background-color: #b3dca8" id="toggle-summary" onclick="toggleSummaryElements()">Hide / Show Fold Markers</button></span>"""
                 ]
             )
             tabs_links.extend(["""</span> </span>"""])
@@ -407,6 +412,7 @@ class HtmlPage:
         # tab_color_button =  """<button class=button-43 onclick="removeColor(); this.style.display = 'none'">Remove Color</button>"""
         tab_color_button = """<button class="button-43" onclick="removeOrRestoreColor()">Remove / Restore Colors</button>"""
         tab_invert_button = """<button class=button-43 onclick="invertColors()">Invert Colors</button>"""
+        tab_toggle_background_button = """<button class=button-43 onclick="togglePreBackground()">Toggle Background</button>"""
 
         return (
             "<hr>"
@@ -417,6 +423,8 @@ class HtmlPage:
             + tab_color_button
             + "<hr>"
             + tab_invert_button
+            + "<hr>"
+            + tab_toggle_background_button
         )
 
     def get_terminal_output(self) -> str:
