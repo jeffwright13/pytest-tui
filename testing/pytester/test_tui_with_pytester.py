@@ -50,7 +50,7 @@ def examples():
 
 
 @pytest.mark.test_tui_with_pytester
-def test_pytester_help_menu_has_tui_info(pytester):
+def test_help_menu_has_tui_info(pytester):
     """Verifies that the --tui option exists in the help menu."""
     result = pytester.runpytest("--help")
     assert any("tui" in line for line in result.outlines)
@@ -59,7 +59,7 @@ def test_pytester_help_menu_has_tui_info(pytester):
 
 
 @pytest.mark.test_tui_with_pytester
-def test_pytester_verify_commandline_options_missing(pytester, defaults):
+def test_verify_commandline_options_missing(pytester, defaults):
     """Verifies that when --tui is not passed on the command line, it is None when args
     are parsed; and when --tui is passed on the command line, it is True ."""
     # test_path = pytester.copy_example("testing/pytester/examples/test_pass.py")
@@ -72,16 +72,33 @@ def test_pytester_verify_commandline_options_missing(pytester, defaults):
     assert cfg.getoption("_tui_regexfile") == defaults.regexfile
 
 
-## TODO: This test is failing.  Fix it.
-@pytest.mark.xfail(reason="Not implemented yet")
-@pytest.mark.test_tui_with_pytester
-def test_pytester_verify_commandline_options_illegal_combinations(pytester):
-    """Verifies response to various illegal combinations of command line options."""
-    assert False
+def test_verify_commandline_options_invalid_option(pytester):
+    """Verifies the response to an invalid command line option."""
+
+    with pytest.raises(SystemExit):
+        pytester.parseconfig("--tui", "--invalid-option")
 
 
 @pytest.mark.test_tui_with_pytester
-def test_pytester_verify_commandline_options_tui_only(pytester, consts):
+def test_illegal_input_options(pytester):
+    """Verifies that illegal combinations of command line options raise appropriate errors.
+    """
+
+    # Case when both --tui-htmlfile and --tui-regexfile are provided without a value
+    with pytest.raises(SystemExit):
+        pytester.parseconfig("--tui", "--tui-htmlfile=", "--tui-regexfile=")
+
+    # Case when --tui is not provided but --tui-htmlfile and --tui-regexfile are
+    with pytest.raises(SystemExit):
+        pytester.parseconfig(
+            "--tui-htmlfile=test_report.html", "--tui-regexfile=test_regex.txt"
+        )
+
+    # Add other illegal combinations as needed
+
+
+@pytest.mark.test_tui_with_pytester
+def test_verify_commandline_options_tui_only(pytester, consts):
     """Verifies that when only '--tui' is passsed on command line, it is True"""
     cfg = pytester.parseconfig("--tui")
 
@@ -91,9 +108,7 @@ def test_pytester_verify_commandline_options_tui_only(pytester, consts):
 
 
 @pytest.mark.test_tui_with_pytester
-def test_pytester_verify_commandline_options_tui_regexfile(
-    pytester, defaults, nondefaults
-):
+def test_verify_commandline_options_tui_regexfile(pytester, defaults, nondefaults):
     """Verifies that when '--tui' and '--tui-htmlfile' are passsed on command line, '_tui'
     is True and '_tui_htmlfile' is as specified."""
 
@@ -109,9 +124,7 @@ def test_pytester_verify_commandline_options_tui_regexfile(
 # TODO: This test is failing.  Fix it.
 @pytest.mark.xfail(reason="Not implemented yet")
 @pytest.mark.test_tui_with_pytester
-def test_pytester_verify_commandline_options_tui_htmlfile(
-    pytester, examples, nondefaults
-):
+def test_verify_commandline_options_tui_htmlfile(pytester, examples, nondefaults):
     """Verifies that when '--tui' and '--tui-htmlfile' are passsed on command line, '_tui'
     is True and '_tui_htmlfile' is as specified."""
 
@@ -127,7 +140,7 @@ def test_pytester_verify_commandline_options_tui_htmlfile(
 
 
 @pytest.mark.test_tui_with_pytester
-def test_pytester_run_with_empty_testfile(pytester):
+def test_run_with_empty_testfile(pytester):
     """Verifies that the pytest-tui plugin handles being paseed an empty test file.
     By emmpty, we mean a test file that has no tests in it."""
 
@@ -140,7 +153,7 @@ def test_pytester_run_with_empty_testfile(pytester):
 
 
 @pytest.mark.test_tui_with_pytester
-def test_pytester_verify_commandline_options_tui_htmlfile_regexfile(pytester, examples):
+def test_verify_commandline_options_tui_htmlfile_regexfile(pytester, examples):
     """Verifies that when '--tui', '--tui-htmlfile', and '--tui-regexfile' are passed on the command line,
     '_tui' is True, '_tui_htmlfile' is as specified, and '_tui_regexfile' is as specified.
     """
@@ -157,7 +170,7 @@ def test_pytester_verify_commandline_options_tui_htmlfile_regexfile(pytester, ex
 
 
 @pytest.mark.test_tui_with_pytester
-def test_pytester_verify_commandline_options_tui_htmlfile_no_value(pytester, consts):
+def test_verify_commandline_options_tui_htmlfile_no_value(pytester, consts):
     """Verifies that when '--tui' and '--tui-htmlfile' are passed on the command line without a value,
     '_tui' is True and '_tui_htmlfile' is the default value."""
 
@@ -169,7 +182,7 @@ def test_pytester_verify_commandline_options_tui_htmlfile_no_value(pytester, con
 
 
 @pytest.mark.test_tui_with_pytester
-def test_pytester_verify_commandline_options_tui_regexfile_no_value(pytester, consts):
+def test_verify_commandline_options_tui_regexfile_no_value(pytester, consts):
     """Verifies that when '--tui' and '--tui-regexfile' are passed on the command line without a value,
     '_tui' is True and '_tui_regexfile' is the default value."""
 
@@ -180,17 +193,9 @@ def test_pytester_verify_commandline_options_tui_regexfile_no_value(pytester, co
     assert cfg.getoption("_tui_regexfile") == consts.regexfile
 
 
-@pytest.mark.test_tui_with_pytester
-def test_pytester_verify_commandline_options_invalid_option(pytester):
-    """Verifies the response to an invalid command line option."""
-
-    with pytest.raises(SystemExit):
-        pytester.parseconfig("--tui", "--invalid-option")
-
-
 '''
 @pytest.mark.test_tui_with_pytester
-def test_pytester_true_assertion(pytester):
+def test_true_assertion(pytester):
     pytester.makepyfile(
         """
         def test_foo():
@@ -202,7 +207,7 @@ def test_pytester_true_assertion(pytester):
 
 
 @pytest.mark.test_tui_with_pytester
-def test_pytester_false_assertion(pytester):
+def test_false_assertion(pytester):
     pytester.makepyfile(
         """
         def test_foo():
