@@ -453,29 +453,57 @@ class HtmlPage:
         converter = Ansi2HTMLConverter()
         html_str = ""
         fold_started = False
-        regex = self.get_regex(self.results.tui_regexfile)[0]
+        regexes = self.get_regex(self.results.tui_regexfile)
 
-        for line in lines:
-            line_stripped = strip_ansi(line)
-            line_converted = converter.convert(line, full=False)
+        if len(regexes) == 1:
+            # If there is only one regex pattern, use it to fold any line that matches
+            regex = regexes[0]
+            for line in lines:
+                line_stripped = strip_ansi(line)
+                line_converted = converter.convert(line, full=False)
+                match = re.search(regex, line_stripped)
 
-            match = re.search(regex, line_stripped)
-            if match:
-                if not fold_started:
-                    fold_started = True
-                    html_str += (
-                        "<details><summary style='nobr'>Folded RegEx:"
-                        f" '{regex}'</summary>"
-                    )
-                html_str += line_converted + "\n"
+                if match:
+                    if not fold_started:
+                        fold_started = True
+                        html_str += (
+                            "<details><summary style='nobr'>Folded RegEx:"
+                            f" '{regex}'</summary>"
+                        )
+                    html_str += line_converted + "\n"
+                elif fold_started:
+                    fold_started = False
+                    html_str += "</details>"
+                    html_str += line_converted + "\n"
+                else:
+                    html_str += line_converted + "\n"
 
-            elif fold_started:
-                fold_started = False
-                html_str += "</details>"
-                html_str += line_converted + "\n"
+        if len(regexes) >= 2:
+            # With 2 regexes, the first is the 'starter' regex and the second is the 'ender' regex
+            regex_starter = regexes[0]
+            regex_ender = regexes[1]
+            for line in lines:
+                line_stripped = strip_ansi(line)
+                line_converted = converter.convert(line, full=False)
+                match_starter = re.search(regex_starter, line_stripped)
+                match_ender = re.search(regex_ender, line_stripped)
 
-            else:
-                html_str += line_converted + "\n"
+                if match_starter:
+                    if not fold_started:
+                        fold_started = True
+                        html_str += (
+                            "<details><summary style='nobr'>Folded RegEx:"
+                            f" '{regex_starter}'</summary>"
+                        )
+                    html_str += line_converted + "\n"
+                elif match_ender:
+                    fold_started = False
+                    html_str += "</details>"
+                    html_str += line_converted + "\n"
+                elif fold_started:
+                    html_str += line_converted + "\n"
+                else:
+                    html_str += line_converted + "\n"
 
         return html_str
 

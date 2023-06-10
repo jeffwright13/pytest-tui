@@ -6,23 +6,32 @@ import pytest
 
 logger = logging.getLogger()
 
-# 3 consecutive ZWS
-TUI_FOLD_TITLE_BEGIN = r"""​​​"""
-# 1 BOM followed by 1 ZWS
-TUI_FOLD_TITLE_END = r"""￼​"""
-regex_start_marker = TUI_FOLD_TITLE_BEGIN
-regex_end_marker = TUI_FOLD_TITLE_END
+
+@pytest.fixture()
+def regex():
+    return r"""  *->"""
 
 
-def test0_pass_1():
+def test_0_regex_single(regex):
     print("Pre-foldy stuff...")
     print("Test Pass 1!")
+    print(regex)
     print("More pre-foldy stuff...")
-    print(f"{TUI_FOLD_TITLE_BEGIN}This line marks the beginning of the RegEx fold.")
+    print("This line marks the middle of the RegEx fold.")
+    print(regex)
     print("This line marks the middle of the RegEx fold.")
     print("This line marks the middle of the RegEx fold.")
     print("This line marks the middle of the RegEx fold.")
-    print("This line marks the middle of the RegEx fold.")
+    print(regex)
+    print(regex)
+    print(regex)
+    print(regex)
+    print(regex)
+    print(regex)
+    print(regex)
+    print(regex)
+    print(regex)
+    print(regex)
     print("Middle of the foldy stuff...")
     print("This line marks the middle of the RegEx fold.")
     print("This line marks the middle of the RegEx fold.")
@@ -37,7 +46,39 @@ def test0_pass_1():
     print("This line marks the middle of the RegEx fold.")
     print("This line marks the middle of the RegEx fold.")
     print("This line marks the middle of the RegEx fold.")
-    print(f"This line marks the end of the RegEx fold.{TUI_FOLD_TITLE_END}")
+    print("Post-foldy stuff...")
+    print("More post-foldy stuff...")
+    assert True
+
+
+def test_0_regex_double(regex):
+    print("Pre-foldy stuff...")
+    print("Test Pass 1!")
+    print(regex)
+    print("More pre-foldy stuff...")
+    print(f"​​​This line marks the beginning of the RegEx fold.")
+    print("This line marks the middle of the RegEx fold.")
+    print(regex)
+    print("This line marks the middle of the RegEx fold.")
+    print("This line marks the middle of the RegEx fold.")
+    print("This line marks the middle of the RegEx fold.")
+    print(regex)
+    print(regex)
+    print(regex)
+    print(regex)
+    print(regex)
+    print(regex)
+    print(regex)
+    print(regex)
+    print(regex)
+    print(regex)
+    print("Middle of the foldy stuff...")
+    print("This line marks the middle of the RegEx fold.")
+    print("This line marks the middle of the RegEx fold.")
+    print("Middle of the foldy stuff...")
+    print("This line marks the middle of the RegEx fold.")
+    print("This line marks the middle of the RegEx fold.")
+    print(f"￼​This line marks the end of the RegEx fold.")
     print("Post-foldy stuff...")
     print("More post-foldy stuff...")
     assert True
