@@ -29,3 +29,19 @@ function invertColors() { document.body.classList.toggle('invert-colors'); }
 var originalColor = document.body.style.backgroundColor; function toggleBackground() { var body = document.getElementsByTagName("body")[0]; var currentColor = body.style.backgroundColor; if (currentColor === "" || currentColor === "white") { body.style.backgroundColor = "black"; } else if (currentColor === "black") { body.style.backgroundColor = originalColor; } else { body.style.backgroundColor = "white"; } }
 
 var preSection = document.getElementById("preSection"); var originalBackgroundColor = preSection.style.backgroundColor; var originalTextColor = preSection.style.color; function togglePreBackground() { preSection.classList.toggle("pre-bg-black"); if (preSection.classList.contains("pre-bg-black")) { preSection.style.backgroundColor = originalBackgroundColor; preSection.style.color = originalTextColor; } else { preSection.style.backgroundColor = "black"; preSection.style.color = "white"; } }
+
+
+
+// var button = document.getElementById("toggleBackground"); var preElements = document.querySelectorAll("pre"); button.addEventListener("click", function() { for (var i = 0; i < preElements.length; i++) { preElements[i].style.backgroundColor = this.checked ? "#E6E6E6" : "#ffffff"; } });
+
+
+// document.querySelector(".button-43").addEventListener("click", togglePreBackground); function togglePreBackground() { var preElements = document.querySelectorAll("pre"); for (var i = 0; i < preElements.length; i++) { preElements[i].style.backgroundColor = this.checked ? "#E6E6E6" : "#ffffff"; } }
+
+
+// document.querySelector(".button-43").addEventListener("click", togglePreBackground); function togglePreBackground() { var preElements = document.querySelectorAll("pre"); for (var i = 0; i < preElements.length; i++) { preElements[i].style.backgroundColor = this.value ? "#E6E6E6" : "#000000"; } }
+
+
+// var isBackgroundBlack = false; function togglePreBackground() { var preElements = document.querySelectorAll("pre"); for (var i = 0; i < preElements.length; i++) { preElements[i].style.backgroundColor = isBackgroundBlack ? "#E6E6E6" : "#000000"; } isBackgroundBlack = !isBackgroundBlack; }
+
+
+var isBackgroundBlack = false; function togglePreBackground() { var preElements = document.querySelectorAll("pre"); for (var i = 0; i < preElements.length; i++) { if (isBackgroundBlack) { preElements[i].style.backgroundColor = "#E6E6E6"; preElements[i].style.color = "#000000"; } else { preElements[i].style.backgroundColor = "#000000"; preElements[i].style.color = "#FFFFFF"; } } isBackgroundBlack = !isBackgroundBlack; }

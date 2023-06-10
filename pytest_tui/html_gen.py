@@ -412,7 +412,8 @@ class HtmlPage:
         # tab_color_button =  """<button class=button-43 onclick="removeColor(); this.style.display = 'none'">Remove Color</button>"""
         tab_color_button = """<button class="button-43" onclick="removeOrRestoreColor()">Remove / Restore Colors</button>"""
         tab_invert_button = """<button class=button-43 onclick="invertColors()">Invert Colors</button>"""
-        tab_toggle_background_button = """<button class=button-43 onclick="togglePreBackground()">Toggle Background</button>"""
+        # tab_toggle_background_button = """<button class=button-43 onclick="togglePreBackground()">Toggle Background</button>"""
+        tab_toggle_background_button = """<button class="button-43" onclick="togglePreBackground()">Toggle Background</button>"""
 
         return (
             "<hr>"
