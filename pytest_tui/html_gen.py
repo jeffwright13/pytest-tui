@@ -13,12 +13,11 @@ from strip_ansi import strip_ansi
 
 from pytest_tui import __version__
 from pytest_tui.utils import (
-    HTML_OUTPUT_FILE,
     PYTEST_TUI_FILES_DIR,
     TERMINAL_OUTPUT_FILE,
-    TUI_REGEXES,
     Results,
     test_session_starts_results_grabber,
+    DEFAULT_HTML_FILE,
 )
 
 logger = logging.getLogger(__name__)
@@ -119,11 +118,6 @@ class TabContent:
 
 class HtmlPage:
     def __init__(self, results: Results):
-        # Read existing config from file, or apply default if not exist
-        # self.config_parser = configparser.ConfigParser()
-        # self.cli = Cli()
-        # self.cli.read_config_file()
-
         self.results = results
         self.tab_content = TabContent(results)
         self.fetched_sections_html = self.tab_content.fetch_sections_html()
@@ -168,7 +162,7 @@ class HtmlPage:
 
     def create_final_test_summary(self) -> str:
         return (
-            """<button class="accordion">Final Test Summary  (click to expand)</button><div class="panel-closed"><p><pre>"""
+            """<button class="accordion-open">Final Test Summary  (click to expand)</button><div class="panel-open"><p><pre>"""
             + self.converter.convert(
                 self.results.tui_sections.short_test_summary.content, full=False
             )
@@ -188,7 +182,7 @@ class HtmlPage:
         )
         ripped = search.groups()[0].encode().decode("unicode-escape") if search else ""
         return (
-            """<button class="accordion">Live Test Session Summary  (click to expand)</button><div class="panel-closed"><p><pre>"""
+            """<button class="accordion-open">Live Test Session Summary  (click to expand)</button><div class="panel-open"><p><pre>"""
             + self.converter.convert(
                 self.results.tui_sections.lastline.content, full=False
             )
@@ -226,14 +220,14 @@ class HtmlPage:
             d, build_direction="LEFT_TO_RIGHT", table_attributes=table_attributes
         )
         return (
-            """<button class="accordion">Test Execution Info</button><div class="panel-open"><p><pre>"""
+            """<button class="accordion-closed">Test Execution Info (click to expand)</button><div class="panel-closed"><p><pre>"""
             + dj
             + """</pre></p></div>"""
         )
 
     def create_environment_info(self, m, table_attributes) -> str:
         return (
-            """<button class="accordion">Environment</button><div class="panel-open"><p><pre>"""
+            """<button class="accordion-closed">Environment (click to expand)</button><div class="panel-closed"><p><pre>"""
             + json2table.convert(
                 m, build_direction="LEFT_TO_RIGHT", table_attributes=table_attributes
             )
@@ -409,12 +403,20 @@ class HtmlPage:
             "tr": "nth-child(even) {background-color: #f2f2f2;}",
         }
 
+        # tab_color_button =  """<rainbow-button onclick="removeColor()">Remove color</rainbow-button>"""
+        # tab_color_button =  """<button class=button-43 onclick="removeColor(); this.style.display = 'none'">Remove Color</button>"""
+        tab_color_button = """<button class="button-43" onclick="removeOrRestoreColor()">Remove / Restore Colors</button>"""
+        tab_invert_button = """<button class=button-43 onclick="invertColors()">Invert Colors</button>"""
+
         return (
             "<hr>"
             + f"{self.create_final_test_summary()}<hr>"
             + f"{self.create_live_test_session_summary()}<hr>"
             + f"{self.create_test_execution_info()}<hr>"
-            + f"{self.create_environment_info(m, table_attributes)}"
+            + f"{self.create_environment_info(m, table_attributes)}<hr>"
+            + tab_color_button
+            + "<hr>"
+            + tab_invert_button
         )
 
     def get_terminal_output(self) -> str:
@@ -427,20 +429,31 @@ class HtmlPage:
             tout = str(f.read(), "utf-8")
         return tout
 
+    def get_regex(self, tui_regexfile: Path) -> List[str]:
+        """Read regex file and return list of regexes"""
+        try:
+            with open(tui_regexfile, "r") as file:
+                # lines = [ast.literal_eval(line) for line in file.readlines() if line]
+                lines = [eval(line) for line in file.readlines() if line]
+                return [line.rstrip() for line in lines if line]
+        except FileNotFoundError as e:
+            # logger.error(f"Regex file not found: {e}")
+            logger.exception(e)
+            return []
+
     def fold_regex_lines(self, lines: List[str]) -> str:
         """
         Refactored code
         Search each line of console output and look for a regex match,
-        using the regex patterns defined in TUI_REGEXES (obtained from file).
-        If a line contains a match for any of the regex patterrns, the line
-        will be folded. Consecutive lines that match a regex are grouped
+        using the regex patterns defined in file TODO.
+        If a line contains a match for the regex patterrn, the line
+        will be folded. Consecutive lines that match regex are grouped
         together wihin the same fold.
         """
         converter = Ansi2HTMLConverter()
         html_str = ""
         fold_started = False
-        # regex = r"[DEBUG|INFO]"
-        regex = r""
+        regex = self.get_regex(self.results.tui_regexfile)[0]
 
         for line in lines:
             line_stripped = strip_ansi(line)
@@ -469,11 +482,7 @@ class HtmlPage:
     def fold_terminal_output_by_regex(self) -> Union[str, None]:
         terminal_output_ansi = self.get_terminal_output_ansi()
         lines = terminal_output_ansi.splitlines()
-        # if self.results.tui_regexfile:
-        if True:
-            return self.fold_regex_lines(lines)
-        else:
-            return None
+        return self.fold_regex_lines(lines) if self.results.tui_regexfile else None
 
 
 def main():
@@ -485,12 +494,8 @@ def main():
     html_trailer = page.create_trailer()
     html_out = html_header + html_tabs + html_trailer
 
-    global HTML_OUTPUT_FILE
-    if results.tui_test_info.get("tui_htmlfile"):
-        HTML_OUTPUT_FILE = Path(
-            PYTEST_TUI_FILES_DIR / results.tui_test_info["tui_htmlfile"]
-        )
-    with open(HTML_OUTPUT_FILE, "w+") as f:
+    html_outfile = Path(results.tui_test_info.get("tui_htmlfile", DEFAULT_HTML_FILE))
+    with open(html_outfile, "w") as f:
         f.write(html_out)
 
 

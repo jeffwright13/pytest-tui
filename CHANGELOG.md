@@ -6,9 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.11.0] 2023-06-01
-- Modify --tui-fold-regex feture to allow for multiple regex's to be specified in a file, rather than on the command line. This allows for more complex folding scenarios.
-- Remove --tui-fold-level option, now replaced by modified --tui-fold-regex implementation (previous bullet point).
-- Close Issue 100 (obviated by previous change in fold behavior).
+- Removed --tui-fold-level option, now replaced by modified --tui-regexfile implementation (previous bullet point); allows for regex to be specified in a file, rather than on the command line.
+- Fixed Issue 100 (obviated by previous change in fold behavior).
+- Changed output files folder to ./tui_files.
+- Added new buttons to About tab to remove/restore/invert colors.
+- Introduced tests to test the plugin itself, using pytest's 'pytester' fixture.
+
 
 ## [1.10.0] 2023-04-12
 - Added new folding mode `--tui-fold-regex`. This mode allows specifying reg-ex's marking the beginning and end of a section that the user wants to fold. See README for details.
@@ -47,7 +50,7 @@ and this project tries to adhere to [Semantic Versioning](https://semver.org/spe
 - Tweaked and formatted a bunch of the tests in /demo-tests.
 ## [1.6.1] 2022-09-23
 
-- Added '*' .gitignore to ptt_files/ so that when people run pytest --tui in other directories they don't see the ptt_files/ dir.
+- Added '*' .gitignore to tui_files/ so that when people run pytest --tui in other directories they don't see the tui_files/ dir.
 
 ## [1.6.0] - 2022-09-20
 
@@ -118,7 +121,7 @@ and this project tries to adhere to [Semantic Versioning](https://semver.org/spe
 - Fixed tui1 (Textual) so that it works with new internal implementation.
 - Retiring tui2 (PyTermTk) for now.
 - Reordered/removed some menu items in tuiconf to fit new content/choices.
-- Changed output files folder to ./ptt_files.
+- Changed output files folder to ./tui_files.
 
 ## [1.1.3] - 2022-08-13
 

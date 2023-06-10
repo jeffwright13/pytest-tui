@@ -4,7 +4,7 @@ WORKDIR = "/Users/jwr003/coding/pytest-tui"
 
 
 def test_html_report_about_tab(sb, pom_vars: dict[str, str]):
-    sb.open(f"file:///{WORKDIR}/ptt_files/html_report.html")
+    sb.open(f"file:///{WORKDIR}/tui_files/html_report.html")
     sb.assert_title(pom_vars["TITLE"])
     sb.assert_element(f"{pom_vars['ABOUT_TAB']}:contains('About')")
 
@@ -61,7 +61,7 @@ def test_html_report_about_tab(sb, pom_vars: dict[str, str]):
 
 
 def test_html_report_all_tests_tab(sb, pom_vars: dict[str, str]):
-    sb.open(f"file:///{WORKDIR}/ptt_files/html_report.html")
+    sb.open(f"file:///{WORKDIR}/tui_files/html_report.html")
     sb.assert_title(pom_vars["TITLE"])
     sb.assert_element(f"{pom_vars['ALL_TESTS_TAB']}:contains('All Tests')")
 
@@ -74,7 +74,7 @@ def test_html_report_all_tests_tab(sb, pom_vars: dict[str, str]):
 
 
 def test_html_report_failures_tab(sb, pom_vars: dict[str, str]):
-    sb.open(f"file:///{WORKDIR}/ptt_files/html_report.html")
+    sb.open(f"file:///{WORKDIR}/tui_files/html_report.html")
     sb.assert_title(pom_vars["TITLE"])
     sb.assert_element(f"{pom_vars['FAILURES_TAB']}:contains('Failures')")
     sb.click(f"{pom_vars['FAILURES_TAB']}")
@@ -86,7 +86,7 @@ def test_html_report_failures_tab(sb, pom_vars: dict[str, str]):
 
 
 def test_html_report_test_passes_tab(sb, pom_vars: dict[str, str]):
-    sb.open(f"file:///{WORKDIR}/ptt_files/html_report.html")
+    sb.open(f"file:///{WORKDIR}/tui_files/html_report.html")
     sb.assert_title(pom_vars["TITLE"])
     sb.assert_element(f"{pom_vars['PASSES_TAB']}:contains('Passes')")
     sb.click(f"{pom_vars['PASSES_TAB']}")
@@ -98,7 +98,7 @@ def test_html_report_test_passes_tab(sb, pom_vars: dict[str, str]):
 
 
 def test_html_report_test_skipped_tab(sb, pom_vars: dict[str, str]):
-    sb.open(f"file:///{WORKDIR}/ptt_files/html_report.html")
+    sb.open(f"file:///{WORKDIR}/tui_files/html_report.html")
     sb.assert_title(pom_vars["TITLE"])
     sb.assert_element(f"{pom_vars['SKIPPED_TAB']}:contains('Skipped')")
     sb.click(f"{pom_vars['SKIPPED_TAB']}")
@@ -110,7 +110,7 @@ def test_html_report_test_skipped_tab(sb, pom_vars: dict[str, str]):
 
 
 def test_html_report_test_xfails_tab(sb, pom_vars: dict[str, str]):
-    sb.open(f"file:///{WORKDIR}/ptt_files/html_report.html")
+    sb.open(f"file:///{WORKDIR}/tui_files/html_report.html")
     sb.assert_title(pom_vars["TITLE"])
     sb.assert_element(f"{pom_vars['XFAILS_TAB']}:contains('Xfails')")
     sb.click(f"{pom_vars['XFAILS_TAB']}")
@@ -122,7 +122,7 @@ def test_html_report_test_xfails_tab(sb, pom_vars: dict[str, str]):
 
 
 def test_html_report_test_xpasses_tab(sb, pom_vars: dict[str, str]):
-    sb.open(f"file:///{WORKDIR}/ptt_files/html_report.html")
+    sb.open(f"file:///{WORKDIR}/tui_files/html_report.html")
     sb.assert_title(pom_vars["TITLE"])
     sb.assert_element(f"{pom_vars['XPASSES_TAB']}:contains('Xpasses')")
     sb.click(f"{pom_vars['XPASSES_TAB']}")
@@ -134,7 +134,7 @@ def test_html_report_test_xpasses_tab(sb, pom_vars: dict[str, str]):
 
 
 def test_html_report_test_reruns_tab(sb, pom_vars: dict[str, str]):
-    sb.open(f"file:///{WORKDIR}/ptt_files/html_report.html")
+    sb.open(f"file:///{WORKDIR}/tui_files/html_report.html")
     sb.assert_title(pom_vars["TITLE"])
     sb.assert_element(f"{pom_vars['RERUNS_TAB']}:contains('Reruns')")
     sb.click(f"{pom_vars['RERUNS_TAB']}")
@@ -146,7 +146,7 @@ def test_html_report_test_reruns_tab(sb, pom_vars: dict[str, str]):
 
 
 def test_html_report_test_full_output_tab(sb, pom_vars: dict[str, str]):
-    sb.open(f"file:///{WORKDIR}/ptt_files/html_report.html")
+    sb.open(f"file:///{WORKDIR}/tui_files/html_report.html")
     sb.assert_title(pom_vars["TITLE"])
     sb.assert_element(f"{pom_vars['FULL_OUTPUT_TAB']}:contains('Full Output')")
     sb.click(f"{pom_vars['FULL_OUTPUT_TAB']}")
@@ -174,13 +174,13 @@ def test_html_report_test_full_output_tab(sb, pom_vars: dict[str, str]):
 
 
 def test_html_report_test_folded_output_tab(sb, pom_vars: dict[str, str]):
-    sb.open(f"file:///{WORKDIR}/ptt_files/html_report.html")
+    sb.open(f"file:///{WORKDIR}/tui_files/html_report.html")
     sb.assert_title(pom_vars["TITLE"])
     sb.assert_element(f"{pom_vars['FOLDED_OUTPUT_TAB']}:contains('Folded Output')")
 
 
 def test_html_report_test_output_sections_tab(sb, pom_vars: dict[str, str]):
-    sb.open(f"file:///{WORKDIR}/ptt_files/html_report.html")
+    sb.open(f"file:///{WORKDIR}/tui_files/html_report.html")
     sb.assert_title(pom_vars["TITLE"])
     sb.assert_element(f"{pom_vars['OUTPUT_SECTIONS_TAB']}:contains('Output Sections')")
 
@@ -229,7 +229,7 @@ def test_html_report_test_output_sections_tab(sb, pom_vars: dict[str, str]):
 
 
 def test_html_report_test_fold_actions_tab(sb, pom_vars: dict[str, str]):
-    sb.open(f"file:///{WORKDIR}/ptt_files/html_report.html")
+    sb.open(f"file:///{WORKDIR}/tui_files/html_report.html")
     sb.click(pom_vars["FOLDED_OUTPUT_TAB"])
     sb.scroll_into_view("Summary", by="tag name")
     sb.assert_element_not_visible(pom_vars["FOLD_ACTIONS_TAB_FOLD_UNFOLD_ACTION"])

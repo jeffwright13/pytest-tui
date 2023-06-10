@@ -61,7 +61,7 @@ output.xml
 # Pytest and plugins
 .pytest_cache
 report.html
-ptt_files/
+tui_files/
 
 # Translations
 *.mo

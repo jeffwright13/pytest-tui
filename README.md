@@ -72,7 +72,7 @@ Pretty much just run pytest like you always do, adding the `--tui` option to the
 
 `pytest --tui <whatever-else-you-normally-do>`
 
-In some environments, where the working directory for pytest has been changed from the default, it may be necessary to cd into the working directory in order to successfully launch the TUI or HTML. Basically, you need to be in the parent directory of wherever the `/ptt_files` folder has been placed by the plugin after a test run. This is a known issue and will be fixed at some point.
+In some environments, where the working directory for pytest has been changed from the default, it may be necessary to cd into the working directory in order to successfully launch the TUI or HTML. Basically, you need to be in the parent directory of wherever the `/tui_files` folder has been placed by the plugin after a test run. This is a known issue and will be fixed at some point.
 
 ### Sample / Demo Tests
 
@@ -92,7 +92,7 @@ On Windows, use the ALT key while click-dragging the mouse. Mac users can get th
 
 ### Generating and viewing the HTML File
 
-The HTML output file is located at `<cwd>/ptt_files/html_report.html`. The HTML file is generated and launched via browser when the `tuih` script is invoked on the command line.
+The HTML output file is located at `<cwd>/tui_files/html_report.html`. The HTML file is generated and launched via browser when the `tuih` script is invoked on the command line.
 
 ### Python Log Message Folding (HTML file)
 
