@@ -12,9 +12,8 @@
 ### HTML:
 ![2022-08-27 08 07 11](https://user-images.githubusercontent.com/4308435/187034046-312b1ee8-0f7b-49a1-994f-9c38a9d3941c.gif)
 
-### LOG FOLDING:
+### Log Folding:
 ![2023-04-11 23 56 57](https://user-images.githubusercontent.com/4308435/231364763-132e8c35-cb61-4172-9686-176d84c038ca.gif)
-
 
 ## Introduction
 When you run Pytest campaigns that produce a lot of terminal output (e.g. with many tests, very detailed output, or with multiple failures), the standard Pytest output can make it difficult to examine the results. You end up scrolling way back in the terminal, looking for that one test you want to examine more closely. Pytest-tui provides a Text User Interface (TUI) and an HTML page that aim to make it easier to find the information you're looking for.
@@ -72,7 +71,7 @@ Pretty much just run pytest like you always do, adding the `--tui` option to the
 
 `pytest --tui <whatever-else-you-normally-do>`
 
-In some environments, where the working directory for pytest has been changed from the default, it may be necessary to cd into the working directory in order to successfully launch the TUI or HTML. Basically, you need to be in the parent directory of wherever the `/ptt_files` folder has been placed by the plugin after a test run. This is a known issue and will be fixed at some point.
+In some environments, where the working directory for pytest has been changed from the default, it may be necessary to cd into the working directory in order to successfully launch the TUI or HTML. Basically, you need to be in the parent directory of wherever the `/tui_files` folder has been placed by the plugin after a test run. This is a known issue and will be fixed at some point.
 
 ### Sample / Demo Tests
 
@@ -92,7 +91,7 @@ On Windows, use the ALT key while click-dragging the mouse. Mac users can get th
 
 ### Generating and viewing the HTML File
 
-The HTML output file is located at `<cwd>/ptt_files/html_report.html`. The HTML file is generated and launched via browser when the `tuih` script is invoked on the command line.
+The HTML output file is located at `<cwd>/tui_files/html_report.html`. The HTML file is generated and launched via browser when the `tuih` script is invoked on the command line.
 
 ### Python Log Message Folding (HTML file)
 

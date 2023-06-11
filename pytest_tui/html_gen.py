@@ -1,29 +1,26 @@
 # import configparser
 import json
+import logging
 import re
 import webbrowser
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, List, Union
+from typing import Dict, List, Tuple, Union
 
 import json2table
 from ansi2html import Ansi2HTMLConverter
+from strip_ansi import strip_ansi
 
 from pytest_tui import __version__
 from pytest_tui.utils import (
-    HTML_OUTPUT_FILE,
-    LOG_LEVEL_MAP,
     PYTEST_TUI_FILES_DIR,
     TERMINAL_OUTPUT_FILE,
     Results,
     test_session_starts_results_grabber,
+    DEFAULT_HTML_FILE,
 )
 
-# Next 3 lines are saved from earlier CLI-Config work
-# CLI CONFIG SAVED WORK
-# from pytest_tui.__main__ import Cli
-# from pytest_tui.utils import CONFIGFILE, HTML_OUTPUT_FILE, TERMINAL_OUTPUT_FILE, Results
-
+logger = logging.getLogger(__name__)
 
 CSS_FILE = Path(__file__).parent / "resources" / "styles.css"
 JS_FILE = Path(__file__).parent / "resources" / "scripts.js"
@@ -121,11 +118,6 @@ class TabContent:
 
 class HtmlPage:
     def __init__(self, results: Results):
-        # Read existing config from file, or apply default if not exist
-        # self.config_parser = configparser.ConfigParser()
-        # self.cli = Cli()
-        # self.cli.read_config_file()
-
         self.results = results
         self.tab_content = TabContent(results)
         self.fetched_sections_html = self.tab_content.fetch_sections_html()
@@ -170,7 +162,7 @@ class HtmlPage:
 
     def create_final_test_summary(self) -> str:
         return (
-            """<button class="accordion">Final Test Summary  (click to expand)</button><div class="panel-closed"><p><pre>"""
+            """<button class="accordion-open">Final Test Summary  (click to expand)</button><div class="panel-open"><p><pre>"""
             + self.converter.convert(
                 self.results.tui_sections.short_test_summary.content, full=False
             )
@@ -190,7 +182,7 @@ class HtmlPage:
         )
         ripped = search.groups()[0].encode().decode("unicode-escape") if search else ""
         return (
-            """<button class="accordion">Live Test Session Summary  (click to expand)</button><div class="panel-closed"><p><pre>"""
+            """<button class="accordion-open">Live Test Session Summary  (click to expand)</button><div class="panel-open"><p><pre>"""
             + self.converter.convert(
                 self.results.tui_sections.lastline.content, full=False
             )
@@ -228,14 +220,14 @@ class HtmlPage:
             d, build_direction="LEFT_TO_RIGHT", table_attributes=table_attributes
         )
         return (
-            """<button class="accordion">Test Execution Info</button><div class="panel-open"><p><pre>"""
+            """<button class="accordion-closed">Test Execution Info (click to expand)</button><div class="panel-closed"><p><pre>"""
             + dj
             + """</pre></p></div>"""
         )
 
     def create_environment_info(self, m, table_attributes) -> str:
         return (
-            """<button class="accordion">Environment</button><div class="panel-open"><p><pre>"""
+            """<button class="accordion-closed">Environment (click to expand)</button><div class="panel-closed"><p><pre>"""
             + json2table.convert(
                 m, build_direction="LEFT_TO_RIGHT", table_attributes=table_attributes
             )
@@ -281,26 +273,6 @@ class HtmlPage:
         )
         tabs_links.extend(["""</span> </span>"""])
 
-        # Dropdown for fold-section actions
-        if self.results.tui_fold_level or self.results.tui_fold_regex:
-            tabs_links.extend(
-                [
-                    """<span class="dropdown"> <button class="dropbtn" style="color: brown; background-color: #d9ead3">Fold Actions</button> <span class="dropdown-content">"""
-                ]
-            )
-
-            tabs_links.extend(
-                [
-                    """<span><button class="dropdown-item tablinks" style="background-color: #a8b3dc" onclick="toggleAllDetails()">Fold/Unfold Logs</button> </span>"""
-                ]
-            )
-            tabs_links.extend(
-                [
-                    """<span><button class="dropdown-item tablinks btn-rt" style="background-color: #b3dca8" id="toggle-details" onclick="toggleDetailsElements()">Show/Hide Fold Markers</button></span>"""
-                ]
-            )
-            tabs_links.extend(["""</span> </span>"""])
-
         # Full Output tab
         tabs_links.extend(
             [
@@ -309,18 +281,50 @@ class HtmlPage:
             ]
         )
 
-        if self.results.tui_fold_level or self.results.tui_fold_regex:
+        # This variable determines if the "Folded Output" tab and "Fold Actions" tabs are displayed or not
+        fold_visibility = "" if self.results.tui_regexfile else "display: none;"
+        if self.results.tui_regexfile:
             tabs_links.extend(
                 [
-                    f"""<span><button class="tablinks" style="background-color: {TAB_FOLDED_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button></span> </div>"""
-                    for section in TAB_FOLDED_OUTPUT
+                    """<span class="dropdown"> <button class="dropbtn" style="color: brown; background-color: #d9ead3">Fold Actions</button> <span class="dropdown-content">"""
                 ]
             )
+            tabs_links.extend(
+                [
+                    """<span><button class="dropdown-item tablinks" style="background-color: #a8b3dc" onclick="toggleAllDetails()">Fold / Unfold</button> </span>"""
+                ]
+            )
+            # tabs_links.extend(
+            #     [
+            #         """<span><button class="dropdown-item tablinks btn-rt" style="background-color: #b3dca8" id="toggle-details" onclick="toggleDetailsElements()">Hide / Show Fold Markers</button></span>"""
+            #     ]
+            # )
+            tabs_links.extend(
+                [
+                    """<span><button class="dropdown-item tablinks btn-rt" style="background-color: #b3dca8" id="toggle-summary" onclick="toggleSummaryElements()">Hide / Show Fold Markers</button></span>"""
+                ]
+            )
+            tabs_links.extend(["""</span> </span>"""])
 
+        # Folded Output tab; always generated but only displayed if self.results.tui_regexfile is True
+        # (i.e. if the user provided a regex file)
+        tab_folded_output = f"""<span id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output_by_regex()}</pre> </span>"""
+
+        # The actual folded output content, tab "Folded Output" is just a container for this content
+        tabs_links.extend(
+            [
+                f"""<span><button class="tablinks" style="{fold_visibility} background-color: {TAB_FOLDED_OUTPUT_COLOR[section]}" onclick="openTab(event, '{section}')" >{section}</button></span> </div>"""
+                for section in TAB_FOLDED_OUTPUT
+            ]
+        )
+
+        # Stitch all the tabs together to be displayed at top of page
         tab_links_section = (
             """<span class="tab">""" + "".join(tabs_links) + """</span>"""
         )
 
+        # Build up content for each tab that shows a results category (Pass, Fail, etc.)
+        # Each results tab is populated with individual result content, each of which is collapsible
         tab_result_content = []
         for tab in TABS_RESULTS:
             if tab == "All Tests":
@@ -336,8 +340,11 @@ class HtmlPage:
                     f"""<div id="{tab}" class="tabcontent"> {self.get_collapsible_results(tab.lower())} </div>"""
                 )
 
+        # Stitch all the results together to be displayed withint their individual category tabs
         tab_results = "".join(tab_result_content)
 
+        # Construct a single tab which drops down and displays individual Pytest output sections (e.g. "Summary", "Errors", etc.)
+        # This content comes ANSI-encoded, so it needs to be converted to HTML for proper display
         tab_section_content = [
             f"""<div id="{section}" class="tabcontent"> <pre>{self.converter.convert(self.tab_content.tabs[section], full=False) or ""}</pre> </div>"""
             for section in TABS_SECTIONS
@@ -345,23 +352,18 @@ class HtmlPage:
         ]
         tab_sections = "".join(tab_section_content)
 
+        # The "About" tab (metadata, etc for this test run)
         tab_about = f"""<div id="{TAB_ABOUT[0]}" class="tabcontent"> <p>{self.get_metadata()}</p> </div>"""
 
+        # The "Full Output" tab (all output from the test run), as it occured chronologically on the console
         tab_full_output = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <pre>{self.get_terminal_output()}</pre> </div>"""
-
-        if self.results.tui_fold_level:
-            tab_folded_output = f"""<span id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output(self.results.tui_fold_level)}</pre> </span>"""
-        elif self.results.tui_fold_regex:
-            tab_folded_output = f"""<span id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output(self.results.tui_fold_regex)}</pre> </span>"""
-        else:
-            tab_folded_output = ""
 
         return (
             tab_links_section
             + tab_about
             + tab_results
-            + tab_sections
             + tab_full_output
+            + tab_sections
             + tab_folded_output
         )
 
@@ -406,12 +408,24 @@ class HtmlPage:
             "tr": "nth-child(even) {background-color: #f2f2f2;}",
         }
 
+        # tab_color_button =  """<rainbow-button onclick="removeColor()">Remove color</rainbow-button>"""
+        # tab_color_button =  """<button class=button-43 onclick="removeColor(); this.style.display = 'none'">Remove Color</button>"""
+        tab_color_button = """<button class="button-43" onclick="removeOrRestoreColor()">Remove / Restore Colors</button>"""
+        tab_invert_button = """<button class=button-43 onclick="invertColors()">Invert Colors</button>"""
+        # tab_toggle_background_button = """<button class=button-43 onclick="togglePreBackground()">Toggle Background</button>"""
+        tab_toggle_background_button = """<button class="button-43" onclick="togglePreBackground()">Toggle Background</button>"""
+
         return (
             "<hr>"
             + f"{self.create_final_test_summary()}<hr>"
             + f"{self.create_live_test_session_summary()}<hr>"
             + f"{self.create_test_execution_info()}<hr>"
-            + f"{self.create_environment_info(m, table_attributes)}"
+            + f"{self.create_environment_info(m, table_attributes)}<hr>"
+            + tab_color_button
+            + "<hr>"
+            + tab_invert_button
+            + "<hr>"
+            + tab_toggle_background_button
         )
 
     def get_terminal_output(self) -> str:
@@ -424,84 +438,88 @@ class HtmlPage:
             tout = str(f.read(), "utf-8")
         return tout
 
-    def get_line_level(self, line: str) -> str:
-        """Is this line a log entry (DEBUG, INFO, WARNING, ERROR, CRITICAL)?"""
-        for level, value in LOG_LEVEL_MAP.items():
-            if level in line:
-                return value
+    def get_regex(self, tui_regexfile: Path) -> List[str]:
+        """Read regex file and return list of regexes"""
+        try:
+            with open(tui_regexfile, "r") as file:
+                # lines = [ast.literal_eval(line) for line in file.readlines() if line]
+                lines = [eval(line) for line in file.readlines() if line]
+                return [line.rstrip() for line in lines if line]
+        except FileNotFoundError as e:
+            # logger.error(f"Regex file not found: {e}")
+            logger.exception(e)
+            return []
 
-    def fold_log_lines(self, lines: list, level: str) -> str:
-        # sourcery skip: hoist-similar-statement-from-if, hoist-statement-from-if, merge-duplicate-blocks, merge-else-if-into-elif, remove-pass-elif, remove-redundant-if
+    def fold_regex_lines(self, lines: List[str]) -> str:
         """
-        Search each line of console output and look for a log level indicator (DEBUG, INFO, WARNING, ERROR, CRITICAL).
-        If a line contains a log level indicator, check if log level is <= the level passed to the function.
-        If the log level is <= the level passed to the function, then the line is folded.
-        If the log level is > than the level passed to the function, then the line is not folded.
+        Refactored code
+        Search each line of console output and look for a regex match,
+        using the regex patterns defined in file TODO.
+        If a line contains a match for the regex patterrn, the line
+        will be folded. Consecutive lines that match regex are grouped
+        together wihin the same fold.
         """
-        html_lines = []
+        converter = Ansi2HTMLConverter()
         html_str = ""
         fold_started = False
-        for l in lines:
-            line = self.converter.convert(l, full=False)
-            this_line_log_level_match = self.get_line_level(l)
-            if this_line_log_level_match:
-                if this_line_log_level_match <= LOG_LEVEL_MAP[level]:
+        regexes = self.get_regex(self.results.tui_regexfile)
+
+        if len(regexes) == 1:
+            # If there is only one regex pattern, use it to fold any line that matches
+            regex = regexes[0]
+            for line in lines:
+                line_stripped = strip_ansi(line)
+                line_converted = converter.convert(line, full=False)
+                match = re.search(regex, line_stripped)
+
+                if match:
                     if not fold_started:
-                        html_str += (
-                            f"<details><summary style='nobr'>Folded {level}</summary>"
-                        )
                         fold_started = True
-                else:
-                    if fold_started:
-                        html_str += "</details>"
-                        fold_started = False
-                html_str += line + "\n"
-            else:
-                if fold_started:
-                    html_str += "</details>"
+                        html_str += (
+                            "<details><summary style='nobr'>Folded RegEx:"
+                            f" '{regex}'</summary>"
+                        )
+                    html_str += line_converted + "\n"
+                elif fold_started:
                     fold_started = False
-                    html_str += line + "\n"
+                    html_str += "</details>"
+                    html_str += line_converted + "\n"
                 else:
-                    html_str += line + "\n"
+                    html_str += line_converted + "\n"
+
+        if len(regexes) >= 2:
+            # With 2 regexes, the first is the 'starter' regex and the second is the 'ender' regex
+            regex_starter = regexes[0]
+            regex_ender = regexes[1]
+            for line in lines:
+                line_stripped = strip_ansi(line)
+                line_converted = converter.convert(line, full=False)
+                match_starter = re.search(regex_starter, line_stripped)
+                match_ender = re.search(regex_ender, line_stripped)
+
+                if match_starter:
+                    if not fold_started:
+                        fold_started = True
+                        html_str += (
+                            "<details><summary style='nobr'>Folded RegEx:"
+                            f" '{regex_starter}'</summary>"
+                        )
+                    html_str += line_converted + "\n"
+                elif match_ender:
+                    fold_started = False
+                    html_str += "</details>"
+                    html_str += line_converted + "\n"
+                elif fold_started:
+                    html_str += line_converted + "\n"
+                else:
+                    html_str += line_converted + "\n"
+
         return html_str
 
-    def fold_regex_lines(self, lines: list, regex: str) -> str:
-        """
-        Search each line of console output and look for a regex match.
-        If a line contains a regex match, then the line is folded.
-        Consecutive lines that match the regex are folded together.
-        """
-        html_lines = []
-        html_str = ""
-        fold_started = False
-        for l in lines:
-            line = self.converter.convert(l, full=False)
-            if re.search(regex[0], line):
-                if not fold_started:
-                    html_str += (
-                        f"<details><summary style='nobr'>Folded RegEx: '{regex[0]}' ..."
-                        f" '{regex[1]}'</summary>"
-                    )
-                    fold_started = True
-                html_str += line + "\n"
-            elif re.search(regex[1], line):
-                fold_started = False
-                html_str += f"{line}</details>"
-            elif fold_started:
-                html_str += line + "\n"
-            else:
-                html_str += line + "\n"
-        return html_str
-
-    def fold_terminal_output(self, searcher: str) -> Union[str, None]:
+    def fold_terminal_output_by_regex(self) -> Union[str, None]:
         terminal_output_ansi = self.get_terminal_output_ansi()
         lines = terminal_output_ansi.splitlines()
-        if self.results.tui_fold_level:
-            return self.fold_log_lines(lines, searcher)
-        elif self.results.tui_fold_regex:
-            return self.fold_regex_lines(lines, searcher)
-        else:
-            return None
+        return self.fold_regex_lines(lines) if self.results.tui_regexfile else None
 
 
 def main():
@@ -513,19 +531,9 @@ def main():
     html_trailer = page.create_trailer()
     html_out = html_header + html_tabs + html_trailer
 
-    global HTML_OUTPUT_FILE
-    if results.tui_test_info.get("tui_htmlfile"):
-        HTML_OUTPUT_FILE = Path(
-            PYTEST_TUI_FILES_DIR / results.tui_test_info["tui_htmlfile"]
-        )
-    with open(HTML_OUTPUT_FILE, "w+") as f:
+    html_outfile = Path(results.tui_test_info.get("tui_htmlfile", DEFAULT_HTML_FILE))
+    with open(html_outfile, "w") as f:
         f.write(html_out)
-    webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
-
-    # Open in browser if autolaunch_html config is set
-    # page.cli.read_config_file()
-    # if page.cli.html_autolaunch:
-    #     webbrowser.open(f"file://{HTML_OUTPUT_FILE._str}")
 
 
 if __name__ == "__main__":

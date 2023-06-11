@@ -9,7 +9,7 @@ from textual.app import App
 from textual.widget import Widget
 from textual.widgets import ScrollView, TreeClick
 
-from pytest_tui._tree_control import TreeControl
+from pytest_tui.tree_control import TreeControl
 from pytest_tui.utils import Results
 
 TREE_WIDTH = 120

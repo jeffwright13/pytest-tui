@@ -71,7 +71,11 @@ div.sticky {
      position: sticky;
      top: 0;
 }
- pre, .pre {
+.pre-bg-black {
+    background-color: black;
+    color: white;
+  }
+pre, .pre {
      display: block;
      font-family: monospace;
      white-space: pre-wrap;
@@ -102,16 +106,6 @@ div.sticky {
      transition: 0.3s;
      font-size: 15px
 }
- .tab button:hover {
-     background-color: #ddd;
-     opacity: 1.0;
-     transition: 0.3s;
-}
- .tab button.focus {
-     background-color: #ccc;
-     opacity: 1.0;
-     transition: 0.3s;
-}
  .tab button.active {
      opacity: 1.0;
      transition: 0.3s;
@@ -120,7 +114,10 @@ div.sticky {
      font-family: "Arial", sans-serif;
      font-size: 15px opacity: 1.0;
 }
- .tabcontent {
+.tablinks.hidden {
+    display: none;
+}
+.tabcontent {
      background-color: #ddd;
      display: none;
      border: 1px solid #ccc;
@@ -129,7 +126,7 @@ div.sticky {
      animation: fadeEffect .25s;
 }
 /* Style the buttons that are used to open and close the accordion panel */
- .accordion {
+ .accordion-open, .accordion-closed {
      background-color: #ddd;
      font-weight: bold;
      color: #222;
@@ -139,33 +136,43 @@ div.sticky {
      text-align: left;
      border: none;
      outline: none;
-     transition: 0.4s;
+     transition: 0.3s;
 }
 .button-43 {
-    background-image: linear-gradient(-180deg, #37AEE2 0%, #1E96C8 100%);
     border-radius: .5rem;
     box-sizing: border-box;
-    color: #FFFFFF;
+    font-weight: bold;
+    color: #222;
+    background-color: #ddd;
     display: flex;
-    font-size: 16px;
+    font-size: 14px;
     justify-content: center;
-    padding: 1rem 1.75rem;
+    padding: 16px;
     text-decoration: none;
-    width: 100%;
     border: 0;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
-}
-.button-43:hover {
-    background-image: linear-gradient(-180deg, #1D95C9 0%, #17759C 100%);
-}
-@media (min-width: 768px) {
-  .button-43 {
-    padding: 1rem 2rem;
   }
-}
+
+  .button-43:hover {
+    background-color: #ccc;
+    opacity: 1.0;
+    transition: 0.3s;
+  }
+
+  .button-43:focus {
+    background-color: #ccc;
+    opacity: 1.0;
+    transition: 0.3s;
+  }
+
+  @media (min-width: 768px) {
+    .button-43 {
+      padding: 16px;
+    }
+  }
 summary {
     font-size: 12px;
     font-weight: bold;
@@ -188,17 +195,18 @@ summary {
 }
 /* Add background color to the button if it is clicked (add the .active class */
 /* with JS), and when you move the mouse over it (hover) */
- .active, .accordion:hover {
+ .active, .accordion-open:hover, .accordion-closed:hover {
      background-color: #ccc;
 }
 /* Style the accordion panel. Note: hidden by default */
- .panel-open {
-     max-height: 100%;
+ .panel-closed {
+     /* max-height: 100%; */
+     max-height: 0;
      padding: 0 16px;
      background-color: #ddd;
-     /* display: none; */
+     /* /* display: none; */
      overflow: hidden;
-     transition: max-height 0.2s ease-out;
+     transition: max-height 0.3s ease-out;
 }
  @-webkit-keyframes fadeEffect {
      from {
@@ -216,13 +224,13 @@ summary {
         opacity: 1.5;
     }
 }
-.panel-closed {
+.panel-open {
     max-height: 100%;
     padding: 0 16px;
     background-color: #ccc;
     display: none;
     overflow: hidden;
-    transition: max-height 0.2s ease-out;
+    transition: max-height 0.3s ease-out;
 }
 @-webkit-keyframes fadeEffect {
     from {
@@ -276,7 +284,32 @@ summary {
      height:auto;
      width:5px;
 }
- p {
+
+@keyframes rainbow {
+    0% {background: red;}
+    14% {background: orange;}
+    28% {background: yellow;}
+    42% {background: green;}
+    57% {background: blue;}
+    71% {background: indigo;}
+    85% {background: violet;}
+    100% {background: red;}
+}
+
+rainbow-button {
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    animation: rainbow 4s linear infinite;
+    cursor: pointer;
+}
+
+body.invert-colors {
+    filter: invert(100%);
+    background: #000; /* Add this if you want a black background */
+}
+
+p {
      font-size: 14px;
      font-family: "Arial", sans-serif;
 }
