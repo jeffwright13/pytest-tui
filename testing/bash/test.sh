@@ -79,8 +79,8 @@ reset
 
 printf "Launching HTML\n"
 tuih
-printf "Check for exisence of output file '.ptt_files/hacked.html..."
-FILE=ptt_files/hacked.html
+printf "Check for exisence of output file '.tui_files/hacked.html..."
+FILE=tui_files/hacked.html
 if [ -f "$FILE" ]; then
     echo "$FILE exists."
 else

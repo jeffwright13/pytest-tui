@@ -91,28 +91,24 @@ On Windows, use the ALT key while click-dragging the mouse. Mac users can get th
 
 ### Generating and viewing the HTML File
 
-The HTML output file is located at `<cwd>/tui_files/html_report.html`. The HTML file is generated and launched via browser when the `tuih` script is invoked on the command line.
+The HTML output file is located at `<cwd>/tui_files/html_report.html`. The HTML file is automatically generated when a test run is completed with the "--tui" option. It can also be generated manually with the `tuih` script by invoking it on the command line.
 
-### Python Log Message Folding (HTML file)
+### "Folding" output in the HTML report
 
-New in 1.9.1 is the "log folding" feature, which will automatically roll up any output lines from the test run which are from the Python logger and which are at or below a configurable level. This lets you view verbose debug-level output when you need it, and fold it away, out of sight when you don't. There is no special configuration that has to be done to use this feature, other than enabling at run time with the `--tui-fold-level` option (see `pytest --help`). By default, this value is set to WARNING, in keeping with the default level of Python's logging module when creating a new logger.
+New in 1.11.0 is the integrated "folding" feature, which will automatically roll up any output lines from the test run which match a regex (or regexes) specified in the regex file given on the command line. This option allows you to match on specific lines of console output from pytest, and 'fold' them (hide them), with an option to unfold/unhide them. Using this feature, you can do things like:
+- log all your tests with DEBUG level logging, but only view those DEBUG messages when yuo want to
+- mark certain sections of your test output with a special pair of markers, and then fold them up when you don't need to see them
 
-This new feature produces a section in the HTML report file called "Folded Output", which displays the test run's console output with all lines of the configured log level folded up. Each folded section can be individually toggled opened/closed by clicking the "Folded WARNING" line (or whatever level you have configured) in the HTML's "Folded Output" section. You can toggle all folded content at once by clicking the "Fold/Unfold Logs" button inside the "Fold Actions" menu at the top right of the HTML page. They can also be hidden entirely by double-clicking the "Show/Hide Fold Markers" button.
+The folding feature is activated by passing the `--tui-regexfile` option (see `pytest --help`), and setting the path of a file containing the desired regex or regexes.
 
+The file itself must contain plain text (UTF-8 encoded) with either a single regex, specified on a single line of the file; or two 'marker' patterns, specified in two consecutive lines of the file. If there is a single line in the file, that line is assumed to contain a regular expressoin that will cause the folding action to be used on any line in the console output of pytest if that line matches the regex. Consecutive lines that match will be folded into the same section. If there are two lines in the regex file, the first line is assumed to be a start marker, and the second line is assumed to be a stop marker. The folding action will be applied to all lines between the start and stop markers
 
-### Python Regex Folding
-
-New in 1.10.0 is the "regex folding" feature, which will automatically roll up any output lines which match the provided regular expression. This feature can be used by specifying the `--tui-fold-regex` option (see `pytest --help`), and setting the value of two regular expressions, separated by a semicolon (think of these as 'start-folding' and 'stop-folding' regex matchers). The resulting Folded Output section of the HTML file folds all output that resides between the lines that match the two regular expressions. Their full content can be revelaed by clicking the flashing "Folded Regex" line. You can toggle all folded content at once by clicking the "Fold/Unfold Logs" button inside the "Fold Actions" menu at the top right of the HTML page. They can also be hidden entirely by double-clicking the "Show/Hide Fold Markers" button.
-
-You can basically use this in two different ways: (1) If you know already the regex pattern that matches two lines surrounding the area of text you want folded, use those. This method is the least intrsuive, since it does not add any text to Pytests's output. (2) Insert `print` or `log` statements into your code that will print out the two lines you want to use as the start and stop folding points. This method is more intrusive, since it adds text to the output of Pytest, but it is also more flexible, since you can use any regex pattern you want. One pattern I really like uses the non-printable characters 'ZWS' and 'ZWJ' ((Zero Width Space)[https://en.wikipedia.org/wiki/Zero-width_space] / (Zero Width Joiner)[https://en.wikipedia.org/wiki/Zero-width_joiner]) as the start and stop markers. The visual impact on the output is minimal, but the regex pattern is very unlikely to match anything else in the output:
+Ideas for folding include:
+- Fold log output of DEBUG level
+- Mark chatty sections of code with start/stop markers to make the overall flow of test more readable
+- Insert `print` or `log` statements into your code that will print out the two lines you want to use as the start and stop folding points. This method is more intrusive, since it adds text to the output of Pytest, but it is also more flexible, since you can use any regex pattern you want. One pattern I really like uses the non-printable characters 'ZWS' and 'ZWJ' ((Zero Width Space)[https://en.wikipedia.org/wiki/Zero-width_space] / (Zero Width Joiner)[https://en.wikipedia.org/wiki/Zero-width_joiner]) as the start and stop markers. The visual impact on the output is minimal, but the regex pattern is very unlikely to match anything else in the output:
 
 `pytest --tui --tui-fold-regex=​​​;￼​`
-
-### Python Log Message Folding
-
-New in 1.9.1 is the "folding" feature, which will automatically roll up any output lines from the test run which are from the Python logger and which are at or below a configurable level. This lets you view verbose debug-level output when you need it, and fold it away, out of sight when you don't. There is no special configuration that has to be done to use this feature, other than enabling at run time with the --tui-fold-level option (see pytest --help). By default, this value is set to WARNING, in keeping with the default level of Python's logging module when creating a new logger.
-
-This new feature produces a section in the HTML report file called "Folded Output", which displays the test run's console output with all lines of the configured log level folded up. Each folded section can be individually toggled opened/closed by clicking the "Folded WARNING" line (or whatever level you have configured). You can toggle all folded sections by clicking the "Fold/Unfold Logs" button inside the "Fold Actions" menu at the top right of the HTML page, and they can be hidden entirely by double-clicking the "Show/Hide Fold Markers" button.  Consecutive runs of logger statements that meet the criteria for folding are contained within the same fold section for convenience.
 
 ## Known Limitations / Issues
 
