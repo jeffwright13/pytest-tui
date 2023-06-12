@@ -1,10 +1,18 @@
 RELEASE_INSTRUCTIONS
 --------------------
 
+- First (VERY IMPORTANT) verify your Python and Pip versions so you know what you're building with. This is especially important if you're using pyenv to manage multiple Python versions. Current recommendation is latest Python 3.9 (3.9.16).
+    $ `which python` --version
+    $ `which pip` --version
+
+    If one of these points to a version different than the one you think you're dealing with, you can specify it manually on the command line like this:
+    $ python3.9 --version
+    $ pip3.9 --version
+
 - Verify package installs from source and runs correctly in editable mode:
     $ git clone git@github.com:jeffwright13/pytest-tui.git dev-dir
     $ cd dev-dir
-    $ pyenv local 3.9.9
+    $ pyenv local 3.9.16
     $ python -m venv venv
     $ source venv/bin/activate
     $ pip install pip-tools
@@ -16,16 +24,16 @@ RELEASE_INSTRUCTIONS
     $ tuih
 
 - Install/upgrade build & release tools:
-    $ pip install --upgrade setuptools wheel twine
+    $ `which pip` install --upgrade setuptools wheel twine
 
 - Clear out old builds:
     $ rm dist/*
 
 - Build:
-    $ python setup.py sdist bdist_wheel
+    $ `which python` setup.py sdist bdist_wheel
 
 - Publish to TestPyPi:
-    $ python -m twine upload --repository testpypi dist/*
+    $ `which python` -m twine upload --repository testpypi dist/*
 
 - Test the installation in a fresh directory by running the 'test.sh' bash script.
   Verify TUI and HTML page for each iteration/Python version.

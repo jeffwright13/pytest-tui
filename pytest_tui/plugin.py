@@ -1,8 +1,8 @@
-import argparse
 import itertools
 import pickle
 import re
 import tempfile
+import traceback
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime, timezone
 from io import StringIO
@@ -12,16 +12,14 @@ from typing import List
 
 import pytest
 from _pytest._io.terminalwriter import TerminalWriter
-from _pytest.config.argparsing import Parser
 from _pytest.config import Config, create_terminal_writer
+from _pytest.config.argparsing import Parser
 from _pytest.nodes import Item
 from _pytest.reports import TestReport
 from strip_ansi import strip_ansi
 
-# from pytest_tui.__main__ import tui_launch
 from pytest_tui.html_gen import main as tuih
-from pytest_tui.utils import (
-    # HTML_OUTPUT_FILE,
+from pytest_tui.utils import (  # HTML_OUTPUT_FILE,
     TERMINAL_OUTPUT_FILE,
     TUI_RESULTS_FILE,
     TuiRerunTestGroup,
@@ -67,13 +65,14 @@ def pytest_addoption(parser: Parser) -> None:
         action="store",
         dest="_tui_htmlfile",
         nargs="?",
-        type=argparse.FileType("w"),
+        # type=argparse.FileType("w"),
         default=Path(f"{Path.cwd()}/tui_files/html_report.html"),
         const=Path(f"{Path.cwd()}/tui_files/html_report.html"),
         help=(
             "Specify a non-default name for the HTML report file. Can be a relative or"
             " absolute pathname, using your operating system's standard format. Default"
             " is 'html-report.html' in the 'tui_files/' directory under the cwd."
+            " If you specify a relative pathname, it will be relative to the cwd."
         ),
     )
     # TODO
@@ -82,6 +81,7 @@ def pytest_addoption(parser: Parser) -> None:
     # TODO: clean up HELP strings
     group.addoption(
         "--tui-regexfile",
+        action="store",
         dest="_tui_regexfile",
         nargs="?",
         default=None,
@@ -453,7 +453,12 @@ def pytui_launch(config: Config) -> None:
         capmanager.suspend_global_capture(in_=True)
     finally:
         # re-enable capturing
-        with ThreadPoolExecutor() as executor:
-            executor.submit(tuih)
-        # tui_launch()
+        try:
+            with ThreadPoolExecutor() as executor:
+                future = executor.submit(tuih)
+                result = future.result()
+        except Exception as e:
+            traceback_str = traceback.format_exc()
+            print(f"Exception in worker thread while running tuih() function: {e}")
+            print(f"Traceback: {traceback_str}")
         capmanager.resume_global_capture()

@@ -5,13 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.11.0] 2023-06-10
-- Removed --tui-fold-level option, now replaced by modified --tui-regexfile implementation (previous bullet point); allows for regex(es) to be specified in a file, rather than on the command line.
+## [2.0.0] 2023-06-12
+- Removed `--tui-fold-level` option, now replaced by modified ``--tui-regexfile` implementation (previous bullet point); allows for regex(es) to be specified in a file, rather than on the command line.
 - Fixed Issue 100 (obviated by previous change in fold behavior).
 - Changed output files folder to ./tui_files.
 - Added new buttons to About tab to remove/restore/invert colors.
 - Introduced tests to test the plugin itself, using pytest's 'pytester' fixture.
 - New buttons in HTML report to invert/remove/restore colors.
+- Added Faker library to standard dependencies.
 
 ## [1.10.0] 2023-04-12
 - Added new folding mode `--tui-fold-regex`. This mode allows specifying reg-ex's marking the beginning and end of a section that the user wants to fold. See README for details.
@@ -31,7 +32,7 @@ and this project tries to adhere to [Semantic Versioning](https://semver.org/spe
 - Minor improvements to HTML report "About" page.
 
 ## [1.8.0] 2023-01-30
-- New command-line option `tui-reportfile', which allows user to specify the name of the HTML file produced when the console script `tuih` is run.
+- New command-line option `tui-reportfile`, which allows user to specify the name of the HTML file produced when the console script `tuih` is run.
 
 ## [1.7.2] 2023-01-29
 - Fixed Issue 94 (KeyError when user env has no JAVA_HOME).

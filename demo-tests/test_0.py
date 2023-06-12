@@ -7,6 +7,16 @@ import pytest
 logger = logging.getLogger()
 
 
+# 3 consecutive ZWS
+ZWS_X3 = r"""​​​"""
+# 1 BOM followed by 1 ZWS
+BOM_ZWS = r"""￼​"""
+# 3 consecutive ZWJ
+ZWJ_X3 = r"""‍‍‍"""
+# 1 BOM followed by 1 ZWJ
+BOM_ZWJ = r"""￼‍"""
+
+
 def test0_pass_1():
     print("Test Pass 1!")
     assert True
@@ -14,11 +24,13 @@ def test0_pass_1():
 
 def test0_pass_2_logs():
     print("Test Pass 2!")
+    logger.info(ZWS_X3)
     logger.critical("CRITICAL")
     logger.error("ERROR")
     logger.warning("WARNING")
     logger.info("INFO")
     logger.debug("DEBUG")
+    logger.info(ZWJ_X3)
     assert True
 
 
@@ -47,22 +59,26 @@ def test0_skip():
 @pytest.mark.xfail()
 def test0_xfail():
     print("Test 0 XFail")
+    logger.info(ZWS_X3)
     logger.critical("CRITICAL")
     logger.error("ERROR")
     logger.warning("WARNING")
     logger.info("INFO")
     logger.debug("DEBUG")
+    logger.info(ZWJ_X3)
     assert False
 
 
 @pytest.mark.xfail()
 def test0_xpass():
     print("Test 0 XPass")
+    logger.info(ZWS_X3)
     logger.critical("CRITICAL")
     logger.error("ERROR")
     logger.warning("WARNING")
     logger.info("INFO")
     logger.debug("DEBUG")
+    logger.info(ZWJ_X3)
     assert True
 
 

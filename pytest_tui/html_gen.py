@@ -1,3 +1,5 @@
+import argparse
+
 # import configparser
 import json
 import logging
@@ -13,14 +15,15 @@ from strip_ansi import strip_ansi
 
 from pytest_tui import __version__
 from pytest_tui.utils import (
+    DEFAULT_HTML_FILE,
     PYTEST_TUI_FILES_DIR,
     TERMINAL_OUTPUT_FILE,
     Results,
     test_session_starts_results_grabber,
-    DEFAULT_HTML_FILE,
 )
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 CSS_FILE = Path(__file__).parent / "resources" / "styles.css"
 JS_FILE = Path(__file__).parent / "resources" / "scripts.js"
@@ -306,10 +309,6 @@ class HtmlPage:
             )
             tabs_links.extend(["""</span> </span>"""])
 
-        # Folded Output tab; always generated but only displayed if self.results.tui_regexfile is True
-        # (i.e. if the user provided a regex file)
-        tab_folded_output = f"""<span id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output_by_regex()}</pre> </span>"""
-
         # The actual folded output content, tab "Folded Output" is just a container for this content
         tabs_links.extend(
             [
@@ -357,6 +356,10 @@ class HtmlPage:
 
         # The "Full Output" tab (all output from the test run), as it occured chronologically on the console
         tab_full_output = f"""<div id="{TAB_FULL_OUTPUT[0]}" class="tabcontent"> <pre>{self.get_terminal_output()}</pre> </div>"""
+
+        # Folded Output tab; always generated but only displayed if self.results.tui_regexfile is True
+        # (i.e. if the user provided a regex file)
+        tab_folded_output = f"""<span id="{TAB_FOLDED_OUTPUT[0]}" class="tabcontent"> <pre>{self.fold_terminal_output_by_regex()}</pre> </span>"""
 
         return (
             tab_links_section
@@ -446,8 +449,10 @@ class HtmlPage:
                 lines = [eval(line) for line in file.readlines() if line]
                 return [line.rstrip() for line in lines if line]
         except FileNotFoundError as e:
-            # logger.error(f"Regex file not found: {e}")
-            logger.exception(e)
+            logger.error(
+                f"Regex file not found: {tui_regexfile}. Proceeding with folding"
+                " feature disabled."
+            )
             return []
 
     def fold_regex_lines(self, lines: List[str]) -> str:
@@ -521,6 +526,13 @@ class HtmlPage:
         lines = terminal_output_ansi.splitlines()
         return self.fold_regex_lines(lines) if self.results.tui_regexfile else None
 
+    def create_output_file(self, html_outfile: Path, html_out: str) -> None:
+        assert isinstance(html_outfile, Path), "html_outfile must be a Path object"
+        html_outfile.parent.mkdir(parents=True, exist_ok=True)
+        with html_outfile.open("w") as f:
+            f.write(html_out)
+        logger.info(f"HTML report generated: {html_outfile}")
+
 
 def main():
     results = Results()
@@ -532,8 +544,7 @@ def main():
     html_out = html_header + html_tabs + html_trailer
 
     html_outfile = Path(results.tui_test_info.get("tui_htmlfile", DEFAULT_HTML_FILE))
-    with open(html_outfile, "w") as f:
-        f.write(html_out)
+    page.create_output_file(html_outfile, html_out)
 
 
 if __name__ == "__main__":

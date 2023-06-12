@@ -14,13 +14,13 @@
 "￼"
 
 # 3 consecutive ZWS
-TUI_FOLD_TITLE_BEGIN = r"""​​​"""
+ZWS_X3 = r"""​​​"""
 
 # 1 BOM followed by 1 ZWS
-TUI_FOLD_TITLE_END = r"""￼​"""
+BOM_ZWS = r"""￼​"""
 
 # 3 consecutive ZWJ
-TUI_FOLD_CONTENT_BEGIN = r"""‍‍‍"""
+ZWJ_X3 = r"""‍‍‍"""
 
 # 1 BOM followed by 1 ZWJ
-TUI_FOLD_CONTENT_END = r"""￼‍"""
+BOM_ZWJ = r"""￼‍"""

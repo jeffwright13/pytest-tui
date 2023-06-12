@@ -93,22 +93,21 @@ On Windows, use the ALT key while click-dragging the mouse. Mac users can get th
 
 The HTML output file is located at `<cwd>/tui_files/html_report.html`. The HTML file is automatically generated when a test run is completed with the "--tui" option. It can also be generated manually with the `tuih` script by invoking it on the command line.
 
+### Visibility
+
+Sometimes it can be difficult to read the terminal output when rendered on the HTML report. Pytest embeds ANSI color codes in its output, which are interpreted by a terminal program to display various colors for text. Pytest-tui takes these ANSI color codes and translates them to HTML (using the [ansi2html](https://pypi.org/project/ansi2html/) librray). Because the dhe default color scheme for the HTML report is a light background with dark text, it can be difficult to see some of the colors. To address this, there are three buttons that can help. The first ("Toggle Background") allow you to toggle the bakcground color of all console output. This should result in a page that closely resembles the output you would get in a standard terminal environment (assuming you have white text on a black background). The other two buttons, Invert Colors and Remove/Restore Colors, are a bit more drastic in that they affect all text in the report. Experiment and see what works for you. Also note that if you have your browser set to dark mode, or have a theme that changes the default color scheme, this can also affect the visibility of the text.
 ### "Folding" output in the HTML report
 
-New in 1.11.0 is the integrated "folding" feature, which will automatically roll up any output lines from the test run which match a regex (or regexes) specified in the regex file given on the command line. This option allows you to match on specific lines of console output from pytest, and 'fold' them (hide them), with an option to unfold/unhide them. Using this feature, you can do things like:
-- log all your tests with DEBUG level logging, but only view those DEBUG messages when yuo want to
-- mark certain sections of your test output with a special pair of markers, and then fold them up when you don't need to see them
+New in 1.11.0 is the integrated "folding" feature, which will automatically roll up any output lines from your test's output which match a regex (or regexes) specified in the file given on the command line. This option allows you to match on specific lines of console output from pytest, and 'fold' them (hide them).
 
 The folding feature is activated by passing the `--tui-regexfile` option (see `pytest --help`), and setting the path of a file containing the desired regex or regexes.
 
 The file itself must contain plain text (UTF-8 encoded) with either a single regex, specified on a single line of the file; or two 'marker' patterns, specified in two consecutive lines of the file. If there is a single line in the file, that line is assumed to contain a regular expressoin that will cause the folding action to be used on any line in the console output of pytest if that line matches the regex. Consecutive lines that match will be folded into the same section. If there are two lines in the regex file, the first line is assumed to be a start marker, and the second line is assumed to be a stop marker. The folding action will be applied to all lines between the start and stop markers
 
-Ideas for folding include:
-- Fold log output of DEBUG level
-- Mark chatty sections of code with start/stop markers to make the overall flow of test more readable
-- Insert `print` or `log` statements into your code that will print out the two lines you want to use as the start and stop folding points. This method is more intrusive, since it adds text to the output of Pytest, but it is also more flexible, since you can use any regex pattern you want. One pattern I really like uses the non-printable characters 'ZWS' and 'ZWJ' ((Zero Width Space)[https://en.wikipedia.org/wiki/Zero-width_space] / (Zero Width Joiner)[https://en.wikipedia.org/wiki/Zero-width_joiner]) as the start and stop markers. The visual impact on the output is minimal, but the regex pattern is very unlikely to match anything else in the output:
-
-`pytest --tui --tui-fold-regex=​​​;￼​`
+Ideas and tips for folding:
+- Run all tests with DEBUG level logging, but only view those DEBUG messages when necessary. I find this option particularly helpful when trying to debug a test that is only failing intermittently.
+- Mark certain sections of a test's output with a pair of start/end markers. If you have test output that is very chatty, but you only want to see it when you need to, this is a good option. For example, if you have a test that is making a bunch of API calls, and you want to see the output of those calls, but only when the test fails, you can mark the start and stop of the API calls with a pair of markers, and then fold them away when you don't need to see them.
+- Use the non-printable characters 'ZWS' and 'ZWJ' ((Zero Width Space)[https://en.wikipedia.org/wiki/Zero-width_space] / (Zero Width Joiner)[https://en.wikipedia.org/wiki/Zero-width_joiner]) as start and stop markers. The visual impact on the output is minimal (only inserts one visible space), and the regex pattern is very unlikely to match anything else in the output. The repo contains a file called `nonprintable_​​characters.txt` that contains cobinations of these characters, which can be used as a starting point for your own regexes.
 
 ## Known Limitations / Issues
 

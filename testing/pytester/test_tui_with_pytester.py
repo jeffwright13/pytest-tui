@@ -193,6 +193,31 @@ def test_verify_commandline_options_tui_regexfile_no_value(pytester, consts):
     assert cfg.getoption("_tui_regexfile") == consts.regexfile
 
 
+@pytest.mark.test_tui_with_pytester
+def test_verify_commandline_options_regexfile_does_not_exist(pytester, consts):
+    """Verifies that when '--tui' and '--tui-regexfile' are passed on the command line without a value,
+    '_tui' is True and '_tui_regexfile' is the default value."""
+
+    cfg = pytester.parseconfig("--tui", "--tui-regexfile=does_not_exist.txt")
+
+    assert cfg.getoption("_tui") is True
+    assert cfg.getoption("_tui_htmlfile") is None
+    assert cfg.getoption("_tui_regexfile") == consts.regexfile
+
+
+@pytest.mark.test_tui_with_pytester
+def test_verify_commandline_options_tui_htmlfile_regexfile_no_value(pytester, consts):
+    """Verifies that when '--tui', '--tui-htmlfile', and '--tui-regexfile' are passed on the command line without a value,
+    '_tui' is True, '_tui_htmlfile' is the default value, and '_tui_regexfile' is the default value.
+    """
+
+    cfg = pytester.parseconfig("--tui", "--tui-htmlfile=", "--tui-regexfile=")
+
+    assert cfg.getoption("_tui") is True
+    assert cfg.getoption("_tui_htmlfile") == consts.htmlfile
+    assert cfg.getoption("_tui_regexfile") == consts.regexfile
+
+
 '''
 @pytest.mark.test_tui_with_pytester
 def test_true_assertion(pytester):
