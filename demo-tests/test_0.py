@@ -17,8 +17,36 @@ ZWJ_X3 = r"""‍‍‍"""
 BOM_ZWJ = r"""￼‍"""
 
 
+def test0_10_fail_capturing(capsys):
+    logger.info(ZWS_X3)
+    print("FAIL this stdout is captured")
+    print("FAIL this stderr is captured", file=sys.stderr)
+    logger.warning("FAIL this log is captured")
+    with capsys.disabled():
+        print("FAIL stdout not captured, going directly to sys.stdout")
+        print("FAIL stderr not captured, going directly to sys.stderr", file=sys.stderr)
+        logger.warning("FAIL is this log captured?")
+    print("FAIL this stdout is also captured")
+    print("FAIL this stderr is also captured", file=sys.stderr)
+    logger.warning("FAIL this log is also captured")
+    logger.critical(fake_data())
+    logger.error(fake_data())
+    logger.warning(fake_data())
+    logger.info(fake_data())
+    logger.debug(fake_data())
+    logger.info(ZWJ_X3)
+    assert False
+
+
 def test0_pass_1():
     print("Test Pass 1!")
+    logger.info(ZWS_X3)
+    logger.critical("CRITICAL")
+    logger.error("ERROR")
+    logger.warning("WARNING")
+    logger.info("INFO")
+    logger.debug("DEBUG")
+    logger.info(ZWJ_X3)
     assert True
 
 

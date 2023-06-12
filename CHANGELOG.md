@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## UNRELEASED
+- Fixed minor issue with start/stop regex folding algorithm, where the start and stop markers were being printed in the output.
+- Added foldable output to individual test cases.
+
 ## [2.0.0] 2023-06-12
 - Removed `--tui-fold-level` option, now replaced by modified ``--tui-regexfile` implementation (previous bullet point); allows for regex(es) to be specified in a file, rather than on the command line.
 - Fixed Issue 100 (obviated by previous change in fold behavior).

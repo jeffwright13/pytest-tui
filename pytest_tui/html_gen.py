@@ -379,17 +379,22 @@ class HtmlPage:
                     results.append(result)
         else:
             results = eval(f"self.results.tui_test_results.all_{outcome}()")
+
         for result in results:
-            content = self.converter.convert(
+            content_ansi = (
                 result.caplog
                 + result.capstderr
                 + result.capstdout
-                + result.longreprtext,
-                full=False,
+                + result.longreprtext
             )
-            if not content:
-                content = "No output was produced for this test"
-            collapsible_results += f"""<button type="button" class="collapsible" style="border: none; outline: none;">{re.sub(r".[0-9]*$", "", str(result.start_time))} | {result.outcome} | {result.fqtn}</button> <div class="content"> <pre>{content}</pre> </div>"""
+            if self.results.tui_regexfile:
+                content_html = self.fold_regex_lines(content_ansi.splitlines())
+            else:
+                content_html = self.converter.convert(content_ansi, full=False)
+            if not content_html:
+                content_html = "No output was produced for this test"
+
+            collapsible_results += f"""<button type="button" class="collapsible" style="border: none; outline: none;">{re.sub(r".[0-9]*$", "", str(result.start_time))} | {result.outcome} | {result.fqtn}</button> <div class="content"> <pre>{content_html}</pre> </div>"""
         return collapsible_results
 
     def get_metadata(self) -> str:
@@ -415,7 +420,6 @@ class HtmlPage:
         # tab_color_button =  """<button class=button-43 onclick="removeColor(); this.style.display = 'none'">Remove Color</button>"""
         tab_color_button = """<button class="button-43" onclick="removeOrRestoreColor()">Remove / Restore Colors</button>"""
         tab_invert_button = """<button class=button-43 onclick="invertColors()">Invert Colors</button>"""
-        # tab_toggle_background_button = """<button class=button-43 onclick="togglePreBackground()">Toggle Background</button>"""
         tab_toggle_background_button = """<button class="button-43" onclick="togglePreBackground()">Toggle Background</button>"""
 
         return (
@@ -459,10 +463,10 @@ class HtmlPage:
         """
         Refactored code
         Search each line of console output and look for a regex match,
-        using the regex patterns defined in file TODO.
+        using the regex patterns defined in file <tui-regexfile>.
         If a line contains a match for the regex patterrn, the line
         will be folded. Consecutive lines that match regex are grouped
-        together wihin the same fold.
+        together within the same fold.
         """
         converter = Ansi2HTMLConverter()
         html_str = ""
@@ -509,11 +513,9 @@ class HtmlPage:
                             "<details><summary style='nobr'>Folded RegEx:"
                             f" '{regex_starter}'</summary>"
                         )
-                    html_str += line_converted + "\n"
                 elif match_ender:
                     fold_started = False
                     html_str += "</details>"
-                    html_str += line_converted + "\n"
                 elif fold_started:
                     html_str += line_converted + "\n"
                 else:
