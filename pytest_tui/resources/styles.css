@@ -129,6 +129,7 @@ pre, .pre {
  .accordion-open, .accordion-closed {
      background-color: #ddd;
      font-weight: bold;
+     font-size: 14px;
      color: #222;
      cursor: pointer;
      padding: 16px;
