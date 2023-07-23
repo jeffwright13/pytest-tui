@@ -295,6 +295,10 @@ def pytest_configure(config: Config) -> None:
                     config._tui_current_section = "test_session_starts"
                     config._tui_sessionstart = False
 
+            # If this is a "collecting..." line, insert a line feed after it to prevent non-wrapped following items.
+            if re.search(r"^collecting\s.*", s):
+                s += "\n"
+
             # If this is an actual test outcome line in the initial `=== test session starts ==='
             # section, populate the TuiTestResult's fully qualified test name field.
             if config._tui_current_section == "test_session_starts":
