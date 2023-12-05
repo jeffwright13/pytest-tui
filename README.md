@@ -4,7 +4,7 @@
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/jsh/trendlist)
 
 # pytest-tui
-## A Pytest plugin for viewing test run results, with console scripts to launch a Text User Interface (TUI) or an HTML page
+## A pytest plugin for viewing test run results, with console scripts to launch a Text User Interface (TUI) or an HTML page
 
 ### TUI:
 ![2022-05-01 19 25 19](https://user-images.githubusercontent.com/4308435/166174159-b442a5b5-416d-42a0-badd-7401e9980e47.gif)
