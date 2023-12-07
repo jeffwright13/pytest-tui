@@ -19,7 +19,8 @@ from _pytest.reports import TestReport
 from strip_ansi import strip_ansi
 
 from pytest_tui.html_gen import main as tuih
-from pytest_tui.utils import (  # HTML_OUTPUT_FILE,
+from pytest_tui.utils import (
+    create_tui_files_directory,
     TERMINAL_OUTPUT_FILE,
     TUI_RESULTS_FILE,
     TuiRerunTestGroup,
@@ -151,8 +152,9 @@ def pytest_sessionstart(session: pytest.Session) -> None:
 
 
 def pytest_cmdline_main(config: Config) -> None:
-    # If the tiui option is enabled, put the TUI plugin in verbose mode,
+    # If the tui option is enabled, put the TUI plugin in verbose mode,
     # and force all test results to be reported, including reruns.
+    # Also create the results folder if required.
     # Verbose (makes final outcome classification possible)
     # Reportchars =RA (forces All test results, plus Reruns)
     if hasattr(config.option, "_tui") and config.option._tui:
@@ -160,6 +162,8 @@ def pytest_cmdline_main(config: Config) -> None:
         config.option.reportchars = "A"
         if hasattr(config.option, "reruns"):
             config.option.reportchars += "R"
+
+        create_tui_files_directory()
 
     # Using global Config object to store TUI-specific attributes.
     # TODO: port to Stash.

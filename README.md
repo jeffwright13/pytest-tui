@@ -61,7 +61,7 @@ Output sections and individual test results are expandable/collapsible, and test
 
 For most users, simply issue the command `pip install pytest-tui` and you are good to go.
 
-For those users wishing to install via a requirements.txt file, they are located in the /requirements directory.
+For those users wishing to install via a requirements.txt file, they are located in the /reqts/ directory.
 
 ## Usage
 
@@ -75,7 +75,7 @@ In some environments, where the working directory for pytest has been changed fr
 
 ### Sample / Demo Tests
 
-If you would like some dummy tests that will allow you to take pytest-tui for a testdrive, copy all the files at https://github.com/jeffwright13/pytest-tui/tree/main/demo-tests into a folder called `demo-tests/` where your test environment resides. You will need the additional libraries listed in /requirements/requirements-dev.txt, so install them (`pip install -r requirements-dev.txt`). Then:
+If you would like some dummy tests that will allow you to take pytest-tui for a testdrive, copy all the files at https://github.com/jeffwright13/pytest-tui/tree/main/demo-tests into a folder called `demo-tests/` where your test environment resides. You will need the additional libraries listed in /reqts/requirements-dev.txt, so install them (`pip install -r requirements-dev.txt`). Then:
 
 `pytest demo-tests/`
 

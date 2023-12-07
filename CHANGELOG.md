@@ -6,8 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project tries to adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## UNRELEASED
+
+## [2.1.0] 2023-12-07
 - Fixed minor issue with start/stop regex folding algorithm, where the start and stop markers were being printed in the output.
 - Added foldable output to individual test cases.
+- Fixed issue 110, where tui_files/ folder was getting created all over the place.
+- Change `requirements/` directory to `reqts/` to avoid confusion with `requirements.txt` file.
 
 ## [2.0.0] 2023-06-12
 - Removed `--tui-fold-level` option, now replaced by modified ``--tui-regexfile` implementation (previous bullet point); allows for regex(es) to be specified in a file, rather than on the command line.
