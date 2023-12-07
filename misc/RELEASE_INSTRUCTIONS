@@ -16,8 +16,8 @@ RELEASE_INSTRUCTIONS
     $ python -m venv venv
     $ source venv/bin/activate
     $ pip install pip-tools
-    $ pip-compile --no-emit-index-url requirements/requirements.in && pip-compile --no-emit-index-url requirements/requirements-dev.in
-    $ pip install -r requirements/requirements.txt
+    $ pip-compile --no-emit-index-url reqts/requirements.in && pip-compile --no-emit-index-url reqts/requirements-dev.in
+    $ pip install -r reqts/requirements.txt
     $ pip install -e .
     $ pytest --tui
     $ tui

@@ -18,7 +18,7 @@ nox.options.sessions = [
 
 @nox.session(python=["3.8", "3.9", "3.10", "3.11"], tags=["install", "basic"])
 def install_requirements_user(session):
-    session.install("-r", "requirements/requirements.txt")
+    session.install("-r", "reqts/requirements.txt")
 
 
 @nox.session(python=["3.8", "3.9", "3.10", "3.11"], tags=["install"])
@@ -29,7 +29,7 @@ def install_requirements_user_plus_pytest_tui_package(session):
 
 @nox.session(python=["3.8", "3.9", "3.10", "3.11"], tags=["install", "dev"])
 def install_requirements_dev(session):
-    session.install("-r", "requirements/requirements-dev.txt")
+    session.install("-r", "reqts/requirements-dev.txt")
 
 
 @nox.session(python=["3.8", "3.9", "3.10", "3.11"], tags=["install", "dev"])
@@ -40,7 +40,7 @@ def install_requirements_dev_plus_pytest_tui_package(session):
 
 @nox.session(python=["3.8", "3.9", "3.10", "3.11"], tags=["tui"])
 def test_with_pytest_tui(session):
-    session.install("-r", "requirements/requirements-dev.txt")
+    session.install("-r", "reqts/requirements-dev.txt")
     session.install(".")
     session.run("pytest", "demo-tests/", "--tui")
 

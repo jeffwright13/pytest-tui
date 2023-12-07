@@ -16,7 +16,6 @@ from strip_ansi import strip_ansi
 from pytest_tui import __version__
 from pytest_tui.utils import (
     DEFAULT_HTML_FILE,
-    PYTEST_TUI_FILES_DIR,
     TERMINAL_OUTPUT_FILE,
     Results,
     test_session_starts_results_grabber,
