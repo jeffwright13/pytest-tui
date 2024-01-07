@@ -31,8 +31,8 @@ def generate_random_text_with_pattern(pattern, num_lines, pattern_interval):
 #     [
 #         ("  *->", 10, 3),
 
-# def test_random_text_with_pattern(capsys):
-#     logger = logging.getLogger()
+# def test_random_text_with_pattern(capsys, logger):
+#
 #     pattern = "  *->"
 #     num_lines = random.randint(10,100)
 #     pattern_interval = 3

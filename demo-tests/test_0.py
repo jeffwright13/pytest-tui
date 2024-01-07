@@ -1,10 +1,8 @@
 import logging
 import random
 import warnings
-
+import sys
 import pytest
-
-logger = logging.getLogger()
 
 
 # 3 consecutive ZWS
@@ -17,7 +15,7 @@ ZWJ_X3 = r"""‍‍‍"""
 BOM_ZWJ = r"""￼‍"""
 
 
-def test0_10_fail_capturing(capsys):
+def test0_10_fail_capturing(capsys, fake_data, logger):
     logger.info(ZWS_X3)
     print("FAIL this stdout is captured")
     print("FAIL this stderr is captured", file=sys.stderr)
@@ -29,16 +27,16 @@ def test0_10_fail_capturing(capsys):
     print("FAIL this stdout is also captured")
     print("FAIL this stderr is also captured", file=sys.stderr)
     logger.warning("FAIL this log is also captured")
-    logger.critical(fake_data())
-    logger.error(fake_data())
-    logger.warning(fake_data())
-    logger.info(fake_data())
-    logger.debug(fake_data())
+    logger.critical(fake_data)
+    logger.error(fake_data)
+    logger.warning(fake_data)
+    logger.info(fake_data)
+    logger.debug(fake_data)
     logger.info(ZWJ_X3)
     assert False
 
 
-def test0_pass_1():
+def test0_pass_1(logger):
     print("Test Pass 1!")
     logger.info(ZWS_X3)
     logger.critical("CRITICAL")
@@ -50,7 +48,7 @@ def test0_pass_1():
     assert True
 
 
-def test0_pass_2_logs():
+def test0_pass_2_logs(logger):
     print("Test Pass 2!")
     logger.info(ZWS_X3)
     logger.critical("CRITICAL")
@@ -63,7 +61,7 @@ def test0_pass_2_logs():
 
 
 @pytest.fixture
-def error_fixt():
+def error_fixt(logger):
     raise Exception("Error in fixture")
 
 
@@ -72,7 +70,7 @@ def test0_pass_3_error_in_fixture(error_fixt):
     assert True
 
 
-def test0_fail_1():
+def test0_fail_1(logger):
     print("Test Fail 1!")
     assert 1 == 2
 
@@ -80,12 +78,12 @@ def test0_fail_1():
 pytest.mark.skip(reason="Skipping this test with decorator.")
 
 
-def test0_skip():
+def test0_skip(logger):
     assert True
 
 
 @pytest.mark.xfail()
-def test0_xfail():
+def test0_xfail(logger):
     print("Test 0 XFail")
     logger.info(ZWS_X3)
     logger.critical("CRITICAL")
@@ -98,11 +96,12 @@ def test0_xfail():
 
 
 @pytest.mark.xfail()
-def test0_xpass():
+def test0_xpass(logger):
+    # logger.name = __name__
     print("Test 0 XPass")
-    logger.info(ZWS_X3)
-    logger.critical("CRITICAL")
-    logger.error("ERROR")
+    # logger.info(ZWS_X3)
+    # logger.critical("CRITICAL")
+    # logger.error("ERROR")
     logger.warning("WARNING")
     logger.info("INFO")
     logger.debug("DEBUG")

@@ -4,11 +4,8 @@ import warnings
 
 import pytest
 
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
 
-
-def test_basic_pass_1(fake_data):
+def test_basic_pass_1(fake_data, logger):
     logger.debug(fake_data)
     logger.debug(fake_data)
     logger.debug(fake_data)
@@ -24,11 +21,11 @@ def test_basic_pass_1(fake_data):
 
 
 @pytest.fixture
-def error_fixt(fake_data):
+def error_fixt(fake_data, logger):
     raise Exception("Error in fixture")
 
 
-def test_basic_pass_3_error_in_fixture(error_fixt):
+def test_basic_pass_3_error_in_fixture(error_fixt, logger, fake_data):
     logger.debug(fake_data)
     logger.debug(fake_data)
     logger.debug(fake_data)
@@ -43,7 +40,7 @@ def test_basic_pass_3_error_in_fixture(error_fixt):
     assert True
 
 
-def test_basic_fail_1(fake_data):
+def test_basic_fail_1(fake_data, logger):
     logger.debug(fake_data)
     logger.debug(fake_data)
     logger.debug(fake_data)
@@ -61,7 +58,7 @@ def test_basic_fail_1(fake_data):
 pytest.mark.skip(reason="Skipping this test with decorator.")
 
 
-def test_basic_skip(fake_data):
+def test_basic_skip(fake_data, logger):
     logger.debug(fake_data)
     logger.debug(fake_data)
     logger.debug(fake_data)
@@ -77,7 +74,7 @@ def test_basic_skip(fake_data):
 
 
 @pytest.mark.xfail()
-def test_basic_xfail(fake_data):
+def test_basic_xfail(fake_data, logger):
     logger.debug(fake_data)
     logger.debug(fake_data)
     logger.debug(fake_data)
@@ -93,7 +90,7 @@ def test_basic_xfail(fake_data):
 
 
 @pytest.mark.xfail()
-def test_basic_xpass(fake_data):
+def test_basic_xpass(fake_data, logger):
     logger.debug(fake_data)
     logger.debug(fake_data)
     logger.debug(fake_data)

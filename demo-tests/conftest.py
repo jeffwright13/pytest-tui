@@ -2,6 +2,55 @@ import pytest
 import random
 
 
+import logging
+import logging.config
+import time
+from datetime import datetime, timezone
+
+
+class UTCFormatter(logging.Formatter):
+    def formatTime(self, record, datefmt=None):
+        dt = datetime.fromtimestamp(record.created, tz=timezone.utc)
+        t = dt.strftime("%Y-%m-%d %H:%M:%S")
+        return f"{t} UTC"
+
+
+@pytest.fixture(scope="module")
+def logger():
+    logging_config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "incremental": False,
+        "formatters": {
+            "default": {
+                "format": "%(levelname)-8s %(asctime)s %(name)-10s %(message)s",
+                "()": UTCFormatter,  # Use custom UTCFormatter
+            },
+        },
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "level": "INFO",
+                "formatter": "default",
+                "stream": "ext://sys.stderr",
+            },
+        },
+        "root": {
+            "level": "INFO",
+            "handlers": ["console"],
+        },
+        "loggers": {
+            "my_logger": {"level": "DEBUG"},  # Set the logger level to DEBUG
+        },
+    }
+
+    logging.config.dictConfig(logging_config)
+    logging.Formatter.converter = time.gmtime
+    logger = logging.getLogger("my_logger")
+    logger.setLevel(logging.DEBUG)
+    return logger
+
+
 data = [
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",

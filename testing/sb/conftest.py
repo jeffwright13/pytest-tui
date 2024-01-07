@@ -1,4 +1,11 @@
 import pytest
+import faker
+import random
+
+
+@pytest.fixture
+def fake_data(min: int = 30, max: int = 60) -> str:
+    return faker.Faker().text(random.randint(min, max))
 
 
 @pytest.fixture

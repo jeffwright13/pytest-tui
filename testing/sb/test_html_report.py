@@ -244,3 +244,11 @@ def test_html_report_test_fold_actions_tab(sb, pom_vars: dict[str, str]):
     sb.click(pom_vars["FOLD_ACTIONS_TAB_SHOW_HIDE_ACTION"])
     sb.click(pom_vars["FOLD_ACTIONS_TAB_SHOW_HIDE_ACTION"])
     sb.wait_for_element_not_visible("Summary", by="tag name")
+
+
+def main():
+    retcode = pytest.main(["-x", f"{WORKDIR}/demo-tests", "--tui", "-vv", "--co"])
+
+
+if __name__ == "__main__":
+    main()

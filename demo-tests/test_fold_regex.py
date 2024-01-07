@@ -4,8 +4,6 @@ import warnings
 
 import pytest
 
-logger = logging.getLogger()
-
 
 @pytest.fixture()
 def regex():

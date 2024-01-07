@@ -2,9 +2,6 @@ import logging
 
 import pytest
 
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-
 
 LOREM = """
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec rutrum molestie arcu, id consectetur nisl commodo luctus. Curabitur ac eros efficitur, bibendum nibh volutpat, lobortis arcu. Nam gravida condimentum felis eu porttitor. Fusce at mi et purus condimentum facilisis et nec felis. Vivamus aliquet, elit eu sagittis bibendum, elit velit scelerisque tellus, et ornare lectus nulla eget diam. Mauris eleifend lectus vel ipsum vehicula malesuada. Ut vitae arcu ac elit bibendum elementum. Aliquam quis sagittis justo. Maecenas sit amet sodales velit.
@@ -15,7 +12,7 @@ Sedsodalesauctorlaoreet.Pellentesqueinaccumsanleo, idultriciesarcu. Inegestas,ar
 """
 
 
-def test_1():
+def test_1(logger):
     logger.critical(LOREM)
     logger.error(LOREM)
     logger.warning(LOREM)
@@ -24,7 +21,7 @@ def test_1():
     assert False
 
 
-def test_2():
+def test_2(logger):
     logger.critical(LOREM)
     logger.error(LOREM)
     logger.warning(LOREM)
@@ -34,7 +31,7 @@ def test_2():
 
 
 @pytest.fixture
-def f():
+def f(logger):
     logger.critical(LOREM)
     logger.error(LOREM)
     logger.warning(LOREM)

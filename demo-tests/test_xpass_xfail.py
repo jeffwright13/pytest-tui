@@ -7,15 +7,9 @@ import faker
 import pytest
 
 LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
-logger = logging.getLogger()
-logger.setLevel(logging.NOTSET)
-logger.propagate = True
-stdout_handler = logging.StreamHandler(sys.stdout)
-logger.addHandler(stdout_handler)
-logging.getLogger("faker").setLevel(logging.ERROR)
 
 
-def test_xfail_by_inline():
+def test_xfail_by_inline(logger):
     logger.debug("Debug level log line")
     logger.info("info level log line")
     logger.warning("Warning level log line")
@@ -27,7 +21,7 @@ def test_xfail_by_inline():
 
 
 @pytest.mark.xfail(reason="Here's my reason for xfail: None")
-def test_xfail_by_decorator():
+def test_xfail_by_decorator(logger):
     logger.debug("Debug level log line")
     logger.info("info level log line")
     logger.warning("Warning level log line")

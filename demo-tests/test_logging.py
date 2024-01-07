@@ -4,9 +4,12 @@ import warnings
 
 import pytest
 
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-logging.basicConfig(format='%(asctime)s%(levelname)s:%(message)s', level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p')
+
+logging.basicConfig(
+    format="%(asctime)s%(levelname)s:%(message)s",
+    level=logging.DEBUG,
+    datefmt="%m/%d/%Y %I:%M:%S %p",
+)
 
 
 def fake_data() -> str:

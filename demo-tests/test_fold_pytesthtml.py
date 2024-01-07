@@ -4,10 +4,8 @@ import warnings
 
 import pytest
 
-logger = logging.getLogger()
 
-
-def test_0_single():
+def test_0_single(logger):
     logger.info(
         "[DETAILS][SUMMARY]Summary of the iteration[/SUMMARY]Verbose logs for iteration"
         " x: ...[/DETAILS]"
