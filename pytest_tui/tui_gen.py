@@ -163,41 +163,65 @@ class TuiApp(App):
         self.xfails_tree = TreeControl(
             Text("Xfails:", style="bold yellow underline"), {}, name="xfails_tree"
         )
-        for failed in self.results.tui_test_results.all_failures():
+        for result in self.results.tui_test_results.all_failures():
             await self.failures_tree.add(
                 self.failures_tree.root.id,
-                Text(failed.fqtn),
-                {"results": f"{failed.caplog}{failed.capstderr}{failed.capstdout}"},
+                Text(result.fqtn),
+                {
+                    "results": (
+                        f"{result.longreprtext or result.capstdout + result.capstderr + result.caplog}"
+                    )
+                },
             )
-        for passed in self.results.tui_test_results.all_passes():
+        for result in self.results.tui_test_results.all_passes():
             await self.passes_tree.add(
                 self.passes_tree.root.id,
-                Text(passed.fqtn),
-                {"results": f"{passed.caplog}{passed.capstderr}{passed.capstdout}"},
+                Text(result.fqtn),
+                {
+                    "results": (
+                        f"{result.longreprtext or result.capstdout + result.capstderr + result.caplog}"
+                    )
+                },
             )
-        for errored in self.results.tui_test_results.all_errors():
+        for result in self.results.tui_test_results.all_errors():
             await self.errors_tree.add(
                 self.errors_tree.root.id,
-                Text(errored.fqtn),
-                {"results": f"{errored.caplog}{errored.capstderr}{errored.capstdout}"},
+                Text(result.fqtn),
+                {
+                    "results": (
+                        f"{result.longreprtext or result.capstdout + result.capstderr + result.caplog}"
+                    )
+                },
             )
-        for skipped in self.results.tui_test_results.all_skipped():
+        for result in self.results.tui_test_results.all_skipped():
             await self.skipped_tree.add(
                 self.skipped_tree.root.id,
-                Text(skipped.fqtn),
-                {"results": f"{skipped.caplog}{skipped.capstderr}{skipped.capstdout}"},
+                Text(result.fqtn),
+                {
+                    "results": (
+                        f"{result.longreprtext or result.capstdout + result.capstderr + result.caplog}"
+                    )
+                },
             )
-        for xpassed in self.results.tui_test_results.all_xpasses():
+        for result in self.results.tui_test_results.all_xpasses():
             await self.xpasses_tree.add(
                 self.xpasses_tree.root.id,
-                Text(xpassed.fqtn),
-                {"results": f"{xpassed.caplog}{xpassed.capstderr}{xpassed.capstdout}"},
+                Text(result.fqtn),
+                {
+                    "results": (
+                        f"{result.longreprtext or result.capstdout + result.capstderr + result.caplog}"
+                    )
+                },
             )
-        for xfailed in self.results.tui_test_results.all_xfails():
+        for result in self.results.tui_test_results.all_xfails():
             await self.xfails_tree.add(
                 self.xfails_tree.root.id,
-                Text(xfailed.fqtn),
-                {"results": f"{xfailed.caplog}{xfailed.capstderr}{xfailed.capstdout}"},
+                Text(result.fqtn),
+                {
+                    "results": (
+                        f"{result.longreprtext or result.capstdout + result.capstderr + result.caplog}"
+                    )
+                },
             )
 
         await self.failures_tree.root.expand()
@@ -220,7 +244,7 @@ class TuiApp(App):
         for test in all_tests_in_category:
             if test.fqtn == label.plain:
                 self.text = Text.from_ansi(
-                    f"{test.caplog}{test.capstderr}{test.capstdout}"
+                    f"{test.longreprtext or test.capstdout + test.capstderr + test.caplog}"
                 )
                 break
 

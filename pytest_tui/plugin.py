@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from io import StringIO
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List
+from typing import List, Tuple
 
 import pytest
 from _pytest._io.terminalwriter import TerminalWriter
@@ -147,6 +147,20 @@ def add_ansi_to_report(config: Config, report: TestReport) -> None:
     reporter._tw = original_writer
 
 
+def replace_string(original_string, new_char, new_phrase):
+    parts = original_string.split(" ")
+
+    old_phrase_length = len(parts[1])
+    new_phrase_length = len(new_phrase)
+    length_difference = old_phrase_length - new_phrase_length
+    char_count = len(parts[0]) + length_difference // 2
+
+    if length_difference % 2 != 0:
+        return f"{new_char * char_count} {new_phrase} {new_char * (char_count + 1)}"
+    else:
+        return f"{new_char * char_count} {new_phrase} {new_char * char_count}"
+
+
 def pytest_sessionstart(session: pytest.Session) -> None:
     pass
 
@@ -208,20 +222,42 @@ def pytest_report_teststatus(report: TestReport, config: Config) -> None:
     if not config.option._tui:
         return
 
+    # Instantiate TerminalWriter to write separation strings for captured stdout,
+    # stderr and stdlog. These are appended to the TuiTestResult's capstdout,
+    # captstderr and caplog attrs to replicate terminal output.
+    # Don't do this for longreptext, as it is already included there.
+
+    caplog_sep = (
+        replace_string(config._tui_test_session_starts_line, "-", "Captured log call")
+        + "\n"
+    )
+    capstderr_sep = (
+        replace_string(
+            config._tui_test_session_starts_line, "-", "Captured stderr call"
+        )
+        + "\n"
+    )
+    capstdout_sep = (
+        replace_string(
+            config._tui_test_session_starts_line, "-", "Captured stdout call"
+        )
+        + "\n"
+    )
+
     if hasattr(report, "caplog") and report.caplog:
         for tui_test_result in config._tui_test_results.test_results:
             if tui_test_result.fqtn == report.nodeid:
-                tui_test_result.caplog = report.caplog
+                tui_test_result.caplog = caplog_sep + report.caplog + "\n"
 
     if hasattr(report, "capstderr") and report.capstderr:
         for tui_test_result in config._tui_test_results.test_results:
             if tui_test_result.fqtn == report.nodeid:
-                tui_test_result.capstderr = report.capstderr
+                tui_test_result.capstderr = capstderr_sep + report.capstderr
 
     if hasattr(report, "capstdout") and report.capstdout:
         for tui_test_result in config._tui_test_results.test_results:
             if tui_test_result.fqtn == report.nodeid:
-                tui_test_result.capstdout = report.capstdout
+                tui_test_result.capstdout = capstdout_sep + report.capstdout
 
     if hasattr(report, "longreprtext") and report.longreprtext:
         add_ansi_to_report(config, report)
@@ -279,6 +315,7 @@ def pytest_configure(config: Config) -> None:
             # Check to see if current line is a section start marker
             if re.search(test_session_starts_matcher, s):
                 config._tui_current_section = "test_session_starts"
+                config._tui_test_session_starts_line = s
             if re.search(errors_section_matcher, s):
                 config._tui_current_section = "errors"
             if re.search(failures_section_matcher, s):
@@ -420,10 +457,6 @@ def pytest_unconfigure(config: Config) -> None:
         if tui_test_result.outcome == "":
             tui_test_result.outcome = "SKIPPED"
 
-    config.pluginmanager.getplugin(
-        "terminalreporter"
-    )  # <= ???  does not appear to be used
-
     # Rewind the temp file containing all the raw ANSI lines sent to the terminal;
     # read its contents;  then close it. Then, write info to file.
     config._tui_terminal_out.seek(0)
@@ -452,7 +485,7 @@ def pytest_unconfigure(config: Config) -> None:
 def pytui_launch(config: Config) -> None:
     """
     Final code invocation after Pytest run has completed; creates HTML report
-    and optionall launches TUI.
+    and optionally launches TUI.
     """
     try:
         # disable capturing while TUI runs to avoid error `redirected stdin is pseudofile, has

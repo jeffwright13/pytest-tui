@@ -381,10 +381,8 @@ class HtmlPage:
 
         for result in results:
             content_ansi = (
-                result.caplog
-                + result.capstderr
-                + result.capstdout
-                + result.longreprtext
+                result.longreprtext
+                or result.capstdout + result.capstderr + result.caplog
             )
             if self.results.tui_regexfile:
                 content_html = self.fold_regex_lines(content_ansi.splitlines())
